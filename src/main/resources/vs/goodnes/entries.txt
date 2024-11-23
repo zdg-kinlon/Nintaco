@@ -1,0 +1,53 @@
+8
+2
+balloon fight (vs) [!].nes
+49168
+balloon fight (vs) (player 2 mode) [b1].nes
+49168
+3
+baseball (vs) (player 2 mode) [b1].nes
+49168
+baseball (vs) (player 1 mode) [b1].nes
+49168
+baseball (vs) [b1].nes
+40976
+2
+baseball (vs) (player 1 mode) [b2].nes
+49168
+baseball (vs) (player 2 mode) [b2].nes
+49168
+2
+baseball (vs) (player 1 mode) [b3].nes
+49168
+baseball (vs) (player 2 mode) [b3].nes
+49168
+2
+ice climber (vs) (player 1 mode) [b1].nes
+49168
+ice climber (vs) (player 2 mode) [b1].nes
+49168
+4
+mahjong (vs) (player 1 mode) [b1].nes
+40976
+mahjong (vs) (player 2 mode) [b1].nes
+40976
+mahjong (vs) [!].nes
+40976
+mahjong (vs) [a1].nes
+49168
+3
+tennis (vs) [o1].nes
+49168
+tennis (vs) (player 2 mode) [b1].nes
+49168
+tennis (vs) [!].nes
+40976
+4
+wrecking crew (vs) (player 1 mode) [b1].nes
+49168
+wrecking crew (vs) (player 2 mode) [b1].nes
+49168
+wrecking crew (vs) [!].nes
+49168
+wrecking crew (vs) [hm01].nes
+49168

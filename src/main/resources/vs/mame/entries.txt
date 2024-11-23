@@ -1,0 +1,802 @@
+53
+11
+balonfgt.hdr
+16
+mds-bf4 a-3.1d
+8192
+mds-bf4 a-3.1c
+8192
+mds-bf4 a-3.1b
+8192
+mds-bf4 a-3.1a
+8192
+mds-bf4 a-3.6d
+8192
+mds-bf4 a-3.6c
+8192
+mds-bf4 a-3.6b
+8192
+mds-bf4 a-3.6a
+8192
+mds-bf4 a-3.2b
+8192
+mds-bf4 a-3.2a
+8192
+11
+bnglngby_pad.hdr
+16
+mds-rb4-2 b.6d
+8192
+mds-rb4-2 b.6c
+8192
+mds-rb4-2 b.6b
+8192
+mds-rb4-2 b.6a
+8192
+pad.8k
+8192
+pad.8k
+8192
+pad.8k
+8192
+mds-rb4-2 b.1a
+8192
+mds-rb4-2 b.8b
+8192
+mds-rb4-2 b.8a
+8192
+7
+btlecity.hdr
+16
+bc.1d
+8192
+bc.1c
+8192
+bc.1b
+8192
+bc.1a
+8192
+bc.2b
+8192
+bc.2a
+8192
+2
+cstlevna.hdr
+16
+mds-cv.u7
+131072
+7
+cluclu.hdr
+16
+cl.6d
+8192
+cl.6c
+8192
+cl.6b
+8192
+cl.6a
+8192
+cl.8b
+8192
+cl.8a
+8192
+3
+drmario.hdr
+16
+dm-uiprg
+65536
+dm-u3chr
+32768
+7
+duckhunt.hdr
+16
+mds-dh3 e.1d or 6d
+8192
+mds-dh3 e.1c or 6c
+8192
+mds-dh3 e.1b or 6b
+8192
+mds-dh3 e.1a or 6a
+8192
+mds-dh3 e.2b or 8b
+8192
+mds-dh3 e.2a or 8a
+8192
+7
+excitebk.hdr
+16
+mds-eb4-3e.1d
+8192
+mds-eb4-3e.1c
+8192
+mds-eb4-3e.1b
+8192
+mds-eb4-3e.1a
+8192
+mds-eb4-3e.2b
+8192
+mds-eb4-3e.2a
+8192
+7
+excitebko.hdr
+16
+mds-eb4-3.1d
+8192
+mds-eb4-3.1c
+8192
+mds-eb4-3.1b
+8192
+mds-eb4-3.1a
+8192
+mds-eb4-3.2b
+8192
+mds-eb4-3.2a
+8192
+7
+excitebkj.hdr
+16
+mds-eb4-4 a.6d
+8192
+mds-eb4-4 a.6c
+8192
+mds-eb4-4 a.6b
+8192
+mds-eb4-4 a.6a
+8192
+mds-eb4-4 a.8b
+8192
+mds-eb4-4 a.8a
+8192
+3
+goonies.hdr
+16
+mds-gn prg e.u7
+65536
+mds-gn chr e.u4
+65536
+7
+hogalley.hdr
+16
+mds-ha4-1 e-1.1d or 6d
+8192
+mds-ha4-1 e-1.1c or 6c
+8192
+mds-ha4-1 e-1.1b or 6b
+8192
+mds-ha4-1 e-1.1a or 6a
+8192
+mds-ha4-1 e-1.2b or 8b
+8192
+mds-ha4-1 e-1.2a or 8a
+8192
+7
+iceclimb.hdr
+16
+mds-ic4-4 b.6d
+8192
+mds-ic4-4 b.6c
+8192
+mds-ic4-4 b-1.6b
+8192
+mds-ic4-4 b.6a
+8192
+mds-ic4-4 b.8b
+8192
+mds-ic4-4 b.8a
+8192
+7
+iceclimba.hdr
+16
+mds-ic4-4.1d
+8192
+mds-ic4-4.1c
+8192
+mds-ic4-4.1b
+8192
+mds-ic4-4.1a
+8192
+mds-ic4-4 b.8b
+8192
+mds-ic4-4 b.8a
+8192
+11
+iceclmrd.hdr
+16
+mds-ic4-4 a.1d
+8192
+mds-ic4-4 a.1c
+8192
+mds-ic4-4 a-1.1b
+8192
+mds-ic4-4 a.1a
+8192
+mds-ic4-4 a.6d
+8192
+mds-ic4-4 a.6c
+8192
+mds-ic4-4 a.6b
+8192
+mds-ic4-4 a.6a
+8192
+mds-ic4-4 a.2b
+8192
+mds-ic4-4 a.2a
+8192
+7
+jajamaru.hdr
+16
+10.bin
+8192
+9.bin
+8192
+8.bin
+8192
+7.bin
+8192
+12.bin
+8192
+11.bin
+8192
+7
+nvs_machrider.hdr
+16
+mr-1d
+8192
+mr-1c
+8192
+mr-1b
+8192
+mr-1a
+8192
+mr-2b
+8192
+mr-2a
+8192
+7
+nvs_machridera.hdr
+16
+mds-mr4-1 a.1d or 6d
+8192
+mds-mr4-1 a.1c or 6c
+8192
+mds-mr4-1 a.1b or 6b
+8192
+mds-mr4-1 a.1a or 6a
+8192
+mds-mr4-1 a.2b or 8b
+8192
+mds-mr4-1 a.2a or 8a
+8192
+6
+nvs_mightybj.hdr
+16
+1d.bin
+8192
+1c.bin
+8192
+1b.bin
+8192
+1a.bin
+8192
+2b.bin
+8192
+3
+nvs_platoon.hdr
+16
+prgver0.ic4
+131072
+chrver0.ic6
+131072
+3
+rbibb.hdr
+16
+rbi-prg
+65536
+rbi-cha
+32768
+3
+rbibb.hdr
+16
+rbi-prga
+65536
+rbi-cha
+32768
+7
+smgolf.hdr
+16
+mds-gf4-2 f.1d or 6d
+8192
+mds-gf4-2 f.1c or 6c
+8192
+mds-gf4-2 f.1b or 6b
+8192
+mds-gf4-2 f.1a or 6a
+8192
+mds-gf4-2 f.2b or 8b
+8192
+mds-gf4-2 f.2a or 8a
+8192
+7
+smgolf.hdr
+16
+mds-gf4-2.1d
+8192
+mds-gf4-2.1c
+8192
+mds-gf4-2.1b
+8192
+mds-gf4-2.1a
+8192
+mds-gf4-2 f.2b or 8b
+8192
+mds-gf4-2 f.2a or 8a
+8192
+7
+smgolfj.hdr
+16
+mds-gf3 b.6d
+8192
+mds-gf3 b.6c
+8192
+mds-gf3 b.6b
+8192
+mds-gf3 b.6a
+8192
+mds-gf3 b.8b
+8192
+mds-gf3 b.8a
+8192
+7
+smgolf.hdr
+16
+mds-lg4 e.1d or 6d
+8192
+mds-lg4 e.1c or 6c
+8192
+mds-lg4 e.1b or 6b
+8192
+mds-lg4 e.1a or 6a
+8192
+mds-lg4 e.2b or 8b
+8192
+mds-lg4 e.2a or 8a
+8192
+7
+smgolf.hdr
+16
+lg-1d
+8192
+lg-1c
+8192
+lg-1b
+8192
+lg-1a
+8192
+mds-lg4 e.2b or 8b
+8192
+mds-lg4 e.2a or 8a
+8192
+7
+starlstr.hdr
+16
+sl_04.1d
+8192
+sl_03.1c
+8192
+sl_02.1b
+8192
+sl_01.1a
+8192
+sl_06.2b
+8192
+sl_05.2a
+8192
+7
+suprmrio.hdr
+16
+mds-sm4-4__1dor6d_e.1d or 6d
+8192
+mds-sm4-4__1cor6c_e.1c or 6c
+8192
+mds-sm4-4__1bor6b_e.1b or 6b
+8192
+mds-sm4-4__1aor6a_e.1a or 6a
+8192
+mds-sm4-4__2bor8b_e.2b or 8b
+8192
+mds-sm4-4__2aor8a_e.2a or 8a
+8192
+7
+suprmrio.hdr
+16
+mds-sm4-4__1dor6d_e.1d or 6d
+8192
+__suprmrioa,.1c or 6c
+8192
+mds-sm4-4__1bor6b_e.1b or 6b
+8192
+mds-sm4-4__1aor6a_e.1a or 6a
+8192
+mds-sm4-4__2bor8b_e.2b or 8b
+8192
+mds-sm4-4__2aor8a_e.2a or 8a
+8192
+7
+suprmrio.hdr
+16
+mds-sm4-4__1dor6d_e.1d or 6d
+8192
+mds-sm4-4__1cor6c_e.1c or 6c
+8192
+mds-sm4-4__1bor6b_e.1b or 6b
+8192
+mds-sm4-4__1aor6a_e.1a or 6a
+8192
+__skatekds,.2b
+8192
+__skatekds,.2a
+8192
+4
+supxevs.hdr
+16
+prg2
+65536
+prg1
+65536
+cha
+32768
+3
+tkoboxng.hdr
+16
+tkoprg.bin
+65536
+tkochr.bin
+65536
+2
+topgun.hdr
+16
+rc-003.u7
+131072
+11
+vsbball.hdr
+16
+mds-ba__1d_e-1.1d
+8192
+mds-ba__1c_e-1.1c
+8192
+mds-ba__1b_e-1.1b
+8192
+mds-ba__1a_e-1.1a
+8192
+mds-ba__6d_e-1.6d
+8192
+mds-ba__6c_e-1.6c
+8192
+mds-ba__6b_e-1.6b
+8192
+mds-ba__6a_e-1.6a
+8192
+mds-ba__2b_e.2b
+8192
+mds-ba__2a_e.2a
+8192
+11
+vsbball.hdr
+16
+mds-ba a-3.1d
+8192
+mds-ba a-3.1c
+8192
+mds-ba a-3.1b
+8192
+mds-ba a-3.1a
+8192
+mds-ba a-3.6d
+8192
+mds-ba a-3.6c
+8192
+mds-ba a-3.6b
+8192
+mds-ba a-3.6a
+8192
+mds-ba a.2b
+8192
+mds-ba a.2a
+8192
+11
+vsbball.hdr
+16
+mds-ba a-2.1d
+8192
+mds-ba a-2.1c
+8192
+mds-ba a-2.1b
+8192
+mds-ba a-2.1a
+8192
+mds-ba a-2.6d
+8192
+mds-ba a-2.6c
+8192
+mds-ba a-2.6b
+8192
+mds-ba a-2.6a
+8192
+mds-ba a.2b
+8192
+mds-ba a.2a
+8192
+11
+vsbball.hdr
+16
+mds-ba a-1.1d
+8192
+mds-ba a-1.1c
+8192
+mds-ba a-1.1b
+8192
+mds-ba a-1.1a
+8192
+mds-ba a-1.6d
+8192
+mds-ba a-1.6c
+8192
+mds-ba a-1.6b
+8192
+mds-ba a-1.6a
+8192
+mds-ba a.2b
+8192
+mds-ba a.2a
+8192
+4
+vsfdf.hdr
+16
+prg2
+65536
+prg1
+65536
+cha2.1
+65536
+3
+vsgradus.hdr
+16
+mds-gr__prg_e.u7
+65536
+mds-gr__chr_e.u4
+65536
+8
+vsgshoe_pad.hdr
+16
+mds-gm5.1d
+16384
+mds-gm5.1c
+8192
+mds-gm5.1b
+8192
+mds-gm5.1a
+8192
+pad.8k
+8192
+mds-gm5.2b
+8192
+mds-gm5.2a
+8192
+10
+vsmahjng_pad.hdr
+16
+pad.8k
+8192
+mj.1c
+8192
+mj.1b
+8192
+mj.1a
+8192
+pad.8k
+8192
+mj.6c
+8192
+mj.6b
+8192
+mj.6a
+8192
+mj.2b
+8192
+7
+vspinbal.hdr
+16
+mds-pn4_1__6d_e.6d
+8192
+mds-pn4_1__6c_e.6c
+8192
+mds-pn4_1__6b_e.6b
+8192
+mds-pn4_1__6a_e.6a
+8192
+mds-pn4_1__8b_e.8b
+8192
+mds-pn4_1__8a_e.8a
+8192
+7
+vspinbalj.hdr
+16
+mds-pn3 b.6d
+8192
+mds-pn3 b.6c
+8192
+mds-pn3 b.6b
+8192
+mds-pn3 b.6a
+8192
+mds-pn3 b.8b
+8192
+mds-pn3 b.8a
+8192
+3
+vsskykid.hdr
+16
+sk-prg1
+32768
+sk-cha
+32768
+6
+vsslalom.hdr
+16
+mds-sl4.1d
+8192
+mds-sl4.1c
+8192
+mds-sl4.1b
+8192
+mds-sl4.1a
+8192
+mds-sl4.2a
+8192
+7
+vssoccer.hdr
+16
+mds-sc4-2 a.1d or 6d
+8192
+mds-sc4-2 a.1c or 6c
+8192
+mds-sc4-2 a.1b or 6b
+8192
+mds-sc4-2 a.1a or 6a
+8192
+mds-sc4-2 a.2b or 8b
+8192
+mds-sc4-2 a.2a or 8a
+8192
+7
+vssoccera.hdr
+16
+mds-sc4-3.1d
+8192
+mds-sc4-3.1c
+8192
+mds-sc4-3.1b
+8192
+mds-sc4-3.1a
+8192
+mds-sc4-3.2b
+8192
+mds-sc4-3.2a
+8192
+13
+vstennis.hdr
+16
+mds-te a-3.1d
+8192
+mds-te a-2.1c
+8192
+mds-te a-2.1b
+8192
+mds-te a-2.1a
+8192
+mds-te a-3.6d
+8192
+mds-te a-2.6c
+8192
+mds-te a-2.6b
+8192
+mds-te a-2.6a
+8192
+mds-te a.2b
+8192
+mds-te a.2a
+8192
+mds-te a.8b
+8192
+mds-te a.8a
+8192
+13
+vstennis.hdr
+16
+mds-te.1d
+8192
+mds-te.1c
+8192
+mds-te.1b
+8192
+mds-te.1a
+8192
+mds-te.6d
+8192
+mds-te.6c
+8192
+mds-te.6b
+8192
+mds-te.6a
+8192
+mds-te a.2b
+8192
+mds-te a.2a
+8192
+mds-te a.8b
+8192
+mds-te a.8a
+8192
+13
+vstennis.hdr
+16
+1d
+8192
+1c
+8192
+1b
+8192
+1a
+8192
+6d
+8192
+6c
+8192
+6b
+8192
+6a
+8192
+mds-te a.2b
+8192
+mds-te a.2a
+8192
+mds-te a.8b
+8192
+mds-te a.8a
+8192
+6
+vstetris_pad.hdr
+16
+pad.8k
+8192
+a000.6c
+8192
+c000.6b
+8192
+e000.6a
+8192
+char.8b
+8192
+11
+wrecking.hdr
+16
+wr.1d
+8192
+wr.1c
+8192
+wr.1b
+8192
+wr.1a
+8192
+wr.6d
+8192
+wr.6c
+8192
+wr.6b
+8192
+wr.6a
+8192
+wr.2b
+8192
+wr.2a
+8192
