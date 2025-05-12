@@ -2,7 +2,7 @@ plugins {
     id("java")
 }
 
-group = "nintaco"
+group = "cn.kinlon.emu"
 version = "2024.10.27"
 
 repositories {
