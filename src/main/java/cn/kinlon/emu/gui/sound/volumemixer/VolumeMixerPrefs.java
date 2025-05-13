@@ -59,7 +59,7 @@ public class VolumeMixerPrefs implements Serializable {
     public int getMasterVolume() {
         synchronized (AppPrefs.class) {
             if (masterVolume == null) {
-                masterVolume = 10;
+                masterVolume = 100;
             }
             return masterVolume;
         }
