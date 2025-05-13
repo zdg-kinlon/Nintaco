@@ -532,7 +532,7 @@ public final class App {
         machine.getAPU().setAudioProcessor(systemAudioProcessor);
         ppu.setScreenRenderer(imageFrame.getImagePane());
         if (ejectedMachine == null) {
-            machine.getCPU().init();
+            machine.getCPU().reset();
         }
         mapper.init();
 

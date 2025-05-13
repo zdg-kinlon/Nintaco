@@ -18,13 +18,19 @@ public enum StatusFlag {
     // N
     NEGATIVE_FLAG(7);
 
+    private final int bit;
     private final int mask;
 
     StatusFlag(int i) {
+        this.bit = i;
         this.mask = 1 << i;
     }
 
     public int getMash() {
         return mask;
+    }
+
+    public int getBit() {
+        return bit;
     }
 }

@@ -1,6 +1,9 @@
 package cn.kinlon.emu.cpu;
 
+import cn.kinlon.emu.utils.BitUtil;
+
 import static cn.kinlon.emu.cpu.StatusFlag.*;
+import static cn.kinlon.emu.utils.BitUtil.*;
 import static cn.kinlon.emu.utils.ByteUtil.toU16;
 import static cn.kinlon.emu.utils.ByteUtil.toU8;
 
@@ -77,15 +80,11 @@ public class Register {
     }
 
     public void p(StatusFlag flag, boolean bool) {
-        if (bool) {
-            p |= flag.getMash();
-        } else {
-            p &= ~flag.getMash();
-        }
+        p = setBit(p, flag.getBit(), bool);
     }
 
     public boolean p(StatusFlag flag) {
-        return (p & flag.getMash()) != 0;
+        return getBitBool(p, flag.getBit());
     }
 
     public boolean c() {

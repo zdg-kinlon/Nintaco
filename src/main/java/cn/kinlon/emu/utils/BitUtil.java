@@ -2,28 +2,12 @@ package cn.kinlon.emu.utils;
 
 public final class BitUtil {
 
-    private static final int[] BIT_REVERSED = new int[256];
-
-    static {
-        for (int i = 0; i < 256; i++) {
-            int value = i;
-            for (int j = 0; j < 8; j++) {
-                BIT_REVERSED[i] = (BIT_REVERSED[i] << 1) | (value & 1);
-                value >>= 1;
-            }
-        }
+    public static int moveBit(final int value, final int from, final int to) {
+        return moveBit(value, from, to, false);
     }
 
-    public static int moveBit(final int value, final int sourceBit, final int destinationBit) {
-        return moveBit(value, sourceBit, destinationBit, false);
-    }
-
-    public static int moveBit(final int value, final int sourceBit, final int destinationBit, final boolean invert) {
-        if (invert) {
-            return (((value >> sourceBit) & 1) ^ 1) << destinationBit;
-        } else {
-            return ((value >> sourceBit) & 1) << destinationBit;
-        }
+    public static int moveBit(final int value, final int from, final int to, final boolean invert) {
+        return (((value >> from) & 1) ^ (invert ? 1 : 0)) << to;
     }
 
     public static int reverseBits(int value) {
@@ -38,11 +22,11 @@ public final class BitUtil {
     }
 
     public static boolean toBitBool(final int value) {
-        return (value & 1) != 0;
+        return value != 0;
     }
 
     public static boolean getBitBool(final int x, final int bit) {
-        return getBit(x, bit) != 0;
+        return toBitBool(getBit(x, bit));
     }
 
     public static int getBit(final int x, final int bit) {
@@ -53,12 +37,12 @@ public final class BitUtil {
         return x | (1 << bit);
     }
 
-    public static int setBit(final int x, final int bit, final boolean value) {
-        if (value) {
-            return x | (1 << bit);
-        } else {
-            return x & ~(1 << bit);
-        }
+    public static int cleanBit(final int x, final int bit) {
+        return x & ~(1 << bit);
+    }
+
+    public static int setBit(final int x, final int bit, final boolean bool) {
+        return bool ? setBit(x, bit) : cleanBit(x, bit);
     }
 
     public static int toggleBit(final int x, final int bit) {
@@ -83,7 +67,7 @@ public final class BitUtil {
     }
 
     public static int log2(final int value) {
-        return (int) (Math.log(value) / Math.log(2.0));
+        return Integer.SIZE - Integer.numberOfLeadingZeros(value) - 1;
     }
 
     private BitUtil() {
