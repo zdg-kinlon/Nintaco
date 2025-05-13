@@ -79,11 +79,11 @@ public class Register {
         return p;
     }
 
-    public void p(StatusFlag flag, boolean bool) {
+    private void p(StatusFlag flag, boolean bool) {
         p = setBit(p, flag.getBit(), bool);
     }
 
-    public boolean p(StatusFlag flag) {
+    private boolean p(StatusFlag flag) {
         return getBitBool(p, flag.getBit());
     }
 
@@ -119,7 +119,7 @@ public class Register {
         p(DECIMAL_MODE, bool);
     }
 
-    private boolean b() {
+    public boolean b() {
         return p(BREAK_COMMAND);
     }
 
@@ -127,7 +127,7 @@ public class Register {
         p(BREAK_COMMAND, bool);
     }
 
-    private boolean r() {
+    public boolean r() {
         return p(RESERVED);
     }
 

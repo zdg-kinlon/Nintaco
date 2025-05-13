@@ -7,11 +7,14 @@ import cn.kinlon.emu.ServicedType;
 import cn.kinlon.emu.apu.APU;
 import cn.kinlon.emu.apu.DeltaModulationChannel;
 import cn.kinlon.emu.mappers.Mapper;
+import cn.kinlon.emu.utils.ByteUtil;
 
 import java.io.Serializable;
 
 import static cn.kinlon.emu.PPU.REG_OAM_DATA;
 import static cn.kinlon.emu.utils.BitUtil.*;
+import static cn.kinlon.emu.utils.ByteUtil.*;
+import static cn.kinlon.emu.utils.ByteUtil.toU8;
 
 public class CPU implements Serializable {
 
@@ -407,7 +410,7 @@ public class CPU implements Serializable {
 
         instructionsCounter++;
     }
-    
+
     public void reset() {
         resetRequested = true;
     }
@@ -555,7 +558,7 @@ public class CPU implements Serializable {
     }
 
     private void ADC(int value) {
-        int t = reg.a() + value + (reg.c() ? 1 : 0);
+        int t = reg.a() + value + toBit(reg.c());
 
         reg.v(getBitBool((reg.a() ^ t) & (value ^ t), 7));
         reg.a(t);
@@ -670,7 +673,7 @@ public class CPU implements Serializable {
     }
 
     private int DEC(int value) {
-        value = (value - 1) & 0b1111_1111;
+        value = toU8(value - 1);
         reg.n(getBitBool(value, 7));
         reg.z(value == 0);
         return value;
@@ -698,7 +701,7 @@ public class CPU implements Serializable {
     }
 
     private int INC(int value) {
-        value = (value + 1) & 0b1111_1111;
+        value = toU8(value + 1);
 
         reg.n(getBitBool(value, 7));
         reg.z(value == 0);
@@ -972,8 +975,10 @@ public class CPU implements Serializable {
         writeStack(reg.pc() & 0x00FF);
         reg.spDec1();
         // 5
+        reg.r(true);
         reg.b(true);
         writeStack(reg.p());
+        reg.b(false);
         reg.spDec1();
         int address;
         if (nmiRequested) {
@@ -998,8 +1003,11 @@ public class CPU implements Serializable {
         readStack();
         reg.spInc1();
         // 4
+        boolean r = reg.r();
+        boolean b = reg.b();
         reg.p(readStack());
-        reg.r(true);
+        reg.r(r);
+        reg.b(b);
         reg.spInc1();
         // 5
         reg.pc((reg.pc() & 0xFF00) | readStack());
@@ -1030,8 +1038,10 @@ public class CPU implements Serializable {
         // 3        
         switch (opcode) {
             case 0x08: // PHP
+                reg.r(true);
                 reg.b(true);
                 writeStack(reg.p());
+                reg.b(false);
                 break;
             case 0x48: // PHA
                 writeStack(reg.a());
@@ -1049,8 +1059,11 @@ public class CPU implements Serializable {
         // 4
         switch (opcode) {
             case 0x28: // PLP
+                boolean r = reg.r();
+                boolean b = reg.b();
                 reg.p(readStack());
-                reg.r(true);
+                reg.r(r);
+                reg.b(b);
                 break;
             case 0x68: // PLA
                 reg.a(readStack());
@@ -1458,8 +1471,7 @@ public class CPU implements Serializable {
         reg.pcInc1();
         // 3
         read(address);
-        address += reg.x();
-        address &= 0x00FF;
+        address = toU8(address + reg.x());
         // 4
         int value = read(address);
         // 5
@@ -1502,12 +1514,11 @@ public class CPU implements Serializable {
         read(address);
         switch (opcode) { // STY $A5,X
             case 0x94, 0x95 -> // STA $A5,X
-                    address += reg.x();
+                    address = toU8(address + reg.x());
             // STX $A5,Y
             case 0x96, 0x97 -> // *SAX $4A,Y
-                    address += reg.y();
+                    address = toU8(address + reg.y());
         }
-        address &= 0x00FF;
         // 4        
         switch (opcode) {
             case 0x94 -> // STY $A5,X
@@ -1530,22 +1541,18 @@ public class CPU implements Serializable {
         // 3    
         address1 |= read(reg.pc()) << 8;
         final int offset;
-        switch (opcode) {
-            case 0x19: // ORA $A5B6,Y
-            case 0x39: // AND $A5B6,Y
-            case 0x59: // EOR $A5B6,Y
-            case 0x79: // ADC $A5B6,Y      
-            case 0xB9: // LDA $A5B6,Y
-            case 0xBB: // *LAR $A5B6,Y
-            case 0xBE: // LDX $A5B6,Y
-            case 0xBF: // *LAX $0557,Y
-            case 0xD9: // CMP $A5B6,Y
-            case 0xF9: // SBC $A5B6,Y
-                offset = reg.y();
-                break;
-            default:
-                offset = reg.x();
-                break;
+        switch (opcode) { // ORA $A5B6,Y
+            // AND $A5B6,Y
+            // EOR $A5B6,Y
+            // ADC $A5B6,Y      
+            // LDA $A5B6,Y
+            // *LAR $A5B6,Y
+            // LDX $A5B6,Y
+            // *LAX $0557,Y
+            // CMP $A5B6,Y
+            case 0x19, 0x39, 0x59, 0x79, 0xB9, 0xBB, 0xBE, 0xBF, 0xD9, 0xF9 -> // SBC $A5B6,Y
+                    offset = reg.y();
+            default -> offset = reg.x();
         }
         final int address2 = (address1 + offset) & 0xFFFF;
         address1 = (address1 & 0xFF00) | (address2 & 0x00FF);
@@ -1611,7 +1618,7 @@ public class CPU implements Serializable {
             default -> offset = reg.x();
         }
         value |= read(reg.pc()) << 8;
-        int address = (value + offset) & 0xFFFF;
+        int address = toU16(value + offset);
         reg.pcInc1();
         // 4
         read((value & 0xFF00) | (address & 0x00FF));
@@ -1667,7 +1674,7 @@ public class CPU implements Serializable {
                     offset = reg.x();
             default -> offset = reg.y();
         }
-        int address = (value + offset) & 0xFFFF;
+        int address = toU16(value + offset);
         value = (value & 0xFF00) | (address & 0x00FF);
         reg.pcInc1();
         // 4
@@ -1741,7 +1748,7 @@ public class CPU implements Serializable {
             if (clearIRQ) {
                 triggerIRQ = false;
             }
-            final int jumpAddress = (reg.pc() + (byte) addressOffset) & 0xFFFF;
+            final int jumpAddress = toU16(reg.pc() + (byte) addressOffset);
             reg.pc((reg.pc() & 0xFF00) | (jumpAddress & 0x00FF));
             if (reg.pc() != jumpAddress) {
                 // 4
@@ -1759,39 +1766,31 @@ public class CPU implements Serializable {
         reg.pcInc1();
         // 3
         read(address1);
-        address1 = (address1 + reg.x()) & 0x00FF;
+        address1 = toU8(address1 + reg.x());
         // 4
         int address2 = read(address1);
-        address1 = (address1 + 1) & 0x00FF;
+        address1 = toU8(address1 + 1);
         // 5
         address2 |= read(address1) << 8;
         // 6        
         final int value = read(address2);
         switch (opcode) {
-            case 0x01: // ORA ($A5,X)
-                ORA(value);
-                break;
-            case 0x21: // AND ($A5,X)
-                AND(value);
-                break;
-            case 0x41: // EOR ($A5,X)
-                EOR(value);
-                break;
-            case 0x61: // ADC ($A5,X)
-                ADC(value);
-                break;
-            case 0xA1: // LDA ($A5,X)
-                LDA(value);
-                break;
-            case 0xA3: // *LAX ($40,X)
-                LAX(value);
-                break;
-            case 0xC1: // CMP ($A5,X)
-                CMP(value);
-                break;
-            case 0xE1: // SBC ($A5,X)
-                SBC(value);
-                break;
+            case 0x01 -> // ORA ($A5,X)
+                    ORA(value);
+            case 0x21 -> // AND ($A5,X)
+                    AND(value);
+            case 0x41 -> // EOR ($A5,X)
+                    EOR(value);
+            case 0x61 -> // ADC ($A5,X)
+                    ADC(value);
+            case 0xA1 -> // LDA ($A5,X)
+                    LDA(value);
+            case 0xA3 -> // *LAX ($40,X)
+                    LAX(value);
+            case 0xC1 -> // CMP ($A5,X)
+                    CMP(value);
+            case 0xE1 -> // SBC ($A5,X)
+                    SBC(value);
         }
     }
 
@@ -1801,10 +1800,10 @@ public class CPU implements Serializable {
         reg.pcInc1();
         // 3
         read(value);
-        value = (value + reg.x()) & 0x00FF;
+        value = toU8(value + reg.x());
         // 4
         int address = read(value);
-        value = (value + 1) & 0x00FF;
+        value = toU8(value + 1);
         // 5
         address |= read(value) << 8;
         // 6
@@ -1812,24 +1811,18 @@ public class CPU implements Serializable {
         // 7
         write(address, value);
         switch (opcode) {
-            case 0x03: // *SLO ($45,X)
-                value = SLO(value);
-                break;
-            case 0x23: // *RLA ($45,X)
-                value = RLA(value);
-                break;
-            case 0x43: // *SRE ($45,X)
-                value = SRE(value);
-                break;
-            case 0x63: // *RRA ($45,X)
-                value = RRA(value);
-                break;
-            case 0xC3: // *DCP ($45,X)
-                value = DCP(value);
-                break;
-            case 0xE3: // *ISB ($45,X)
-                value = ISB(value);
-                break;
+            case 0x03 -> // *SLO ($45,X)
+                    value = SLO(value);
+            case 0x23 -> // *RLA ($45,X)
+                    value = RLA(value);
+            case 0x43 -> // *SRE ($45,X)
+                    value = SRE(value);
+            case 0x63 -> // *RRA ($45,X)
+                    value = RRA(value);
+            case 0xC3 -> // *DCP ($45,X)
+                    value = DCP(value);
+            case 0xE3 -> // *ISB ($45,X)
+                    value = ISB(value);
         }
         // 8       
         write(address, value);
@@ -1841,10 +1834,10 @@ public class CPU implements Serializable {
         reg.pcInc1();
         // 3
         read(value);
-        value = (value + reg.x()) & 0x00FF;
+        value = toU8(value + reg.x());
         // 4
         int address = read(value);
-        value = (value + 1) & 0x00FF;
+        value = toU8(value + 1);
         // 5
         address |= read(value) << 8;
         // 6        
@@ -1866,11 +1859,10 @@ public class CPU implements Serializable {
         reg.pcInc1();
         // 3
         int address2 = read(address1);
-        address1++;
-        address1 &= 0x00FF;
+        address1 = toU8(++address1);
         // 4
         address2 |= read(address1) << 8;
-        address1 = (address2 + reg.y()) & 0xFFFF;
+        address1 = toU16(address2 + reg.y());
         address2 = (address2 & 0xFF00) | (address1 & 0x00FF);
         // 5
         int value = read(address2);
@@ -1912,11 +1904,10 @@ public class CPU implements Serializable {
         reg.pcInc1();
         // 3
         int value = read(address);
-        address++;
-        address &= 0x00FF;
+        address = toU8(++address);
         // 4
         value |= read(address) << 8;
-        address = (value + reg.y()) & 0xFFFF;
+        address = toU16(value + reg.y());
         value = (value & 0xFF00) | (address & 0x00FF);
         // 5
         read(value);
@@ -1954,11 +1945,10 @@ public class CPU implements Serializable {
         reg.pcInc1();
         // 3
         int value = read(address);
-        address++;
-        address &= 0x00FF;
+        address = toU8(++address);
         // 4
         value |= read(address) << 8;
-        address = (value + reg.y()) & 0xFFFF;
+        address = toU16(value + reg.y());
         value = (value & 0xFF00) | (address & 0x00FF);
         // 5
         read(value);
