@@ -4,7 +4,7 @@ import java.io.*;
 import java.util.*;
 
 import cn.kinlon.emu.Machine;
-import cn.kinlon.emu.PPU;
+import cn.kinlon.emu.ppu.PPU;
 import cn.kinlon.emu.apu.APU;
 import cn.kinlon.emu.cpu.CPU;
 import cn.kinlon.emu.cpu.Register;

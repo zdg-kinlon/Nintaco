@@ -2,16 +2,15 @@ package cn.kinlon.emu.cpu;
 
 import cn.kinlon.emu.App;
 import cn.kinlon.emu.Machine;
-import cn.kinlon.emu.PPU;
+import cn.kinlon.emu.ppu.PPU;
 import cn.kinlon.emu.ServicedType;
 import cn.kinlon.emu.apu.APU;
 import cn.kinlon.emu.apu.DeltaModulationChannel;
 import cn.kinlon.emu.mappers.Mapper;
-import cn.kinlon.emu.utils.ByteUtil;
 
 import java.io.Serializable;
 
-import static cn.kinlon.emu.PPU.REG_OAM_DATA;
+import static cn.kinlon.emu.ppu.PPU.REG_OAM_DATA;
 import static cn.kinlon.emu.utils.BitUtil.*;
 import static cn.kinlon.emu.utils.ByteUtil.*;
 import static cn.kinlon.emu.utils.ByteUtil.toU8;
@@ -649,6 +648,18 @@ public class CPU implements Serializable {
         reg.v(false);
     }
 
+    private void SEC() {
+        reg.c(true);
+    }
+
+    private void SED() {
+        reg.d(true);
+    }
+
+    private void SEI() {
+        reg.i(true);
+    }
+
     private void CMP(int value) {
         reg.c(reg.a() >= value);
         reg.n(getBitBool(reg.a() - value, 7));
@@ -809,18 +820,6 @@ public class CPU implements Serializable {
 
     private void SBC(int value) {
         ADC(value ^ 0xFF);
-    }
-
-    private void SEC() {
-        reg.c(true);
-    }
-
-    private void SED() {
-        reg.d(true);
-    }
-
-    private void SEI() {
-        reg.i(true);
     }
 
     private int SLO(int value) {

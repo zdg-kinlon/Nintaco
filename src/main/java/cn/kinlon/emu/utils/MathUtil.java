@@ -2,9 +2,6 @@ package cn.kinlon.emu.utils;
 
 public final class MathUtil {
 
-    private static final int[] digitsTable = {9, 99, 999, 9999, 99999, 999999,
-            9999999, 99999999, 999999999, Integer.MAX_VALUE};
-
     private MathUtil() {
     }
 
@@ -52,20 +49,6 @@ public final class MathUtil {
     // m/n 
     public static int roundUpDivision(final int m, final int n) {
         return (m + n - 1) / n;
-    }
-
-    public static int hash(final byte[] data, final int offset,
-                           final int length) {
-        int hash = length;
-        for (int i = length - 1; i >= 0; i--) {
-            hash += data[i + offset] & 0xFF;
-            hash += hash << 10;
-            hash ^= hash >> 6;
-        }
-        hash += hash << 3;
-        hash ^= hash >> 11;
-        hash += hash << 15;
-        return hash;
     }
 
 }

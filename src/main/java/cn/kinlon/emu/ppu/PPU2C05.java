@@ -1,4 +1,4 @@
-package cn.kinlon.emu;
+package cn.kinlon.emu.ppu;
 
 public class PPU2C05 extends PPU {
 

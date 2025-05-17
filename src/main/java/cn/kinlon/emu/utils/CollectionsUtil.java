@@ -39,25 +39,6 @@ public final class CollectionsUtil {
         return vs;
     }
 
-    public static <T> T[] convertToArray(final Class<T> c, final List<T> list) {
-        return convertToArray(c, list, true);
-    }
-
-    public static <T> T[] convertToArray(final Class<T> c, final List<T> list,
-                                         final boolean returnNullForEmptyList) {
-        if (list == null || list.isEmpty()) {
-            if (returnNullForEmptyList) {
-                return null;
-            } else {
-                return (T[]) Array.newInstance(c, 0);
-            }
-        } else {
-            final T[] ts = (T[]) Array.newInstance(c, list.size());
-            list.toArray(ts);
-            return ts;
-        }
-    }
-
     public static <T> T[] addElement(final Class<T> c, final T[] array,
                                      final T element) {
 
@@ -74,28 +55,6 @@ public final class CollectionsUtil {
             a = (T[]) Array.newInstance(c, array.length + 1);
             System.arraycopy(array, 0, a, 0, array.length);
             a[a.length - 1] = element;
-        }
-        return a;
-    }
-
-    public static <T> T[] removeElement(final Class<T> c, final T[] array,
-                                        final int index) {
-
-        if (array == null) {
-            return null;
-        }
-        if (index >= array.length || index < 0) {
-            return array;
-        }
-        if (array.length <= 1) {
-            return null;
-        }
-        final T[] a = (T[]) Array.newInstance(c, array.length - 1);
-        if (index != 0) {
-            System.arraycopy(array, 0, a, 0, index);
-        }
-        if (index != array.length - 1) {
-            System.arraycopy(array, index + 1, a, index, array.length - index - 1);
         }
         return a;
     }

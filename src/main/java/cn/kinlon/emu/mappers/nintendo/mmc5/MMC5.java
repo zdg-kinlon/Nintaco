@@ -4,7 +4,7 @@ import cn.kinlon.emu.files.CartFile;
 import cn.kinlon.emu.mappers.Mapper;
 import cn.kinlon.emu.tv.TVSystem;
 
-import static cn.kinlon.emu.PPU.REG_PPU_MASK;
+import static cn.kinlon.emu.ppu.PPU.REG_PPU_MASK;
 import static cn.kinlon.emu.utils.BitUtil.getBitBool;
 
 public class MMC5 extends Mapper {

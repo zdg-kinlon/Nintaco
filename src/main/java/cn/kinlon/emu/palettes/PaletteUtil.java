@@ -129,18 +129,6 @@ public final class PaletteUtil {
         palettes.put(displayName, loadPaletteResource(fileName));
     }
 
-    public static void savePalette(final int[] palette, final OutputStream out)
-            throws Throwable {
-        try (BufferedOutputStream bout = new BufferedOutputStream(out)) {
-            for (int i = 0; i < palette.length; i++) {
-                final int p = palette[i];
-                bout.write((p >> 16) & 0xFF);
-                bout.write((p >> 8) & 0xFF);
-                bout.write(p & 0xFF);
-            }
-        }
-    }
-
     public static int[] loadPaletteResource(final String fileName) throws Throwable {
         return loadPalette(FileUtil.getResourceAsStream("/palettes/" + fileName + ".pal"));
     }
@@ -171,10 +159,6 @@ public final class PaletteUtil {
             }
             return palette;
         }
-    }
-
-    public static boolean isStandardPaletteName(final String name) {
-        return standardPaletteNames.contains(name);
     }
 
     public static String getDefaultName() {

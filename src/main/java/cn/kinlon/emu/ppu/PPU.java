@@ -1,5 +1,8 @@
-package cn.kinlon.emu;
+package cn.kinlon.emu.ppu;
 
+import cn.kinlon.emu.Machine;
+import cn.kinlon.emu.MachineRunner;
+import cn.kinlon.emu.ScreenRenderer;
 import cn.kinlon.emu.cpu.CPU;
 import cn.kinlon.emu.gui.image.preferences.View;
 import cn.kinlon.emu.input.DeviceMapper;
@@ -76,7 +79,6 @@ public class PPU implements Serializable {
     }
 
     private static boolean spritesEnabled = true;
-    private static boolean spriteBoxesEnabled;
     private static boolean backgroundEnabled = true;
     private static boolean showInputDevices;
     private static int highlightedSpriteX = -1;
@@ -86,9 +88,7 @@ public class PPU implements Serializable {
 
     private CPU cpu;
     private Mapper mapper;
-    private transient volatile MachineRunner machineRunner;
     private transient ScreenRenderer screenRenderer;
-    private transient int[] lastScreen;
     private transient int[] screen;
 
     private final int[] OAM = new int[0x121];
@@ -179,13 +179,7 @@ public class PPU implements Serializable {
     public static void setShowInputDevices(final boolean showInputDevices) {
         PPU.showInputDevices = showInputDevices;
     }
-
-    public static void setHighlightedSprite(final int highlightedSpriteX,
-                                            final int highlightedSpriteY) {
-        PPU.highlightedSpriteX = highlightedSpriteX;
-        PPU.highlightedSpriteY = highlightedSpriteY;
-    }
-
+    
     public static void setZapperLightDetectionMargin(
             final int zapperLightDetectionMargin) {
         PPU.zapperLightDetectionMargin = zapperLightDetectionMargin;
@@ -265,7 +259,6 @@ public class PPU implements Serializable {
         readDelay = 0;
         ioValue = 0;
         ioAddress = 0;
-//    vCopyDelay = 0;
 
         OAM[OAM_DUMMY_BYTE_INDEX] = OAM_DUMMY_BYTE_VALUE;
         writePPUCtrl(0);
@@ -335,7 +328,6 @@ public class PPU implements Serializable {
     }
 
     public void setScreenRenderer(final ScreenRenderer renderer) {
-        lastScreen = screen;
         this.screenRenderer = renderer;
         this.screen = renderer.render();
     }
@@ -363,54 +355,32 @@ public class PPU implements Serializable {
     public void writeRegister(final int register, final int value) {
         lastReadValue = value;
         switch (register) {
-            case REG_PPU_CTRL:
-                writePPUCtrl(value);
-                break;
-            case REG_PPU_MASK:
-                writePPUMask(value);
-                break;
-            case REG_OAM_ADDR:
-                writeOAMAddr(value);
-                break;
-            case REG_OAM_DATA:
-                writeOAMData(value);
-                break;
-            case REG_PPU_SCROLL:
-                writePPUScroll(value);
-                break;
-            case REG_PPU_ADDR:
-                writePPUAddr(value);
-                break;
-            case REG_PPU_DATA:
-                writePPUData(value);
-                break;
+            case REG_PPU_CTRL -> writePPUCtrl(value);
+            case REG_PPU_MASK -> writePPUMask(value);
+            case REG_OAM_ADDR -> writeOAMAddr(value);
+            case REG_OAM_DATA -> writeOAMData(value);
+            case REG_PPU_SCROLL -> writePPUScroll(value);
+            case REG_PPU_ADDR -> writePPUAddr(value);
+            case REG_PPU_DATA -> writePPUData(value);
         }
     }
 
     public int peekRegister(final int register) {
-        switch (register) {
-            case REG_PPU_STATUS:
-                return peekPPUStatus();
-            case REG_OAM_DATA:
-                return peekOAMData();
-            case REG_PPU_DATA:
-                return peekPPUData();
-            default:
-                return lastReadValue;
-        }
+        return switch (register) {
+            case REG_PPU_STATUS -> peekPPUStatus();
+            case REG_OAM_DATA -> peekOAMData();
+            case REG_PPU_DATA -> peekPPUData();
+            default -> lastReadValue;
+        };
     }
 
     public int readRegister(final int register) {
-        switch (register) {
-            case REG_PPU_STATUS:
-                return readPPUStatus();
-            case REG_OAM_DATA:
-                return readOAMData();
-            case REG_PPU_DATA:
-                return readPPUData();
-            default:
-                return lastReadValue;
-        }
+        return switch (register) {
+            case REG_PPU_STATUS -> readPPUStatus();
+            case REG_OAM_DATA -> readOAMData();
+            case REG_PPU_DATA -> readPPUData();
+            default -> lastReadValue;
+        };
     }
 
     public void update() {
@@ -632,7 +602,6 @@ public class PPU implements Serializable {
             scanlineCycle = 0;
             scanline++;
             if (scanline == 240) {
-                final MachineRunner runner = machineRunner;
                 drawHighlightedSprite();
                 if (showInputDevices) {
                     final DeviceMapper[] deviceMappers = mapper.getDeviceMappers();
@@ -642,7 +611,6 @@ public class PPU implements Serializable {
                         }
                     }
                 }
-                lastScreen = screen;
                 screen = screenRenderer.render();
             } else if (scanline == nmiScanline) {
                 NMI_occurred = true;
@@ -896,7 +864,6 @@ public class PPU implements Serializable {
                 tileBitmap = 0;
             }
             boolean spriteRendered = false;
-            boolean invertPalette = false;
             if (showSprites && (scanlineCycle >= 8 || showLeftmostSprites)) {
                 for (int y = 0; y < spriteCount; y += 4) {
                     final int spritePixel = scanlineCycle
@@ -919,7 +886,6 @@ public class PPU implements Serializable {
                         }
                         break;
                     }
-                    invertPalette = spriteBoxesEnabled;
                 }
             }
             if (!(spriteRendered || backgroundEnabled)) {
@@ -942,13 +908,8 @@ public class PPU implements Serializable {
                 zapperLightNotDetected = false;
                 zapper.handleLightDetected();
             }
-            screen[screenIndex++] = emphasis | (invertPalette
-                    ? INVERSE_PALETTE[paletteIndex & grayscale]
-                    : (paletteIndex & grayscale));
+            screen[screenIndex++] = emphasis | paletteIndex & grayscale;
         }
-//    if (vCopyDelay > 0 && --vCopyDelay == 0) {
-//      V = T;
-//    }
     }
 
     private void drawHighlightedSprite() {
@@ -1076,7 +1037,6 @@ public class PPU implements Serializable {
 
     private void writePPUAddr(final int value) {
         if (W) {
-//      vCopyDelay = 3;
             V = T = (T & 0x7F00) | value;
         } else {
             T = (T & 0x00FF) | ((value & 0x3F) << 8);

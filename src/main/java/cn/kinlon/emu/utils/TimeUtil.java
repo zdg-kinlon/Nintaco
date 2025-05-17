@@ -99,8 +99,7 @@ public class TimeUtil {
         }
         return next;
     }
-
-
+    
     private static void delayUntil(final long nanoTime) {
         switch (interframeDelay) {
             case Sleep:

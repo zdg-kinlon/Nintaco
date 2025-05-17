@@ -8,6 +8,7 @@ import cn.kinlon.emu.input.ControllerInput;
 import cn.kinlon.emu.input.InputUtil;
 import cn.kinlon.emu.input.OtherInput;
 import cn.kinlon.emu.mappers.Mapper;
+import cn.kinlon.emu.ppu.PPU;
 import cn.kinlon.emu.task.Task;
 
 import static cn.kinlon.emu.PauseStepType.*;

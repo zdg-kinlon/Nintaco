@@ -1,7 +1,7 @@
 package cn.kinlon.emu.mappers.nintendo.vs;
 
 import cn.kinlon.emu.cpu.CPU;
-import cn.kinlon.emu.PPU;
+import cn.kinlon.emu.ppu.PPU;
 import cn.kinlon.emu.ScreenRenderer;
 import cn.kinlon.emu.apu.APU;
 import cn.kinlon.emu.tv.TVSystem;

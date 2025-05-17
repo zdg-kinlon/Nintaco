@@ -20,6 +20,7 @@ import cn.kinlon.emu.mappers.nintendo.vs.VsGame;
 import cn.kinlon.emu.mappers.nsf.NsfMapper;
 import cn.kinlon.emu.palettes.PalettePPU;
 import cn.kinlon.emu.palettes.PaletteUtil;
+import cn.kinlon.emu.ppu.PPU;
 import cn.kinlon.emu.preferences.AppPrefs;
 import cn.kinlon.emu.preferences.GamePrefs;
 import cn.kinlon.emu.utils.GuiUtil;
@@ -29,7 +30,6 @@ import cn.kinlon.emu.utils.TimeUtil;
 
 import java.awt.*;
 import java.io.*;
-import java.security.MessageDigest;
 
 import static java.awt.event.KeyEvent.*;
 import static cn.kinlon.emu.files.FileType.*;

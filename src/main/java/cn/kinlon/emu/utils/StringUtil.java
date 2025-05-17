@@ -1,12 +1,7 @@
 package cn.kinlon.emu.utils;
 
-import java.text.SimpleDateFormat;
-
 public final class StringUtil {
-
-    private static final SimpleDateFormat hhmmssFormat
-            = new SimpleDateFormat("HH:mm:ss");
-
+    
     private StringUtil() {
     }
 
@@ -15,7 +10,7 @@ public final class StringUtil {
     }
 
     public static boolean isBlank(final String str) {
-        return str == null || str.trim().length() == 0;
+        return str == null || str.trim().isEmpty();
     }
 
     public static String toYesNo(final boolean value) {
@@ -80,14 +75,6 @@ public final class StringUtil {
             }
         }
         return sb.toString();
-    }
-
-    public static int parseInt(final String value, final int defaultValue) {
-        try {
-            return isBlank(value) ? defaultValue : Integer.parseInt(value);
-        } catch (Throwable t) {
-            return defaultValue;
-        }
     }
 
     public static int findMatch(final String[] values, final String target) {

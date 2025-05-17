@@ -1,6 +1,6 @@
 package cn.kinlon.emu.gui.hexeditor;
 
-import cn.kinlon.emu.PPU;
+import cn.kinlon.emu.ppu.PPU;
 
 public class PpuDataSource extends DataSource {
 

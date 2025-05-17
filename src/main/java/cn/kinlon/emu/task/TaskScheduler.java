@@ -11,8 +11,6 @@ public class TaskScheduler {
 
     private volatile boolean running = true;
 
-    private boolean ready;
-
     public TaskScheduler() {
         thread = new Thread(this::run, "Task Secheduler Thread");
         thread.start();
@@ -22,12 +20,10 @@ public class TaskScheduler {
         while (running) {
             Task task = null;
             synchronized (tasks) {
-                ready = true;
                 tasks.notifyAll();
                 while (running && tasks.isEmpty()) {
                     threadWait(tasks);
                 }
-                ready = false;
                 tasks.notifyAll();
                 if (running && !tasks.isEmpty()) {
                     task = tasks.get(0);

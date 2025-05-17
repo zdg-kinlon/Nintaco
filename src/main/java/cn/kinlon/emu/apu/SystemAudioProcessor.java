@@ -233,41 +233,30 @@ public class SystemAudioProcessor implements AudioProcessor {
         }
     }
 
-    private static class FlushThread implements Runnable {
-
-        private final SourceDataLine sourceDataLine;
-        private final int lineBufferSize;
-        private final boolean close;
-
-        public FlushThread(final SourceDataLine sourceDataLine,
-                           final int lineBufferSize, final boolean close) {
-            this.sourceDataLine = sourceDataLine;
-            this.lineBufferSize = lineBufferSize;
-            this.close = close;
-        }
+    private record FlushThread(SourceDataLine sourceDataLine, int lineBufferSize, boolean close) implements Runnable {
 
         @Override
-        public void run() {
-            try {
-                if (sourceDataLine != null && lineBufferSize > 0) {
-                    for (int i = 0; i < 1000; i++) {
-                        if (sourceDataLine.available() == lineBufferSize) {
-                            break;
+            public void run() {
+                try {
+                    if (sourceDataLine != null && lineBufferSize > 0) {
+                        for (int i = 0; i < 1000; i++) {
+                            if (sourceDataLine.available() == lineBufferSize) {
+                                break;
+                            } else {
+                                ThreadUtil.sleep(1);
+                            }
+                        }
+                        if (close) {
+                            sourceDataLine.stop();
+                            sourceDataLine.flush();
+                            sourceDataLine.close();
                         } else {
-                            ThreadUtil.sleep(1);
+                            sourceDataLine.flush();
                         }
                     }
-                    if (close) {
-                        sourceDataLine.stop();
-                        sourceDataLine.flush();
-                        sourceDataLine.close();
-                    } else {
-                        sourceDataLine.flush();
-                    }
+                } catch (final Throwable t) {
+                    //t.printStackTrace();
                 }
-            } catch (final Throwable t) {
-                //t.printStackTrace();
             }
         }
-    }
 }

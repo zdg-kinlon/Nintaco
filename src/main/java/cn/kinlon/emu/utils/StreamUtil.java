@@ -113,25 +113,6 @@ public final class StreamUtil {
         out.write(str.getBytes(ISO_8859_1));
     }
 
-    public static ByteArrayOutputStream toByteArrayOutputStream(
-            final Serializable object) {
-
-        if (object == null) {
-            return null;
-        }
-
-        final ByteArrayOutputStream baos = new ByteArrayOutputStream(
-                BYTE_ARRAY_OUTPUT_INITIAL_SIZE);
-        try (final ObjectOutputStream oos = new ObjectOutputStream(baos)) {
-            oos.writeObject(object);
-        } catch (final Throwable t) {
-            //t.printStackTrace();
-        }
-
-        return baos;
-//    return Serializer.serialize(object);
-    }
-
     public static void writeBytes(OutputStream out, int[] bytes)
             throws IOException {
         writeBytes(out, bytes, 0, bytes.length);
@@ -144,13 +125,7 @@ public final class StreamUtil {
             out.write(bytes != null && index < bytes.length ? bytes[index] : 0);
         }
     }
-
-    public static void writeByteArrayOutputStream(final DataOutputStream out,
-                                                  final ByteArrayOutputStream baos) throws IOException {
-        out.writeInt(baos.size());
-        baos.writeTo(out);
-    }
-
+    
     public static Object readObject(final byte[] data) throws Throwable {
         if (data == null) {
             return null;

@@ -1,7 +1,7 @@
 package cn.kinlon.emu.input.gamepad;
 
 import cn.kinlon.emu.Machine;
-import cn.kinlon.emu.PPU;
+import cn.kinlon.emu.ppu.PPU;
 import cn.kinlon.emu.cartdb.Cart;
 import cn.kinlon.emu.cartdb.CartDB;
 import cn.kinlon.emu.input.DeviceMapper;

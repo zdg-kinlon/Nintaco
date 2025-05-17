@@ -9,6 +9,8 @@ import cn.kinlon.emu.mappers.nintendo.vs.DualAPU;
 import cn.kinlon.emu.mappers.nintendo.vs.MainCPU;
 import cn.kinlon.emu.mappers.nintendo.vs.MainVsDualSystem;
 import cn.kinlon.emu.mappers.nintendo.vs.VsGame;
+import cn.kinlon.emu.ppu.PPU;
+import cn.kinlon.emu.ppu.PPU2C05;
 
 
 import static cn.kinlon.emu.mappers.nintendo.vs.VsPPU.*;
