@@ -548,90 +548,6 @@ public class CPU implements Serializable {
 
     // -- Instructions -----------------------------------------------------------
 
-    private void AAC(final int value) {
-        reg.a(reg.a() & value);
-
-        reg.c(getBitBool(reg.a(), 7));
-        reg.n(reg.c());
-        reg.z(reg.a() == 0);
-    }
-
-    private void ADC(int value) {
-        int t = reg.a() + value + toBit(reg.c());
-
-        reg.v(getBitBool((reg.a() ^ t) & (value ^ t), 7));
-        reg.a(t);
-
-        reg.c(getBitBool(t, 8));
-        reg.n(getBitBool(t, 7));
-        reg.z(reg.a() == 0);
-    }
-
-    private void AND(int value) {
-        reg.a(reg.a() & value);
-
-        reg.n(getBitBool(reg.a(), 7));
-        reg.z(reg.a() == 0);
-    }
-
-    private void ARR(int value) {
-        reg.a(ROR(reg.a() & value));
-
-        switch ((getBit(reg.a(), 6) << 1) | getBit(reg.a(), 5)) {
-            case 0b00:
-                reg.v(false);
-                reg.c(false);
-                break;
-            case 0b01:
-                reg.v(true);
-                reg.c(false);
-                break;
-            case 0b10:
-                reg.v(true);
-                reg.c(true);
-                break;
-            case 0b11:
-                reg.v(false);
-                reg.c(true);
-                break;
-        }
-        reg.n(getBitBool(reg.a(), 7));
-        reg.z(reg.a() == 0);
-    }
-
-    private int ASL(int value) {
-        reg.c(getBitBool(value, 7));
-        value = (value << 1) & 0b1111_1110;
-
-        reg.n(getBitBool(value, 7));
-        reg.z(value == 0);
-        return value;
-    }
-
-    private void ASR(int value) {
-        reg.a(LSR(reg.a() & value));
-    }
-
-    private void ATX(int value) {
-        reg.a(value);
-        TAX();
-    }
-
-    private void AXS(int value) {
-        int t = (reg.a() & reg.x()) + 256 - value;
-        reg.x(t);
-
-        reg.c(getBitBool(t, 8));
-        reg.n(getBitBool(reg.x(), 7));
-        reg.z(reg.x() == 0);
-    }
-
-    private void BIT(int value) {
-        reg.v(getBitBool(value, 6));
-        reg.n(getBitBool(value, 7));
-        reg.z((reg.a() & value) == 0);
-    }
-
     private void CLC() {
         reg.c(false);
     }
@@ -659,23 +575,111 @@ public class CPU implements Serializable {
     private void SEI() {
         reg.i(true);
     }
+    
+    private void setZ(int value){
+        reg.z(value == 0);
+    }
+
+    private void AAC(final int value) {
+        reg.a(reg.a() & value);
+
+        reg.c(getBitBool(reg.a(), 7));
+        reg.n(reg.c());
+        setZ(reg.a());
+    }
+
+    private void ADC(int value) {
+        int t = reg.a() + value + toBit(reg.c());
+
+        reg.v(getBitBool((reg.a() ^ t) & (value ^ t), 7));
+        reg.a(t);
+
+        reg.c(getBitBool(t, 8));
+        reg.n(getBitBool(t, 7));
+        setZ(reg.a());
+    }
+
+    private void AND(int value) {
+        reg.a(reg.a() & value);
+
+        reg.n(getBitBool(reg.a(), 7));
+        setZ(reg.a());
+    }
+
+    private void ARR(int value) {
+        reg.a(ROR(reg.a() & value));
+
+        switch ((getBit(reg.a(), 6) << 1) | getBit(reg.a(), 5)) {
+            case 0b00:
+                reg.v(false);
+                reg.c(false);
+                break;
+            case 0b01:
+                reg.v(true);
+                reg.c(false);
+                break;
+            case 0b10:
+                reg.v(true);
+                reg.c(true);
+                break;
+            case 0b11:
+                reg.v(false);
+                reg.c(true);
+                break;
+        }
+        reg.n(getBitBool(reg.a(), 7));
+        setZ(reg.a());
+    }
+
+    private int ASL(int value) {
+        reg.c(getBitBool(value, 7));
+        value = (value << 1) & 0b1111_1110;
+
+        reg.n(getBitBool(value, 7));
+        setZ(value);
+        return value;
+    }
+
+    private void ASR(int value) {
+        reg.a(LSR(reg.a() & value));
+    }
+
+    private void ATX(int value) {
+        reg.a(value);
+        TAX();
+    }
+
+    private void AXS(int value) {
+        int t = (reg.a() & reg.x()) + 256 - value;
+        reg.x(t);
+
+        reg.c(getBitBool(t, 8));
+        reg.n(getBitBool(reg.x(), 7));
+        setZ(reg.x());
+    }
+
+    private void BIT(int value) {
+        reg.v(getBitBool(value, 6));
+        reg.n(getBitBool(value, 7));
+        setZ(reg.a() & value);
+    }
 
     private void CMP(int value) {
         reg.c(reg.a() >= value);
         reg.n(getBitBool(reg.a() - value, 7));
-        reg.z(reg.a() == value);
+        setZ(reg.a() - value);
     }
 
     private void CPX(int value) {
         reg.c(reg.x() >= value);
         reg.n(getBitBool(reg.x() - value, 7));
-        reg.z(reg.x() == value);
+        setZ(reg.x() - value);
     }
 
     private void CPY(int value) {
         reg.c(reg.y() >= value);
         reg.n(getBitBool(reg.y() - value, 7));
-        reg.z(reg.y() == value);
+        setZ(reg.y() - value);
     }
 
     private int DCP(int value) {
@@ -686,7 +690,7 @@ public class CPU implements Serializable {
     private int DEC(int value) {
         value = toU8(value - 1);
         reg.n(getBitBool(value, 7));
-        reg.z(value == 0);
+        setZ(value);
         return value;
     }
 
@@ -694,28 +698,28 @@ public class CPU implements Serializable {
         reg.x(reg.x() - 1);
 
         reg.n(getBitBool(reg.x(), 7));
-        reg.z(reg.x() == 0);
+        setZ(reg.x());
     }
 
     private void DEY() {
         reg.y(reg.y() - 1);
 
         reg.n(getBitBool(reg.y(), 7));
-        reg.z(reg.y() == 0);
+        setZ(reg.y());
     }
 
     private void EOR(int value) {
         reg.a(reg.a() ^ value);
 
         reg.n(getBitBool(reg.a(), 7));
-        reg.z(reg.a() == 0);
+        setZ(reg.a());
     }
 
     private int INC(int value) {
         value = toU8(value + 1);
 
         reg.n(getBitBool(value, 7));
-        reg.z(value == 0);
+        setZ(value);
         return value;
     }
 
@@ -723,14 +727,14 @@ public class CPU implements Serializable {
         reg.x(reg.x() + 1);
 
         reg.n(getBitBool(reg.x(), 7));
-        reg.z(reg.x() == 0);
+        setZ(reg.x());
     }
 
     private void INY() {
         reg.y(reg.y() + 1);
 
         reg.n(getBitBool(reg.y(), 7));
-        reg.z(reg.y() == 0);
+        setZ(reg.y());
     }
 
     private int ISB(int value) {
@@ -753,21 +757,21 @@ public class CPU implements Serializable {
         reg.a(value);
 
         reg.n(getBitBool(reg.a(), 7));
-        reg.z(reg.a() == 0);
+        setZ(reg.a());
     }
 
     private void LDX(int value) {
         reg.x(value);
 
         reg.n(getBitBool(reg.x(), 7));
-        reg.z(reg.x() == 0);
+        setZ(reg.x());
     }
 
     private void LDY(int value) {
         reg.y(value);
 
         reg.n(getBitBool(reg.y(), 7));
-        reg.z(reg.y() == 0);
+        setZ(reg.y());
     }
 
     private int LSR(int value) {
@@ -775,7 +779,7 @@ public class CPU implements Serializable {
         value = (value >> 1) & 0b0111_1111;
 
         reg.n(false);
-        reg.z(value == 0);
+        setZ(value);
         return value;
     }
 
@@ -783,7 +787,7 @@ public class CPU implements Serializable {
         reg.a(reg.a() | value);
 
         reg.n(getBitBool(reg.a(), 7));
-        reg.z(reg.a() == 0);
+        setZ(reg.a());
     }
 
     private int RLA(int value) {
@@ -798,7 +802,7 @@ public class CPU implements Serializable {
 
         reg.c(t);
         reg.n(getBitBool(value, 7));
-        reg.z(value == 0);
+        setZ(value);
         return value;
     }
 
@@ -808,8 +812,8 @@ public class CPU implements Serializable {
         value |= (reg.c() ? 1 : 0) << 7;
 
         reg.c(t);
-        reg.z(value == 0);
         reg.n(getBitBool(value, 7));
+        setZ(value);
         return value;
     }
 
@@ -836,28 +840,28 @@ public class CPU implements Serializable {
         reg.x(reg.a());
 
         reg.n(getBitBool(reg.x(), 7));
-        reg.z(reg.x() == 0);
+        setZ(reg.x());
     }
 
     private void TAY() {
         reg.y(reg.a());
 
         reg.n(getBitBool(reg.y(), 7));
-        reg.z(reg.y() == 0);
+        setZ(reg.y());
     }
 
     private void TSX() {
         reg.x(reg.sp());
 
         reg.n(getBitBool(reg.x(), 7));
-        reg.z(reg.x() == 0);
+        setZ(reg.x());
     }
 
     private void TXA() {
         reg.a(reg.x());
 
         reg.n(getBitBool(reg.a(), 7));
-        reg.z(reg.a() == 0);
+        setZ(reg.a());
     }
 
     private void TXS() {
@@ -868,7 +872,7 @@ public class CPU implements Serializable {
         reg.a(reg.y());
 
         reg.n(getBitBool(reg.a(), 7));
-        reg.z(reg.a() == 0);
+        setZ(reg.a());
     }
 
     private void XAA(final int value) {
@@ -876,7 +880,7 @@ public class CPU implements Serializable {
 
         reg.c(getBitBool(reg.a(), 7));
         reg.n(reg.c());
-        reg.z(reg.a() == 0);
+        setZ(reg.a());
     }
 
     private int XAS(final int value) {
