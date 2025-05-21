@@ -153,18 +153,18 @@ public class ALU {
 
     /// Rotate Left
     public int rol(int value) {
-        boolean c = getBitBool(value, 7);
+        boolean _c = getBitBool(value, 7);
         value = toU8(value << 1) | (toBit(reg.c()));
-        reg.c(c);
+        reg.c(_c);
         setNZ(value);
         return value;
     }
 
     /// Rotate Right
     public int ror(int value) {
-        boolean c = getBitBool(value, 0);
+        boolean _c = getBitBool(value, 0);
         value = toU8(value >>> 1) | (toBit(reg.c()) << 7);
-        reg.c(c);
+        reg.c(_c);
         setNZ(value);
         return value;
     }
@@ -196,10 +196,10 @@ public class ALU {
 
     /// Add with Carry
     public void adc(int value) {
-        int i = reg.a() + value + toBit(reg.c());
-        reg.v(getBitBool((reg.a() ^ i) & (value ^ i), 7));
-        reg.c(getBitBool(i, 8));
-        reg.a(i);
+        int _i = reg.a() + value + toBit(reg.c());
+        reg.v(getBitBool((reg.a() ^ _i) & (value ^ _i), 7));
+        reg.c(getBitBool(_i, 8));
+        reg.a(_i);
         setNZ(reg.a());
     }
 
@@ -285,6 +285,11 @@ public class ALU {
         tax();
     }
 
+    public int xas(int value) {
+        reg.sp(reg.x() & reg.a());
+        return reg.sp() & value;
+    }
+
     public void sax(int value) {
         cpu.write(value, reg.a() & reg.x());
     }
@@ -326,6 +331,11 @@ public class ALU {
         return value;
     }
 
+    public int slo(int value) {
+        ora(value = asl(value));
+        return value;
+    }
+
     public int rla(int value) {
         and(value = rol(value));
         return value;
@@ -347,9 +357,9 @@ public class ALU {
     }
 
     public void axs(int value) {
-        int t = (reg.a() & reg.x()) + 256 - value;
-        reg.x(t);
-        reg.c(getBitBool(t, 8));
+        value = (reg.a() & reg.x()) + 256 - value;
+        reg.x(value);
+        reg.c(getBitBool(value, 8));
         setNZ(reg.x());
     }
 
@@ -357,16 +367,6 @@ public class ALU {
         reg.a(reg.a() & reg.x() & value);
         reg.c(getBitBool(reg.a(), 7));
         setNZ(reg.a());
-    }
-
-    public int slo(int value) {
-        ora(value = asl(value));
-        return value;
-    }
-
-    public int xas(int value) {
-        reg.sp(reg.x() & reg.a());
-        return reg.sp() & value;
     }
 
     // -- Private Methods
