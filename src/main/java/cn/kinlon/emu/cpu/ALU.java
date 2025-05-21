@@ -13,11 +13,8 @@ public class ALU {
         this.reg = cpu.getRegister();
     }
 
-    // -- Official 6502 Instructions --
+    // -- Official 6502 Instructions ------------------------------------------------
     // https://www.nesdev.org/wiki/Instruction_reference
-    // Branch	    BCC	BCS	BEQ	BNE	BPL	BMI	BVC	BVS
-    // Jump	        JMP	JSR	RTS	BRK	RTI
-    // Other	    NOP
 
     /// Set Carry
     public void sec() {
@@ -57,25 +54,29 @@ public class ALU {
     /// Transfer A to X
     public void tax() {
         reg.x(reg.a());
-        setNZ(reg.x());
+        reg.n(getBitBool(reg.x(), 7));
+        reg.z(reg.x() == 0);
     }
 
     /// Transfer X to A
     public void txa() {
         reg.a(reg.x());
-        setNZ(reg.a());
+        reg.n(getBitBool(reg.a(), 7));
+        reg.z(reg.a() == 0);
     }
 
     /// Transfer A to Y
     public void tay() {
         reg.y(reg.a());
-        setNZ(reg.y());
+        reg.n(getBitBool(reg.y(), 7));
+        reg.z(reg.y() == 0);
     }
 
     /// Transfer Y to A
     public void tya() {
         reg.a(reg.y());
-        setNZ(reg.a());
+        reg.n(getBitBool(reg.a(), 7));
+        reg.z(reg.a() == 0);
     }
 
     /// Transfer X to Stack Pointer
@@ -86,7 +87,8 @@ public class ALU {
     /// Transfer Stack Pointer to X
     public void tsx() {
         reg.x(reg.sp());
-        setNZ(reg.x());
+        reg.n(getBitBool(reg.x(), 7));
+        reg.z(reg.x() == 0);
     }
 
     /// Push A
@@ -97,7 +99,8 @@ public class ALU {
     /// Pull A
     public void pla() {
         reg.a(cpu.pull());
-        setNZ(reg.a());
+        reg.n(getBitBool(reg.a(), 7));
+        reg.z(reg.a() == 0);
     }
 
     /// Push Processor Status
@@ -120,17 +123,26 @@ public class ALU {
 
     /// Compare A
     public void cmp(int value) {
-        compare(reg.a(), value);
+        reg.c(reg.a() >= value);
+        value = reg.a() - value;
+        reg.n(getBitBool(value, 7));
+        reg.z(value == 0);
     }
 
     /// Compare X
     public void cpx(int value) {
-        compare(reg.x(), value);
+        reg.c(reg.x() >= value);
+        value = reg.x() - value;
+        reg.n(getBitBool(value, 7));
+        reg.z(value == 0);
     }
 
     /// Compare Y
     public void cpy(int value) {
-        compare(reg.y(), value);
+        reg.c(reg.y() >= value);
+        value = reg.y() - value;
+        reg.n(getBitBool(value, 7));
+        reg.z(value == 0);
     }
 
     /// Arithmetic Shift Left
@@ -138,7 +150,8 @@ public class ALU {
         reg.c(getBitBool(value, 7));
         value <<= 1;
         value = toU8(value);
-        setNZ(value);
+        reg.n(getBitBool(value, 7));
+        reg.z(value == 0);
         return value;
     }
 
@@ -147,7 +160,8 @@ public class ALU {
         reg.c(getBitBool(value, 0));
         value >>>= 1;
         value = toU8(value);
-        setNZ(value);
+        reg.n(getBitBool(value, 7));
+        reg.z(value == 0);
         return value;
     }
 
@@ -156,7 +170,8 @@ public class ALU {
         boolean _c = getBitBool(value, 7);
         value = toU8(value << 1) | (toBit(reg.c()));
         reg.c(_c);
-        setNZ(value);
+        reg.n(getBitBool(value, 7));
+        reg.z(value == 0);
         return value;
     }
 
@@ -165,33 +180,37 @@ public class ALU {
         boolean _c = getBitBool(value, 0);
         value = toU8(value >>> 1) | (toBit(reg.c()) << 7);
         reg.c(_c);
-        setNZ(value);
+        reg.n(getBitBool(value, 7));
+        reg.z(value == 0);
         return value;
     }
 
     /// Bitwise AND
     public void and(int value) {
         reg.a(reg.a() & value);
-        setNZ(reg.a());
+        reg.n(getBitBool(reg.a(), 7));
+        reg.z(reg.a() == 0);
     }
 
     /// Bitwise OR
     public void ora(int value) {
         reg.a(reg.a() | value);
-        setNZ(reg.a());
+        reg.n(getBitBool(reg.a(), 7));
+        reg.z(reg.a() == 0);
     }
 
     /// Bitwise Exclusive OR
     public void eor(int value) {
         reg.a(reg.a() ^ value);
-        setNZ(reg.a());
+        reg.n(getBitBool(reg.a(), 7));
+        reg.z(reg.a() == 0);
     }
 
     /// Bit Test
     public void bit(int value) {
         reg.v(getBitBool(value, 6));
-        setN(value);
-        setZ(reg.a() & value);
+        reg.n(getBitBool(value, 7));
+        reg.z((reg.a() & value) == 0);
     }
 
     /// Add with Carry
@@ -200,7 +219,8 @@ public class ALU {
         reg.v(getBitBool((reg.a() ^ _i) & (value ^ _i), 7));
         reg.c(getBitBool(_i, 8));
         reg.a(_i);
-        setNZ(reg.a());
+        reg.n(getBitBool(reg.a(), 7));
+        reg.z(reg.a() == 0);
     }
 
     /// Subtract with Carry
@@ -210,12 +230,18 @@ public class ALU {
 
     /// Increment Memory
     public int inc(int value) {
-        return setNZu8(++value);
+        value = toU8(++value);
+        reg.n(getBitBool(value, 7));
+        reg.z(value == 0);
+        return value;
     }
 
     /// Decrement Memory
     public int dec(int value) {
-        return setNZu8(--value);
+        value = toU8(--value);
+        reg.n(getBitBool(value, 7));
+        reg.z(value == 0);
+        return value;
     }
 
     /// Increment X
@@ -241,7 +267,8 @@ public class ALU {
     /// Load A
     public void lda(int value) {
         reg.a(value);
-        setNZ(reg.a());
+        reg.n(getBitBool(reg.a(), 7));
+        reg.z(reg.a() == 0);
     }
 
     /// Store A
@@ -252,7 +279,8 @@ public class ALU {
     /// Load X
     public void ldx(int value) {
         reg.x(value);
-        setNZ(reg.x());
+        reg.n(getBitBool(reg.x(), 7));
+        reg.z(reg.x() == 0);
     }
 
     /// Store X
@@ -263,7 +291,8 @@ public class ALU {
     /// Load Y
     public void ldy(int value) {
         reg.y(value);
-        setNZ(reg.y());
+        reg.n(getBitBool(reg.y(), 7));
+        reg.z(reg.y() == 0);
     }
 
     /// Store Y
@@ -271,7 +300,7 @@ public class ALU {
         cpu.write(value, reg.y());
     }
 
-    // -- Unofficial 6502 Instructions --
+    // -- Unofficial 6502 Instructions ------------------------------------------------
     // https://www.nesdev.org/wiki/CPU_unofficial_opcodes
 
     public void lax(int value) {
@@ -295,15 +324,15 @@ public class ALU {
     }
 
     public void shx(int value) {
-        cpu.write(value, reg.x() & nextPage(value));
+        cpu.write(value, reg.x() & ((value >> 8) + 1));
     }
 
     public void shy(int value) {
-        cpu.write(value, reg.y() & nextPage(value));
+        cpu.write(value, reg.y() & ((value >> 8) + 1));
     }
 
     public void ahx(int value) {
-        cpu.write(value, reg.a() & reg.x() & nextPage(value));
+        cpu.write(value, reg.a() & reg.x() & ((value >> 8) + 1));
     }
 
     // bug
@@ -360,42 +389,14 @@ public class ALU {
         value = (reg.a() & reg.x()) + 256 - value;
         reg.x(value);
         reg.c(getBitBool(value, 8));
-        setNZ(reg.x());
+        reg.n(getBitBool(reg.x(), 7));
+        reg.z(reg.x() == 0);
     }
 
     public void xaa(int value) {
         reg.a(reg.a() & reg.x() & value);
         reg.c(getBitBool(reg.a(), 7));
-        setNZ(reg.a());
-    }
-
-    // -- Private Methods
-
-    private int nextPage(int address) {
-        return toU8((address >> 8) + 1);
-    }
-
-    private void setZ(int value) {
-        reg.z(value == 0);
-    }
-
-    private void setN(int value) {
-        reg.n(getBitBool(value, 7));
-    }
-
-    private void setNZ(int value) {
-        setN(value);
-        setZ(value);
-    }
-
-    private int setNZu8(int value) {
-        value = toU8(value);
-        setNZ(value);
-        return value;
-    }
-
-    private void compare(int x, int y) {
-        reg.c(x >= y);
-        setNZ(x - y);
+        reg.n(getBitBool(reg.a(), 7));
+        reg.z(reg.a() == 0);
     }
 }

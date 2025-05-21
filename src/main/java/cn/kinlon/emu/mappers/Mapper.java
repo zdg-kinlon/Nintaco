@@ -97,6 +97,8 @@ import cn.kinlon.emu.serializer.Transients;
 import cn.kinlon.emu.tv.TVSystem;
 
 import static cn.kinlon.emu.utils.BitUtil.*;
+import static cn.kinlon.emu.utils.ByteUtil.toU16;
+import static cn.kinlon.emu.utils.ByteUtil.toU8;
 import static cn.kinlon.emu.utils.StreamUtil.*;
 import static cn.kinlon.emu.mappers.NametableMirroring.*;
 import static cn.kinlon.emu.tv.TVSystem.*;
@@ -509,7 +511,7 @@ public abstract class Mapper implements Serializable, Transients {
     }
 
     public int maskAddress(int address) {
-        address &= 0xFFFF;
+        address = toU16(address);
         if (address < 0x2000) {
             return address & 0x07FF;
         } else if (address < 0x4000) {
@@ -593,7 +595,7 @@ public abstract class Mapper implements Serializable, Transients {
     }
 
     public void writeCpuMemory(int address, int value) {
-        value &= 0xFF;
+        value = toU8(value);
         address = maskAddress(address);
         switch (address) {
             case PPU.REG_PPU_CTRL:
