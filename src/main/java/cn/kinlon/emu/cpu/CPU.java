@@ -34,6 +34,7 @@ public class CPU implements Serializable {
     private static final int IRQ_DMC = 2;
 
     private final Register reg = new Register();
+    private final ALU alu = new ALU(this);
 
     private long cycleCounter;
     private int opcode;
@@ -74,20 +75,34 @@ public class CPU implements Serializable {
         switch (opcode) {
 
             // Stack instructions
-            case 0x00 -> // BRK
-                    BRK();
-            case 0x40 -> // RTI
-                    RTI();
-            case 0x60 -> // RTS
-                    RTS();
+            // BRK
+            case 0x00:
+                BRK();
+                break;
+// RTI
+            case 0x40:
+                RTI();
+                break;
+// RTS
+            case 0x60:
+                RTS();
+                break;
             // PHP
-            case 0x08, 0x48 -> // PHA
-                    PUSH();
+            // PHA
+            case 0x08:
+            case 0x48:
+                PUSH();
+                break;
             // PLP
-            case 0x28, 0x68 -> // PLA
-                    PULL();
-            case 0x20 -> // JSR $A5B6
-                    JSR();
+            // PLA
+            case 0x28:
+            case 0x68:
+                PULL();
+                break;
+// JSR $A5B6
+            case 0x20:
+                JSR();
+                break;
 
 
             // Accumulator or implied addressing instructions
@@ -118,9 +133,37 @@ public class CPU implements Serializable {
             // INX
             // NOP
             // SED
-            case 0x0A, 0x1A, 0x18, 0x2A, 0x38, 0x3A, 0x4A, 0x58, 0x5A, 0x6A, 0x78, 0x7A, 0x88, 0x8A, 0x98, 0x9A, 0xA8,
-                 0xAA, 0xB8, 0xBA, 0xC8, 0xCA, 0xD8, 0xDA, 0xE8, 0xEA, 0xF8, 0xFA -> // *NOP
-                    ACCUMULATOR_OR_IMPLIED();
+            // *NOP
+            case 0x0A:
+            case 0x1A:
+            case 0x18:
+            case 0x2A:
+            case 0x38:
+            case 0x3A:
+            case 0x4A:
+            case 0x58:
+            case 0x5A:
+            case 0x6A:
+            case 0x78:
+            case 0x7A:
+            case 0x88:
+            case 0x8A:
+            case 0x98:
+            case 0x9A:
+            case 0xA8:
+            case 0xAA:
+            case 0xB8:
+            case 0xBA:
+            case 0xC8:
+            case 0xCA:
+            case 0xD8:
+            case 0xDA:
+            case 0xE8:
+            case 0xEA:
+            case 0xF8:
+            case 0xFA:
+                ACCUMULATOR_OR_IMPLIED();
+                break;
 
 
             // Immediate addressing instructions
@@ -147,14 +190,40 @@ public class CPU implements Serializable {
             // CPX #$A5
             // *DOP #$89
             // SBC #$A5
-            case 0x09, 0x0B, 0x2B, 0x29, 0x49, 0x4B, 0x69, 0x6B, 0x80, 0x82, 0x89, 0x8B, 0xA0, 0xA2, 0xA9, 0xAB, 0xC0,
-                 0xC2, 0xC9, 0xCB, 0xE0, 0xE2, 0xE9, 0xEB -> // *SBC #$40
-                    IMMEDIATE();
+            // *SBC #$40
+            case 0x09:
+            case 0x0B:
+            case 0x2B:
+            case 0x29:
+            case 0x49:
+            case 0x4B:
+            case 0x69:
+            case 0x6B:
+            case 0x80:
+            case 0x82:
+            case 0x89:
+            case 0x8B:
+            case 0xA0:
+            case 0xA2:
+            case 0xA9:
+            case 0xAB:
+            case 0xC0:
+            case 0xC2:
+            case 0xC9:
+            case 0xCB:
+            case 0xE0:
+            case 0xE2:
+            case 0xE9:
+            case 0xEB:
+                IMMEDIATE();
+                break;
 
 
             // Absolute addressing instructions
-            case 0x4C -> // JMP $A5B6
-                    ABSOLUTE_JUMP();
+            // JMP $A5B6
+            case 0x4C:
+                ABSOLUTE_JUMP();
+                break;
             // *NOP $A9A9
             // ORA $A5B6
             // BIT $A5B6
@@ -168,8 +237,23 @@ public class CPU implements Serializable {
             // CPY $A5B6
             // CMP $A5B6
             // CPX $A5B6
-            case 0x0C, 0x0D, 0x2C, 0x2D, 0x4D, 0x6D, 0xAC, 0xAD, 0xAE, 0xAF, 0xCC, 0xCD, 0xEC, 0xED -> // SBC $A5B6
-                    ABSOLUTE_READ();
+            // SBC $A5B6
+            case 0x0C:
+            case 0x0D:
+            case 0x2C:
+            case 0x2D:
+            case 0x4D:
+            case 0x6D:
+            case 0xAC:
+            case 0xAD:
+            case 0xAE:
+            case 0xAF:
+            case 0xCC:
+            case 0xCD:
+            case 0xEC:
+            case 0xED:
+                ABSOLUTE_READ();
+                break;
             // ASL $A5B6
             // *SLO $0647
             // ROL $A5B6
@@ -181,13 +265,31 @@ public class CPU implements Serializable {
             // DEC $A5B6
             // *DCP $0647
             // INC $A5B6
-            case 0x0E, 0x0F, 0x2E, 0x2F, 0x4F, 0x4E, 0x6E, 0x6F, 0xCE, 0xCF, 0xEE, 0xEF -> // *ISB $0647
-                    ABSOLUTE_READ_MODIFY_WRITE();
+            // *ISB $0647
+            case 0x0E:
+            case 0x0F:
+            case 0x2E:
+            case 0x2F:
+            case 0x4F:
+            case 0x4E:
+            case 0x6E:
+            case 0x6F:
+            case 0xCE:
+            case 0xCF:
+            case 0xEE:
+            case 0xEF:
+                ABSOLUTE_READ_MODIFY_WRITE();
+                break;
             // STY $A5B6
             // STA $A5B6
             // STX $A5B6
-            case 0x8C, 0x8D, 0x8E, 0x8F -> // *SAX $0549
-                    ABSOLUTE_WRITE();
+            // *SAX $0549
+            case 0x8C:
+            case 0x8D:
+            case 0x8E:
+            case 0x8F:
+                ABSOLUTE_WRITE();
+                break;
 
 
             // Zero page addressing instructions
@@ -206,9 +308,25 @@ public class CPU implements Serializable {
             // CPY $A5
             // CMP $A5
             // CPX $A5
-            case 0x04, 0x05, 0x24, 0x25, 0x44, 0x45, 0x64, 0x65, 0xA4, 0xA5, 0xA6, 0xA7, 0xC4, 0xC5, 0xE4,
-                 0xE5 -> // SBC $A5
-                    ZERO_PAGE_READ();
+            // SBC $A5
+            case 0x04:
+            case 0x05:
+            case 0x24:
+            case 0x25:
+            case 0x44:
+            case 0x45:
+            case 0x64:
+            case 0x65:
+            case 0xA4:
+            case 0xA5:
+            case 0xA6:
+            case 0xA7:
+            case 0xC4:
+            case 0xC5:
+            case 0xE4:
+            case 0xE5:
+                ZERO_PAGE_READ();
+                break;
             // ASL $A5
             // *SLO $47
             // ROL $A5
@@ -220,13 +338,31 @@ public class CPU implements Serializable {
             // DEC $A5
             // *DCP $47
             // INC $A5
-            case 0x06, 0x07, 0x26, 0x27, 0x46, 0x47, 0x66, 0x67, 0xC6, 0xC7, 0xE6, 0xE7 -> // *ISB $47
-                    ZERO_PAGE_READ_MODIFY_WRITE();
+            // *ISB $47
+            case 0x06:
+            case 0x07:
+            case 0x26:
+            case 0x27:
+            case 0x46:
+            case 0x47:
+            case 0x66:
+            case 0x67:
+            case 0xC6:
+            case 0xC7:
+            case 0xE6:
+            case 0xE7:
+                ZERO_PAGE_READ_MODIFY_WRITE();
+                break;
             // STY $A5
             // STA $A5
             // STX $A5
-            case 0x84, 0x85, 0x86, 0x87 -> // *SAX $49
-                    ZERO_PAGE_WRITE();
+            // *SAX $49
+            case 0x84:
+            case 0x85:
+            case 0x86:
+            case 0x87:
+                ZERO_PAGE_WRITE();
+                break;
 
 
             // Zero page indexed addressing instructions
@@ -245,9 +381,25 @@ public class CPU implements Serializable {
             // *NOP $A9,X
             // CMP $A5,X
             // *NOP $A9,X
-            case 0x14, 0x15, 0x34, 0x35, 0x54, 0x55, 0x74, 0x75, 0xB4, 0xB5, 0xB6, 0xB7, 0xD4, 0xD5, 0xF4,
-                 0xF5 -> // SBC $A5,X
-                    ZERO_PAGE_INDEXED_READ();
+            // SBC $A5,X
+            case 0x14:
+            case 0x15:
+            case 0x34:
+            case 0x35:
+            case 0x54:
+            case 0x55:
+            case 0x74:
+            case 0x75:
+            case 0xB4:
+            case 0xB5:
+            case 0xB6:
+            case 0xB7:
+            case 0xD4:
+            case 0xD5:
+            case 0xF4:
+            case 0xF5:
+                ZERO_PAGE_INDEXED_READ();
+                break;
             // ASL $A5,X
             // *SLO $48,X
             // ROL $A5,X
@@ -259,13 +411,31 @@ public class CPU implements Serializable {
             // DEC $A5,X
             // *DCP $48,X
             // INC $A5,X
-            case 0x16, 0x17, 0x36, 0x37, 0x56, 0x57, 0x76, 0x77, 0xD6, 0xD7, 0xF6, 0xF7 -> // *ISB $48,X
-                    ZERO_PAGE_INDEXED_READ_MODIFY_WRITE();
+            // *ISB $48,X
+            case 0x16:
+            case 0x17:
+            case 0x36:
+            case 0x37:
+            case 0x56:
+            case 0x57:
+            case 0x76:
+            case 0x77:
+            case 0xD6:
+            case 0xD7:
+            case 0xF6:
+            case 0xF7:
+                ZERO_PAGE_INDEXED_READ_MODIFY_WRITE();
+                break;
             // STY $A5,X
             // STA $A5,X
             // STX $A5,Y
-            case 0x94, 0x95, 0x96, 0x97 -> // *SAX $4A,Y
-                    ZERO_PAGE_INDEXED_WRITE();
+            // *SAX $4A,Y
+            case 0x94:
+            case 0x95:
+            case 0x96:
+            case 0x97:
+                ZERO_PAGE_INDEXED_WRITE();
+                break;
 
 
             // Absolute indexed addressing instructions
@@ -292,9 +462,33 @@ public class CPU implements Serializable {
             // CMP $A5B6,X
             // SBC $A5B6,Y
             // *NOP $A9A9,X
-            case 0x19, 0x1C, 0x1D, 0x3C, 0x3D, 0x39, 0x5C, 0x5D, 0x59, 0x7C, 0x7D, 0x79, 0xBB, 0xBC, 0xB9, 0xBD, 0xBE,
-                 0xBF, 0xD9, 0xDC, 0xDD, 0xF9, 0xFC, 0xFD -> // SBC $A5B6,X
-                    ABSOLUTE_INDEXED_READ();
+            // SBC $A5B6,X
+            case 0x19:
+            case 0x1C:
+            case 0x1D:
+            case 0x3C:
+            case 0x3D:
+            case 0x39:
+            case 0x5C:
+            case 0x5D:
+            case 0x59:
+            case 0x7C:
+            case 0x7D:
+            case 0x79:
+            case 0xBB:
+            case 0xBC:
+            case 0xB9:
+            case 0xBD:
+            case 0xBE:
+            case 0xBF:
+            case 0xD9:
+            case 0xDC:
+            case 0xDD:
+            case 0xF9:
+            case 0xFC:
+            case 0xFD:
+                ABSOLUTE_INDEXED_READ();
+                break;
             // *SLO $0548,Y
             // ASL $A5B6,X
             // *SLO $0548,X
@@ -312,16 +506,41 @@ public class CPU implements Serializable {
             // *DCP $0548,X
             // INC $A5B6,X
             // *ISB $0548,Y  
-            case 0x1B, 0x1E, 0x1F, 0x3B, 0x3E, 0x3F, 0x5E, 0x5B, 0x5F, 0x7B, 0x7E, 0x7F, 0xDB, 0xDE, 0xDF, 0xFE, 0xFB,
-                 0xFF -> // *ISB $0548,X
-                    ABSOLUTE_INDEXED_READ_MODIFY_WRITE();
+            // *ISB $0548,X
+            case 0x1B:
+            case 0x1E:
+            case 0x1F:
+            case 0x3B:
+            case 0x3E:
+            case 0x3F:
+            case 0x5E:
+            case 0x5B:
+            case 0x5F:
+            case 0x7B:
+            case 0x7E:
+            case 0x7F:
+            case 0xDB:
+            case 0xDE:
+            case 0xDF:
+            case 0xFE:
+            case 0xFB:
+            case 0xFF:
+                ABSOLUTE_INDEXED_READ_MODIFY_WRITE();
+                break;
             // STA $A5B6,Y
             // *XAS $A5B6,Y  
             // *SHY $A5B6,X
             // STA $A5B6,X
             // *SHX $A5B6,Y
-            case 0x99, 0x9B, 0x9C, 0x9D, 0x9E, 0x9F -> // *SHA $A5B6,Y
-                    ABSOLUTE_INDEXED_WRITE();
+            // *SHA $A5B6,Y
+            case 0x99:
+            case 0x9B:
+            case 0x9C:
+            case 0x9D:
+            case 0x9E:
+            case 0x9F:
+                ABSOLUTE_INDEXED_WRITE();
+                break;
 
 
             // Relative addressing instructions
@@ -332,8 +551,17 @@ public class CPU implements Serializable {
             // BCC $A5
             // BCS $A5
             // BNE $A5
-            case 0x10, 0x30, 0x50, 0x70, 0x90, 0xB0, 0xD0, 0xF0 -> // BEQ $A5
-                    RELATIVE_BRANCH();
+            // BEQ $A5
+            case 0x10:
+            case 0x30:
+            case 0x50:
+            case 0x70:
+            case 0x90:
+            case 0xB0:
+            case 0xD0:
+            case 0xF0:
+                RELATIVE_BRANCH();
+                break;
 
 
             // Indexed indirect addressing instructions
@@ -344,18 +572,37 @@ public class CPU implements Serializable {
             // LDA ($A5,X)
             // *LAX ($40,X)
             // CMP ($A5,X)
-            case 0x01, 0x21, 0x41, 0x61, 0xA1, 0xA3, 0xC1, 0xE1 -> // SBC ($A5,X)
-                    INDEXED_INDIRECT_READ();
+            // SBC ($A5,X)
+            case 0x01:
+            case 0x21:
+            case 0x41:
+            case 0x61:
+            case 0xA1:
+            case 0xA3:
+            case 0xC1:
+            case 0xE1:
+                INDEXED_INDIRECT_READ();
+                break;
             // *SLO ($45,X)
             // *RLA ($45,X)
             // *SRE ($45,X)
             // *RRA ($45,X)
             // *DCP ($45,X)
-            case 0x03, 0x23, 0x43, 0x63, 0xC3, 0xE3 -> // *ISB ($45,X)
-                    INDEXED_INDIRECT_READ_MODIFY_WRITE();
+            // *ISB ($45,X)
+            case 0x03:
+            case 0x23:
+            case 0x43:
+            case 0x63:
+            case 0xC3:
+            case 0xE3:
+                INDEXED_INDIRECT_READ_MODIFY_WRITE();
+                break;
             // STA ($A5,X)
-            case 0x81, 0x83 -> // *SAX ($49,X)
-                    INDEXED_INDIRECT_WRITE();
+            // *SAX ($49,X)
+            case 0x81:
+            case 0x83:
+                INDEXED_INDIRECT_WRITE();
+                break;
 
 
             // Indirect indexed addressing instructions
@@ -366,23 +613,44 @@ public class CPU implements Serializable {
             // LDA ($A5),Y
             // *LAX ($43),Y  
             // CMP ($A5),Y
-            case 0x11, 0x31, 0x51, 0x71, 0xB1, 0xB3, 0xD1, 0xF1 -> // SBC ($A5),Y
-                    INDIRECT_INDEXED_READ();
+            // SBC ($A5),Y
+            case 0x11:
+            case 0x31:
+            case 0x51:
+            case 0x71:
+            case 0xB1:
+            case 0xB3:
+            case 0xD1:
+            case 0xF1:
+                INDIRECT_INDEXED_READ();
+                break;
             // *SLO ($45),Y
             // *RLA ($45),Y
             // *SRE ($45),Y
             // *RRA ($45),Y
             // *DCP ($45),Y
-            case 0x13, 0x33, 0x53, 0x73, 0xD3, 0xF3 -> // *ISB ($45),Y
-                    INDIRECT_INDEXED_READ_MODIFY_WRITE();
+            // *ISB ($45),Y
+            case 0x13:
+            case 0x33:
+            case 0x53:
+            case 0x73:
+            case 0xD3:
+            case 0xF3:
+                INDIRECT_INDEXED_READ_MODIFY_WRITE();
+                break;
             // STA ($A5),Y
-            case 0x91, 0x93 -> // *SHA ($A5),Y
-                    INDIRECT_INDEXED_WRITE();
+            // *SHA ($A5),Y
+            case 0x91:
+            case 0x93:
+                INDIRECT_INDEXED_WRITE();
+                break;
 
 
             // Absolute indirect addressing instructions
-            case 0x6C -> // JMP ($A5B6)
-                    ABSOLUTE_INDIRECT_JUMP();
+            // JMP ($A5B6)
+            case 0x6C:
+                ABSOLUTE_INDIRECT_JUMP();
+                break;
             // *KIL
             // *KIL
             // *KIL
@@ -394,8 +662,21 @@ public class CPU implements Serializable {
             // *KIL
             // *KIL
             // *KIL
-            case 0x02, 0x12, 0x22, 0x32, 0x42, 0x52, 0x62, 0x72, 0x92, 0xB2, 0xD2, 0xF2 -> // *KIL
-                    KIL();
+            // *KIL
+            case 0x02:
+            case 0x12:
+            case 0x22:
+            case 0x32:
+            case 0x42:
+            case 0x52:
+            case 0x62:
+            case 0x72:
+            case 0x92:
+            case 0xB2:
+            case 0xD2:
+            case 0xF2:
+                KIL();
+                break;
         }
 
         if (running) {
@@ -503,16 +784,25 @@ public class CPU implements Serializable {
         ppu.update();
     }
 
-
-    private int readStack() {
+    public int pull() {
+        reg.spInc1();
         return read(VEC_STACK_START | reg.sp());
     }
 
-    private void writeStack(int value) {
+    public void push(int value) {
+        write(VEC_STACK_START | reg.sp(), value);
+        reg.spDec1();
+    }
+
+    public int readStack() {
+        return read(VEC_STACK_START | reg.sp());
+    }
+
+    public void writeStack(int value) {
         write(VEC_STACK_START | reg.sp(), value);
     }
 
-    private void write(final int address, int value) {
+    public void write(final int address, int value) {
         if (dmcCycle > 0) {
             dmcCycle--;
         }
@@ -544,348 +834,6 @@ public class CPU implements Serializable {
         handleCpuCycle();
 
         return mapper.readCpuMemory(address);
-    }
-
-    // -- Instructions -----------------------------------------------------------
-
-    private void CLC() {
-        reg.c(false);
-    }
-
-    private void CLD() {
-        reg.d(false);
-    }
-
-    private void CLI() {
-        reg.i(false);
-    }
-
-    private void CLV() {
-        reg.v(false);
-    }
-
-    private void SEC() {
-        reg.c(true);
-    }
-
-    private void SED() {
-        reg.d(true);
-    }
-
-    private void SEI() {
-        reg.i(true);
-    }
-    
-    private void setZ(int value){
-        reg.z(value == 0);
-    }
-
-    private void AAC(final int value) {
-        reg.a(reg.a() & value);
-
-        reg.c(getBitBool(reg.a(), 7));
-        reg.n(reg.c());
-        setZ(reg.a());
-    }
-
-    private void ADC(int value) {
-        int t = reg.a() + value + toBit(reg.c());
-
-        reg.v(getBitBool((reg.a() ^ t) & (value ^ t), 7));
-        reg.a(t);
-
-        reg.c(getBitBool(t, 8));
-        reg.n(getBitBool(t, 7));
-        setZ(reg.a());
-    }
-
-    private void AND(int value) {
-        reg.a(reg.a() & value);
-
-        reg.n(getBitBool(reg.a(), 7));
-        setZ(reg.a());
-    }
-
-    private void ARR(int value) {
-        reg.a(ROR(reg.a() & value));
-
-        switch ((getBit(reg.a(), 6) << 1) | getBit(reg.a(), 5)) {
-            case 0b00:
-                reg.v(false);
-                reg.c(false);
-                break;
-            case 0b01:
-                reg.v(true);
-                reg.c(false);
-                break;
-            case 0b10:
-                reg.v(true);
-                reg.c(true);
-                break;
-            case 0b11:
-                reg.v(false);
-                reg.c(true);
-                break;
-        }
-        reg.n(getBitBool(reg.a(), 7));
-        setZ(reg.a());
-    }
-
-    private int ASL(int value) {
-        reg.c(getBitBool(value, 7));
-        value = (value << 1) & 0b1111_1110;
-
-        reg.n(getBitBool(value, 7));
-        setZ(value);
-        return value;
-    }
-
-    private void ASR(int value) {
-        reg.a(LSR(reg.a() & value));
-    }
-
-    private void ATX(int value) {
-        reg.a(value);
-        TAX();
-    }
-
-    private void AXS(int value) {
-        int t = (reg.a() & reg.x()) + 256 - value;
-        reg.x(t);
-
-        reg.c(getBitBool(t, 8));
-        reg.n(getBitBool(reg.x(), 7));
-        setZ(reg.x());
-    }
-
-    private void BIT(int value) {
-        reg.v(getBitBool(value, 6));
-        reg.n(getBitBool(value, 7));
-        setZ(reg.a() & value);
-    }
-
-    private void CMP(int value) {
-        reg.c(reg.a() >= value);
-        reg.n(getBitBool(reg.a() - value, 7));
-        setZ(reg.a() - value);
-    }
-
-    private void CPX(int value) {
-        reg.c(reg.x() >= value);
-        reg.n(getBitBool(reg.x() - value, 7));
-        setZ(reg.x() - value);
-    }
-
-    private void CPY(int value) {
-        reg.c(reg.y() >= value);
-        reg.n(getBitBool(reg.y() - value, 7));
-        setZ(reg.y() - value);
-    }
-
-    private int DCP(int value) {
-        CMP(value = DEC(value));
-        return value;
-    }
-
-    private int DEC(int value) {
-        value = toU8(value - 1);
-        reg.n(getBitBool(value, 7));
-        setZ(value);
-        return value;
-    }
-
-    private void DEX() {
-        reg.x(reg.x() - 1);
-
-        reg.n(getBitBool(reg.x(), 7));
-        setZ(reg.x());
-    }
-
-    private void DEY() {
-        reg.y(reg.y() - 1);
-
-        reg.n(getBitBool(reg.y(), 7));
-        setZ(reg.y());
-    }
-
-    private void EOR(int value) {
-        reg.a(reg.a() ^ value);
-
-        reg.n(getBitBool(reg.a(), 7));
-        setZ(reg.a());
-    }
-
-    private int INC(int value) {
-        value = toU8(value + 1);
-
-        reg.n(getBitBool(value, 7));
-        setZ(value);
-        return value;
-    }
-
-    private void INX() {
-        reg.x(reg.x() + 1);
-
-        reg.n(getBitBool(reg.x(), 7));
-        setZ(reg.x());
-    }
-
-    private void INY() {
-        reg.y(reg.y() + 1);
-
-        reg.n(getBitBool(reg.y(), 7));
-        setZ(reg.y());
-    }
-
-    private int ISB(int value) {
-        SBC(value = INC(value));
-        return value;
-    }
-
-    private void LAR(final int value) {
-        reg.a(value & reg.sp());
-        reg.sp(reg.a());
-        TAX();
-    }
-
-    private void LAX(int value) {
-        LDA(value);
-        TAX();
-    }
-
-    private void LDA(int value) {
-        reg.a(value);
-
-        reg.n(getBitBool(reg.a(), 7));
-        setZ(reg.a());
-    }
-
-    private void LDX(int value) {
-        reg.x(value);
-
-        reg.n(getBitBool(reg.x(), 7));
-        setZ(reg.x());
-    }
-
-    private void LDY(int value) {
-        reg.y(value);
-
-        reg.n(getBitBool(reg.y(), 7));
-        setZ(reg.y());
-    }
-
-    private int LSR(int value) {
-        reg.c(getBitBool(value, 0));
-        value = (value >> 1) & 0b0111_1111;
-
-        reg.n(false);
-        setZ(value);
-        return value;
-    }
-
-    private void ORA(int value) {
-        reg.a(reg.a() | value);
-
-        reg.n(getBitBool(reg.a(), 7));
-        setZ(reg.a());
-    }
-
-    private int RLA(int value) {
-        AND(value = ROL(value));
-        return value;
-    }
-
-    private int ROL(int value) {
-        boolean t = getBitBool(value, 7);
-        value = (value << 1) & 0b1111_1110;
-        value |= reg.c() ? 1 : 0;
-
-        reg.c(t);
-        reg.n(getBitBool(value, 7));
-        setZ(value);
-        return value;
-    }
-
-    private int ROR(int value) {
-        boolean t = getBitBool(value, 0);
-        value = (value >> 1) & 0b0111_1111;
-        value |= (reg.c() ? 1 : 0) << 7;
-
-        reg.c(t);
-        reg.n(getBitBool(value, 7));
-        setZ(value);
-        return value;
-    }
-
-    private int RRA(int value) {
-        ADC(value = ROR(value));
-        return value;
-    }
-
-    private void SBC(int value) {
-        ADC(value ^ 0xFF);
-    }
-
-    private int SLO(int value) {
-        ORA(value = ASL(value));
-        return value;
-    }
-
-    private int SRE(int value) {
-        EOR(value = LSR(value));
-        return value;
-    }
-
-    private void TAX() {
-        reg.x(reg.a());
-
-        reg.n(getBitBool(reg.x(), 7));
-        setZ(reg.x());
-    }
-
-    private void TAY() {
-        reg.y(reg.a());
-
-        reg.n(getBitBool(reg.y(), 7));
-        setZ(reg.y());
-    }
-
-    private void TSX() {
-        reg.x(reg.sp());
-
-        reg.n(getBitBool(reg.x(), 7));
-        setZ(reg.x());
-    }
-
-    private void TXA() {
-        reg.a(reg.x());
-
-        reg.n(getBitBool(reg.a(), 7));
-        setZ(reg.a());
-    }
-
-    private void TXS() {
-        reg.sp(reg.x());
-    }
-
-    private void TYA() {
-        reg.a(reg.y());
-
-        reg.n(getBitBool(reg.a(), 7));
-        setZ(reg.a());
-    }
-
-    private void XAA(final int value) {
-        reg.a(reg.a() & (reg.x() & value));
-
-        reg.c(getBitBool(reg.a(), 7));
-        reg.n(reg.c());
-        setZ(reg.a());
-    }
-
-    private int XAS(final int value) {
-        reg.sp(reg.x() & reg.a());
-        return reg.sp() & value;
     }
 
     // -- Stack instructions -----------------------------------------------------
@@ -1041,16 +989,12 @@ public class CPU implements Serializable {
         // 3        
         switch (opcode) {
             case 0x08: // PHP
-                reg.r(true);
-                reg.b(true);
-                writeStack(reg.p());
-                reg.b(false);
+                alu.php();
                 break;
             case 0x48: // PHA
-                writeStack(reg.a());
+                alu.pha();
                 break;
         }
-        reg.spDec1();
     }
 
     private void PULL() {
@@ -1058,20 +1002,13 @@ public class CPU implements Serializable {
         read(reg.pc());
         // 3
         readStack();
-        reg.spInc1();
         // 4
         switch (opcode) {
             case 0x28: // PLP
-                boolean r = reg.r();
-                boolean b = reg.b();
-                reg.p(readStack());
-                reg.r(r);
-                reg.b(b);
+                alu.plp();
                 break;
             case 0x68: // PLA
-                reg.a(readStack());
-                reg.n(getBitBool(reg.a(), 7));
-                reg.z(reg.a() == 0);
+                alu.pla();
                 break;
         }
     }
@@ -1106,47 +1043,47 @@ public class CPU implements Serializable {
         read(reg.pc());
         switch (opcode) {
             case 0x0A -> // ASL A
-                    reg.a(ASL(reg.a()));
+                    reg.a(alu.asl(reg.a()));
             case 0x18 -> // CLC
-                    CLC();
+                    alu.clc();
             case 0x2A -> // ROL A
-                    reg.a(ROL(reg.a()));
+                    reg.a(alu.rol(reg.a()));
             case 0x38 -> // SEC
-                    SEC();
+                    alu.sec();
             case 0x4A -> // LSR A
-                    reg.a(LSR(reg.a()));
+                    reg.a(alu.lsr(reg.a()));
             case 0x58 -> // CLI
-                    CLI();
+                    alu.cli();
             case 0x6A -> // ROR A
-                    reg.a(ROR(reg.a()));
+                    reg.a(alu.ror(reg.a()));
             case 0x78 -> // SEI
-                    SEI();
+                    alu.sei();
             case 0x88 -> // DEY
-                    DEY();
+                    alu.dey();
             case 0x8A -> // TXA
-                    TXA();
+                    alu.txa();
             case 0x98 -> // TYA
-                    TYA();
+                    alu.tya();
             case 0x9A -> // TXS
-                    TXS();
+                    alu.txs();
             case 0xA8 -> // TAY
-                    TAY();
+                    alu.tay();
             case 0xAA -> // TAX
-                    TAX();
+                    alu.tax();
             case 0xB8 -> // CLV
-                    CLV();
+                    alu.clv();
             case 0xBA -> // TSX
-                    TSX();
+                    alu.tsx();
             case 0xC8 -> // INY
-                    INY();
+                    alu.iny();
             case 0xCA -> // DEX
-                    DEX();
+                    alu.dex();
             case 0xD8 -> // CLD
-                    CLD();
+                    alu.cld();
             case 0xE8 -> // INX
-                    INX();
+                    alu.inx();
             case 0xF8 -> // SED
-                    SED();
+                    alu.sed();
             // *NOP
             // *NOP
             // *NOP
@@ -1166,41 +1103,41 @@ public class CPU implements Serializable {
         reg.pcInc1();
         switch (opcode) {
             case 0x09 -> // ORA #$A5
-                    ORA(value);
+                    alu.ora(value);
             // *AAC #$A5
             case 0x0B, 0x2B -> // *AAC #$A5
-                    AAC(value);
+                    alu.anc(value);
             case 0x29 -> // AND #$A5
-                    AND(value);
+                    alu.and(value);
             case 0x49 -> // EOR #$A5
-                    EOR(value);
+                    alu.eor(value);
             case 0x4B -> // *ASR #$A5
-                    ASR(value);
+                    alu.alr(value);
             case 0x69 -> // ADC #$A5
-                    ADC(value);
+                    alu.adc(value);
             case 0x6B -> // *ARR #$A5
-                    ARR(value);
+                    alu.arr(value);
             case 0x8B -> // *XAA #$A5
-                    XAA(value);
+                    alu.xaa(value);
             case 0xA0 -> // LDY #$A5
-                    LDY(value);
+                    alu.ldy(value);
             case 0xA2 -> // LDX #$A5
-                    LDX(value);
+                    alu.ldx(value);
             case 0xA9 -> // LDA #$A5
-                    LDA(value);
+                    alu.lda(value);
             case 0xAB -> // *ATX #$A5
-                    ATX(value);
+                    alu.lax(value);
             case 0xC0 -> // CPY #$A5
-                    CPY(value);
+                    alu.cpy(value);
             case 0xC9 -> // CMP #$A5
-                    CMP(value);
+                    alu.cmp(value);
             case 0xCB -> // *AXS #$A5
-                    AXS(value);
+                    alu.axs(value);
             case 0xE0 -> // CPX #$A5
-                    CPX(value);
+                    alu.cpx(value);
             // SBC #$A5
             case 0xE9, 0xEB -> // *SBC #$40
-                    SBC(value);
+                    alu.sbc(value);
             // *NOP #$89
             // *DOP #$89
             // *DOP #$89
@@ -1233,31 +1170,31 @@ public class CPU implements Serializable {
             case 0x0C -> {
             }
             case 0x0D -> // ORA $A5B6
-                    ORA(value);
+                    alu.ora(value);
             case 0x2C -> // BIT $A5B6
-                    BIT(value);
+                    alu.bit(value);
             case 0x2D -> // AND $A5B6
-                    AND(value);
+                    alu.and(value);
             case 0x4D -> // EOR $A5B6
-                    EOR(value);
+                    alu.eor(value);
             case 0x6D -> // ADC $A5B6
-                    ADC(value);
+                    alu.adc(value);
             case 0xAC -> // LDY $A5B6
-                    LDY(value);
+                    alu.ldy(value);
             case 0xAD -> // LDA $A5B6
-                    LDA(value);
+                    alu.lda(value);
             case 0xAE -> // LDX $A5B6
-                    LDX(value);
+                    alu.ldx(value);
             case 0xAF -> // *LAX $0577
-                    LAX(value);
+                    alu.lax(value);
             case 0xCC -> // CPY $A5B6
-                    CPY(value);
+                    alu.cpy(value);
             case 0xCD -> // CMP $A5B6
-                    CMP(value);
+                    alu.cmp(value);
             case 0xEC -> // CPX $A5B6
-                    CPX(value);
+                    alu.cpx(value);
             case 0xED -> // SBC $A5B6
-                    SBC(value);
+                    alu.sbc(value);
         }
     }
 
@@ -1274,29 +1211,29 @@ public class CPU implements Serializable {
         write(address, value);
         switch (opcode) {
             case 0x0E -> // ASL $A5B6
-                    value = ASL(value);
+                    value = alu.asl(value);
             case 0x0F -> // *SLO $0647
-                    value = SLO(value);
+                    value = alu.slo(value);
             case 0x2E -> // ROL $A5B6
-                    value = ROL(value);
+                    value = alu.rol(value);
             case 0x2F -> // *RLA $0647
-                    value = RLA(value);
+                    value = alu.rla(value);
             case 0x4F -> // *SRE $0647
-                    value = SRE(value);
+                    value = alu.sre(value);
             case 0x4E -> // LSR $A5B6
-                    value = LSR(value);
+                    value = alu.lsr(value);
             case 0x6E -> // ROR $A5B6
-                    value = ROR(value);
+                    value = alu.ror(value);
             case 0x6F -> // *RRA $0647
-                    value = RRA(value);
+                    value = alu.rra(value);
             case 0xCE -> // DEC $A5B6
-                    value = DEC(value);
+                    value = alu.dec(value);
             case 0xCF -> // *DCP $0647
-                    value = DCP(value);
+                    value = alu.dcp(value);
             case 0xEE -> // INC $A5B6
-                    value = INC(value);
+                    value = alu.inc(value);
             case 0xEF -> // *ISB $0647
-                    value = ISB(value);
+                    value = alu.isc(value);
         }
         // 6        
         write(address, value);
@@ -1312,13 +1249,13 @@ public class CPU implements Serializable {
         // 4       
         switch (opcode) {
             case 0x8C -> // STY $A5B6
-                    write(address, reg.y());
+                    alu.sty(address);
             case 0x8D -> // STA $A5B6
-                    write(address, reg.a());
+                    alu.sta(address);
             case 0x8E -> // STX $A5B6
-                    write(address, reg.x());
+                    alu.stx(address);
             case 0x8F -> // *SAX $0549
-                    write(address, reg.a() & reg.x());
+                    alu.sax(address);
         }
     }
 
@@ -1334,31 +1271,31 @@ public class CPU implements Serializable {
             case 0x04, 0x44, 0x64 -> {
             }
             case 0x05 -> // ORA $A5
-                    ORA(value);
+                    alu.ora(value);
             case 0x24 -> // BIT $A5
-                    BIT(value);
+                    alu.bit(value);
             case 0x25 -> // AND $A5
-                    AND(value);
+                    alu.and(value);
             case 0x45 -> // EOR $A5
-                    EOR(value);
+                    alu.eor(value);
             case 0x65 -> // ADC $A5
-                    ADC(value);
+                    alu.adc(value);
             case 0xA4 -> // LDY $A5
-                    LDY(value);
+                    alu.ldy(value);
             case 0xA5 -> // LDA $A5
-                    LDA(value);
+                    alu.lda(value);
             case 0xA6 -> // LDX $A5
-                    LDX(value);
+                    alu.ldx(value);
             case 0xA7 -> // *LAX $67
-                    LAX(value);
+                    alu.lax(value);
             case 0xC4 -> // CPY $A5
-                    CPY(value);
+                    alu.cpy(value);
             case 0xC5 -> // CMP $A5
-                    CMP(value);
+                    alu.cmp(value);
             case 0xE4 -> // CPX $A5
-                    CPX(value);
+                    alu.cpx(value);
             case 0xE5 -> // SBC $A5
-                    SBC(value);
+                    alu.sbc(value);
         }
     }
 
@@ -1372,29 +1309,29 @@ public class CPU implements Serializable {
         write(address, value);
         switch (opcode) {
             case 0x06 -> // ASL $A5
-                    value = ASL(value);
+                    value = alu.asl(value);
             case 0x07 -> // *SLO $47
-                    value = SLO(value);
+                    value = alu.slo(value);
             case 0x26 -> // ROL $A5
-                    value = ROL(value);
+                    value = alu.rol(value);
             case 0x27 -> // *RLA $47
-                    value = RLA(value);
+                    value = alu.rla(value);
             case 0x46 -> // LSR $A5
-                    value = LSR(value);
+                    value = alu.lsr(value);
             case 0x47 -> // *SRE $47
-                    value = SRE(value);
+                    value = alu.sre(value);
             case 0x66 -> // ROR $A5
-                    value = ROR(value);
+                    value = alu.ror(value);
             case 0x67 -> // *RRA $47
-                    value = RRA(value);
+                    value = alu.rra(value);
             case 0xC6 -> // DEC $A5
-                    value = DEC(value);
+                    value = alu.dec(value);
             case 0xC7 -> // *DCP $47
-                    value = DCP(value);
+                    value = alu.dcp(value);
             case 0xE6 -> // INC $A5
-                    value = INC(value);
+                    value = alu.inc(value);
             case 0xE7 -> // *ISB $47
-                    value = ISB(value);
+                    value = alu.isc(value);
         }
         // 5       
         write(address, value);
@@ -1407,13 +1344,13 @@ public class CPU implements Serializable {
         // 3        
         switch (opcode) {
             case 0x84 -> // STY $A5
-                    write(address, reg.y());
+                    alu.sty(address);
             case 0x85 -> // STA $A5
-                    write(address, reg.a());
+                    alu.sta(address);
             case 0x86 -> // STX $A5
-                    write(address, reg.x());
+                    alu.stx(address);
             case 0x87 -> // *SAX $49
-                    write(address, reg.a() & reg.x());
+                    alu.sax(address);
         }
     }
 
@@ -1439,25 +1376,25 @@ public class CPU implements Serializable {
         final int value = read(address);
         switch (opcode) {
             case 0x15 -> // ORA $A5,X
-                    ORA(value);
+                    alu.ora(value);
             case 0x35 -> // AND $A5,X
-                    AND(value);
+                    alu.and(value);
             case 0x55 -> // EOR $A5,X
-                    EOR(value);
+                    alu.eor(value);
             case 0x75 -> // ADC $A5,X
-                    ADC(value);
+                    alu.adc(value);
             case 0xB4 -> // LDY $A5,X
-                    LDY(value);
+                    alu.ldy(value);
             case 0xB5 -> // LDA $A5,X
-                    LDA(value);
+                    alu.lda(value);
             case 0xB6 -> // LDX $A5,Y
-                    LDX(value);
+                    alu.ldx(value);
             case 0xB7 -> // *LAX $10,Y
-                    LAX(value);
+                    alu.lax(value);
             case 0xD5 -> // CMP $A5,X
-                    CMP(value);
+                    alu.cmp(value);
             case 0xF5 -> // SBC $A5,X
-                    SBC(value);
+                    alu.sbc(value);
             // *NOP $A9,X
             // *NOP $A9,X
             // *NOP $A9,X
@@ -1481,29 +1418,29 @@ public class CPU implements Serializable {
         write(address, value);
         switch (opcode) {
             case 0x16 -> // ASL $A5,X
-                    value = ASL(value);
+                    value = alu.asl(value);
             case 0x17 -> // *SLO $48,X
-                    value = SLO(value);
+                    value = alu.slo(value);
             case 0x36 -> // ROL $A5,X
-                    value = ROL(value);
+                    value = alu.rol(value);
             case 0x37 -> // *RLA $48,X
-                    value = RLA(value);
+                    value = alu.rla(value);
             case 0x56 -> // LSR $A5,X
-                    value = LSR(value);
+                    value = alu.lsr(value);
             case 0x57 -> // *SRE $48,X
-                    value = SRE(value);
+                    value = alu.sre(value);
             case 0x76 -> // ROR $A5,X
-                    value = ROR(value);
+                    value = alu.ror(value);
             case 0x77 -> // *RRA $48,X
-                    value = RRA(value);
+                    value = alu.rra(value);
             case 0xD6 -> // DEC $A5,X
-                    value = DEC(value);
+                    value = alu.dec(value);
             case 0xD7 -> // *DCP $48,X
-                    value = DCP(value);
+                    value = alu.dcp(value);
             case 0xF6 -> // INC $A5,X
-                    value = INC(value);
+                    value = alu.inc(value);
             case 0xF7 -> // *ISB $48,X
-                    value = ISB(value);
+                    value = alu.isc(value);
         }
         // 6
         write(address, value);
@@ -1515,23 +1452,16 @@ public class CPU implements Serializable {
         reg.pcInc1();
         // 3
         read(address);
-        switch (opcode) { // STY $A5,X
-            case 0x94, 0x95 -> // STA $A5,X
-                    address = toU8(address + reg.x());
-            // STX $A5,Y
-            case 0x96, 0x97 -> // *SAX $4A,Y
-                    address = toU8(address + reg.y());
-        }
         // 4        
         switch (opcode) {
             case 0x94 -> // STY $A5,X
-                    write(address, reg.y());
+                    alu.sty(toU8(address + reg.x()));
             case 0x95 -> // STA $A5,X
-                    write(address, reg.a());
+                    alu.sta(toU8(address + reg.x()));
             case 0x96 -> // STX $A5,Y
-                    write(address, reg.x());
+                    alu.stx(toU8(address + reg.y()));
             case 0x97 -> // *SAX $4A,Y
-                    write(address, reg.a() & reg.x());
+                    alu.sax(toU8(address + reg.y()));
         }
     }
 
@@ -1568,33 +1498,33 @@ public class CPU implements Serializable {
         }
         switch (opcode) { // ORA $A5B6,Y
             case 0x19, 0x1D -> // ORA $A5B6,X
-                    ORA(value);
+                    alu.ora(value);
             // AND $A5B6,X
             case 0x3D, 0x39 -> // AND $A5B6,Y
-                    AND(value);
+                    alu.and(value);
             // EOR $A5B6,X
             case 0x5D, 0x59 -> // EOR $A5B6,Y
-                    EOR(value);
+                    alu.eor(value);
             // ADC $A5B6,X
             case 0x7D, 0x79 -> // ADC $A5B6,Y
-                    ADC(value);
+                    alu.adc(value);
             case 0xBB -> // *LAR $A5B6,Y
-                    LAR(value);
+                    alu.las(value);
             case 0xBC -> // LDY $A5B6,X
-                    LDY(value);
+                    alu.ldy(value);
             // LDA $A5B6,Y
             case 0xB9, 0xBD -> // LDA $A5B6,X
-                    LDA(value);
+                    alu.lda(value);
             case 0xBE -> // LDX $A5B6,Y
-                    LDX(value);
+                    alu.ldx(value);
             case 0xBF -> // *LAX $0557,Y
-                    LAX(value);
+                    alu.lax(value);
             // CMP $A5B6,Y
             case 0xD9, 0xDD -> // CMP $A5B6,X
-                    CMP(value);
+                    alu.cmp(value);
             // SBC $A5B6,Y
             case 0xF9, 0xFD -> // SBC $A5B6,X
-                    SBC(value);
+                    alu.sbc(value);
             // *NOP $A9A9,X
             // *NOP $A9A9,X
             // *NOP $A9A9,X
@@ -1631,34 +1561,34 @@ public class CPU implements Serializable {
         write(address, value);
         switch (opcode) { // *SLO $0548,Y
             case 0x1B, 0x1F -> // *SLO $0548,X
-                    value = SLO(value);
+                    value = alu.slo(value);
             case 0x1E -> // ASL $A5B6,X
-                    value = ASL(value);
+                    value = alu.asl(value);
             // *RLA $0548,Y
             case 0x3B, 0x3F -> // *RLA $0548,X
-                    value = RLA(value);
+                    value = alu.rla(value);
             case 0x3E -> // ROL $A5B6,X
-                    value = ROL(value);
+                    value = alu.rol(value);
             // *SRE $0548,Y
             case 0x5B, 0x5F -> // *SRE $0548,X
-                    value = SRE(value);
+                    value = alu.sre(value);
             case 0x5E -> // LSR $A5B6,X
-                    value = LSR(value);
+                    value = alu.lsr(value);
             // *RRA $0548,Y
             case 0x7B, 0x7F -> // *RRA $0548,X
-                    value = RRA(value);
+                    value = alu.rra(value);
             case 0x7E -> // ROR $A5B6,X
-                    value = ROR(value);
+                    value = alu.ror(value);
             // *DCP $0548,Y
             case 0xDB, 0xDF -> // *DCP $0548,X
-                    value = DCP(value);
+                    value = alu.dcp(value);
             case 0xDE -> // DEC $A5B6,X
-                    value = DEC(value);
+                    value = alu.dec(value);
             // *ISB $0548,Y
             case 0xFB, 0xFF -> // *ISB $0548,X
-                    value = ISB(value);
+                    value = alu.isc(value);
             case 0xFE -> // INC $A5B6,X
-                    value = INC(value);
+                    value = alu.inc(value);
         }
         // 7        
         write(address, value);
@@ -1685,26 +1615,26 @@ public class CPU implements Serializable {
         // 5        
         switch (opcode) { // STA $A5B6,Y
             case 0x99, 0x9D -> // STA $A5B6,X
-                    write(address, reg.a());
+                    alu.sta(address);
             case 0x9B -> // *XAS $A5B6,Y
-                    write(address, XAS(high + 1));
+                    alu.tas(address, high);
             case 0x9C -> {
                 if ((value >> 8) != (address >> 8)) {
                     value &= reg.y() << 8;
                 }
-                write(value, reg.y() & ((value >> 8) + 1));
+                alu.shy(value);
             }
             case 0x9E -> {
                 if ((value >> 8) != (address >> 8)) {
                     value &= reg.x() << 8;
                 }
-                write(value, reg.x() & ((value >> 8) + 1));
+                alu.shx(value);
             }
             case 0x9F -> {
                 if ((value >> 8) != (address >> 8)) {
                     value &= (reg.x() & reg.a()) << 8;
                 }
-                write(address, reg.x() & reg.a() & ((address >> 8) + 1));
+                alu.ahx(address);
             }
         }
     }
@@ -1779,21 +1709,21 @@ public class CPU implements Serializable {
         final int value = read(address2);
         switch (opcode) {
             case 0x01 -> // ORA ($A5,X)
-                    ORA(value);
+                    alu.ora(value);
             case 0x21 -> // AND ($A5,X)
-                    AND(value);
+                    alu.and(value);
             case 0x41 -> // EOR ($A5,X)
-                    EOR(value);
+                    alu.eor(value);
             case 0x61 -> // ADC ($A5,X)
-                    ADC(value);
+                    alu.adc(value);
             case 0xA1 -> // LDA ($A5,X)
-                    LDA(value);
+                    alu.lda(value);
             case 0xA3 -> // *LAX ($40,X)
-                    LAX(value);
+                    alu.lax(value);
             case 0xC1 -> // CMP ($A5,X)
-                    CMP(value);
+                    alu.cmp(value);
             case 0xE1 -> // SBC ($A5,X)
-                    SBC(value);
+                    alu.sbc(value);
         }
     }
 
@@ -1815,17 +1745,17 @@ public class CPU implements Serializable {
         write(address, value);
         switch (opcode) {
             case 0x03 -> // *SLO ($45,X)
-                    value = SLO(value);
+                    value = alu.slo(value);
             case 0x23 -> // *RLA ($45,X)
-                    value = RLA(value);
+                    value = alu.rla(value);
             case 0x43 -> // *SRE ($45,X)
-                    value = SRE(value);
+                    value = alu.sre(value);
             case 0x63 -> // *RRA ($45,X)
-                    value = RRA(value);
+                    value = alu.rra(value);
             case 0xC3 -> // *DCP ($45,X)
-                    value = DCP(value);
+                    value = alu.dcp(value);
             case 0xE3 -> // *ISB ($45,X)
-                    value = ISB(value);
+                    value = alu.isc(value);
         }
         // 8       
         write(address, value);
@@ -1846,10 +1776,10 @@ public class CPU implements Serializable {
         // 6        
         switch (opcode) {
             case 0x81: // STA ($A5,X)
-                write(address, reg.a());
+                alu.sta(address);
                 break;
             case 0x83: // *SAX ($49,X)
-                write(address, reg.a() & reg.x());
+                alu.sax(address);
                 break;
         }
     }
@@ -1875,28 +1805,28 @@ public class CPU implements Serializable {
         }
         switch (opcode) {
             case 0x11: // ORA ($A5),Y
-                ORA(value);
+                alu.ora(value);
                 break;
             case 0x31: // AND ($A5),Y
-                AND(value);
+                alu.and(value);
                 break;
             case 0x51: // EOR ($A5),Y
-                EOR(value);
+                alu.eor(value);
                 break;
             case 0x71: // ADC ($A5),Y
-                ADC(value);
+                alu.adc(value);
                 break;
             case 0xB1: // LDA ($A5),Y
-                LDA(value);
+                alu.lda(value);
                 break;
             case 0xB3: // *LAX ($43),Y
-                LAX(value);
+                alu.lax(value);
                 break;
             case 0xD1: // CMP ($A5),Y
-                CMP(value);
+                alu.cmp(value);
                 break;
             case 0xF1: // SBC ($A5),Y
-                SBC(value);
+                alu.sbc(value);
                 break;
         }
     }
@@ -1919,24 +1849,18 @@ public class CPU implements Serializable {
         // 7
         write(address, value);
         switch (opcode) {
-            case 0x13: // *SLO ($45),Y
-                value = SLO(value);
-                break;
-            case 0x33: // *RLA ($45),Y
-                value = RLA(value);
-                break;
-            case 0x53: // *SRE ($45),Y
-                value = SRE(value);
-                break;
-            case 0x73: // *RRA ($45),Y
-                value = RRA(value);
-                break;
-            case 0xD3: // *DCP ($45),Y
-                value = DCP(value);
-                break;
-            case 0xF3: // *ISB ($45),Y
-                value = ISB(value);
-                break;
+            case 0x13 -> // *SLO ($45),Y
+                    value = alu.slo(value);
+            case 0x33 -> // *RLA ($45),Y
+                    value = alu.rla(value);
+            case 0x53 -> // *SRE ($45),Y
+                    value = alu.sre(value);
+            case 0x73 -> // *RRA ($45),Y
+                    value = alu.rra(value);
+            case 0xD3 -> // *DCP ($45),Y
+                    value = alu.dcp(value);
+            case 0xF3 -> // *ISB ($45),Y
+                    value = alu.isc(value);
         }
         // 8        
         write(address, value);
@@ -1958,10 +1882,10 @@ public class CPU implements Serializable {
         // 6        
         switch (opcode) {
             case 0x91: // STA ($A5),Y
-                write(address, reg.a());
+                alu.sta(address);
                 break;
             case 0x93: // *SHA ($A5),Y
-                write(address, reg.x() & reg.a() & ((address >> 8) + 1));
+                alu.ahx(address);
                 break;
         }
     }
