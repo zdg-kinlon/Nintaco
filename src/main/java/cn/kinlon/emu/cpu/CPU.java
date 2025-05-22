@@ -35,6 +35,7 @@ public class CPU implements Serializable {
 
     private final Register reg = new Register();
     private final ALU alu = new ALU(this);
+    private final AddressingMode mode = new AddressingMode(this);
 
     private long cycleCounter;
     private int opcode;
@@ -81,15 +82,42 @@ public class CPU implements Serializable {
             case 0x60 -> RTS();
             case 0x08, 0x48 -> PUSH();
             case 0x28, 0x68 -> PULL();
-            case 0x20 -> JSR();
+            case 0x20 -> mode.absolute_jsr(alu::jsr);
             case 0x0A, 0x1A, 0x18, 0x2A, 0x38, 0x3A, 0x4A, 0x58, 0x5A, 0x6A, 0x78, 0x7A, 0x88, 0x8A, 0x98, 0x9A, 0xA8,
                  0xAA, 0xB8, 0xBA, 0xC8, 0xCA, 0xD8, 0xDA, 0xE8, 0xEA, 0xF8, 0xFA -> ACCUMULATOR_OR_IMPLIED();
             case 0x09, 0x0B, 0x2B, 0x29, 0x49, 0x4B, 0x69, 0x6B, 0x80, 0x82, 0x89, 0x8B, 0xA0, 0xA2, 0xA9, 0xAB, 0xC0,
                  0xC2, 0xC9, 0xCB, 0xE0, 0xE2, 0xE9, 0xEB -> IMMEDIATE();
-            case 0x4C -> ABSOLUTE_JUMP();
-            case 0x0C, 0x0D, 0x2C, 0x2D, 0x4D, 0x6D, 0xAC, 0xAD, 0xAE, 0xAF, 0xCC, 0xCD, 0xEC, 0xED -> ABSOLUTE_READ();
-            case 0x0E, 0x0F, 0x2E, 0x2F, 0x4F, 0x4E, 0x6E, 0x6F, 0xCE, 0xCF, 0xEE, 0xEF -> ABSOLUTE_READ_MODIFY_WRITE();
-            case 0x8C, 0x8D, 0x8E, 0x8F -> ABSOLUTE_WRITE();
+            case 0x4C -> mode.absolute_jump(alu::jmp);
+            case 0x0C -> mode.absolute_read(alu::nop);
+            case 0x0D -> mode.absolute_read(alu::ora);
+            case 0x2C -> mode.absolute_read(alu::bit);
+            case 0x2D -> mode.absolute_read(alu::and);
+            case 0x4D -> mode.absolute_read(alu::eor);
+            case 0x6D -> mode.absolute_read(alu::adc);
+            case 0xAC -> mode.absolute_read(alu::ldy);
+            case 0xAD -> mode.absolute_read(alu::lda);
+            case 0xAE -> mode.absolute_read(alu::ldx);
+            case 0xAF -> mode.absolute_read(alu::lax);
+            case 0xCC -> mode.absolute_read(alu::cpy);
+            case 0xCD -> mode.absolute_read(alu::cmp);
+            case 0xEC -> mode.absolute_read(alu::cpx);
+            case 0xED -> mode.absolute_read(alu::sbc);
+            case 0x0E -> mode.absolute_modify(alu::asl);
+            case 0x0F -> mode.absolute_modify(alu::slo);
+            case 0x2E -> mode.absolute_modify(alu::rol);
+            case 0x2F -> mode.absolute_modify(alu::rla);
+            case 0x4F -> mode.absolute_modify(alu::sre);
+            case 0x4E -> mode.absolute_modify(alu::lsr);
+            case 0x6E -> mode.absolute_modify(alu::ror);
+            case 0x6F -> mode.absolute_modify(alu::rra);
+            case 0xCE -> mode.absolute_modify(alu::dec);
+            case 0xCF -> mode.absolute_modify(alu::dcp);
+            case 0xEE -> mode.absolute_modify(alu::inc);
+            case 0xEF -> mode.absolute_modify(alu::isc);
+            case 0x8C -> mode.absolute_write(alu::sty);
+            case 0x8D -> mode.absolute_write(alu::sta);
+            case 0x8E -> mode.absolute_write(alu::stx);
+            case 0x8F -> mode.absolute_write(alu::sax);
             case 0x04, 0x05, 0x24, 0x25, 0x44, 0x45, 0x64, 0x65, 0xA4, 0xA5, 0xA6, 0xA7, 0xC4, 0xC5, 0xE4, 0xE5 ->
                     ZERO_PAGE_READ();
             case 0x06, 0x07, 0x26, 0x27, 0x46, 0x47, 0x66, 0x67, 0xC6, 0xC7, 0xE6, 0xE7 ->
@@ -112,7 +140,7 @@ public class CPU implements Serializable {
             case 0x11, 0x31, 0x51, 0x71, 0xB1, 0xB3, 0xD1, 0xF1 -> INDIRECT_INDEXED_READ();
             case 0x13, 0x33, 0x53, 0x73, 0xD3, 0xF3 -> INDIRECT_INDEXED_READ_MODIFY_WRITE();
             case 0x91, 0x93 -> INDIRECT_INDEXED_WRITE();
-            case 0x6C -> ABSOLUTE_INDIRECT_JUMP();
+            case 0x6C -> mode.absolute_indirect_jump(alu::jmp);
             case 0x02, 0x12, 0x22, 0x32, 0x42, 0x52, 0x62, 0x72, 0x92, 0xB2, 0xD2, 0xF2 -> KIL();
         }
 
@@ -248,7 +276,7 @@ public class CPU implements Serializable {
         mapper.writeCpuMemory(address, value);
     }
 
-    private int read(final int address) {
+    public int read(final int address) {
 
         if (dmcCycle > 0) {
             int cycle = dmcCycle - 1;
@@ -536,71 +564,6 @@ public class CPU implements Serializable {
 
     // -- Absolute addressing instructions ---------------------------------------
 
-    private void ABSOLUTE_JUMP() {
-        // 2
-        final int address = read(reg.pc());
-        reg.pcInc1();
-        // 3
-        reg.pc((read(reg.pc()) << 8) | address);
-    }
-
-    private void ABSOLUTE_READ() {
-        // 2
-        int address = read(reg.pc());
-        reg.pcInc1();
-        // 3
-        address |= read(reg.pc()) << 8;
-        reg.pcInc1();
-        // 4       
-        final int value = read(address);
-        switch (opcode) {
-            case 0x0C -> {
-            }
-            case 0x0D -> alu.ora(value);
-            case 0x2C -> alu.bit(value);
-            case 0x2D -> alu.and(value);
-            case 0x4D -> alu.eor(value);
-            case 0x6D -> alu.adc(value);
-            case 0xAC -> alu.ldy(value);
-            case 0xAD -> alu.lda(value);
-            case 0xAE -> alu.ldx(value);
-            case 0xAF -> alu.lax(value);
-            case 0xCC -> alu.cpy(value);
-            case 0xCD -> alu.cmp(value);
-            case 0xEC -> alu.cpx(value);
-            case 0xED -> alu.sbc(value);
-        }
-    }
-
-    private void ABSOLUTE_READ_MODIFY_WRITE() {
-        // 2
-        int address = read(reg.pc());
-        reg.pcInc1();
-        // 3
-        address |= read(reg.pc()) << 8;
-        reg.pcInc1();
-        // 4
-        int value = read(address);
-        // 5
-        write(address, value);
-        switch (opcode) {
-            case 0x0E -> value = alu.asl(value);
-            case 0x0F -> value = alu.slo(value);
-            case 0x2E -> value = alu.rol(value);
-            case 0x2F -> value = alu.rla(value);
-            case 0x4F -> value = alu.sre(value);
-            case 0x4E -> value = alu.lsr(value);
-            case 0x6E -> value = alu.ror(value);
-            case 0x6F -> value = alu.rra(value);
-            case 0xCE -> value = alu.dec(value);
-            case 0xCF -> value = alu.dcp(value);
-            case 0xEE -> value = alu.inc(value);
-            case 0xEF -> value = alu.isc(value);
-        }
-        // 6        
-        write(address, value);
-    }
-
     private void ABSOLUTE_WRITE() {
         // 2
         int address = read(reg.pc());
@@ -610,10 +573,10 @@ public class CPU implements Serializable {
         reg.pcInc1();
         // 4       
         switch (opcode) {
-            case 0x8C -> alu.sty(address);
-            case 0x8D -> alu.sta(address);
-            case 0x8E -> alu.stx(address);
-            case 0x8F -> alu.sax(address);
+            case 0x8C -> mode.absolute_write(alu::sty);
+            case 0x8D -> mode.absolute_write(alu::sta);
+            case 0x8E -> mode.absolute_write(alu::stx);
+            case 0x8F -> mode.absolute_write(alu::sax);
         }
     }
 
@@ -1073,22 +1036,6 @@ public class CPU implements Serializable {
             case 0x91 -> alu.sta(address);
             case 0x93 -> alu.ahx(address);
         }
-    }
-
-    // -- Absolute indirect addressing instructions ------------------------------
-
-    private void ABSOLUTE_INDIRECT_JUMP() {
-        // 2
-        int address = read(reg.pc());
-        reg.pcInc1();
-        // 3
-        address |= read(reg.pc()) << 8;
-        reg.pcInc1();
-        // 4
-        reg.pc((reg.pc() & 0xFF00) | read(address));
-        address = (address & 0xFF00) | ((address + 1) & 0x00FF);
-        // 5       
-        reg.pc((read(address) << 8) | (reg.pc() & 0x00FF));
     }
 
     public Register getRegister() {

@@ -16,6 +16,10 @@ public class ALU {
     // -- Official 6502 Instructions ------------------------------------------------
     // https://www.nesdev.org/wiki/Instruction_reference
 
+    /// No Operation
+    public void nop(int value) {
+    }
+
     /// Set Carry
     public void sec() {
         reg.c(true);
@@ -298,6 +302,18 @@ public class ALU {
     /// Store Y
     public void sty(int value) {
         cpu.write(value, reg.y());
+    }
+
+    /// Jump
+    public void jmp(int value) {
+        reg.pc(value);
+    }
+
+    /// Jump to Subroutine
+    public void jsr(int value) {
+        cpu.push(reg.pc() >> 8);
+        cpu.push(reg.pc() & 0x00FF);
+        reg.pc(value);
     }
 
     // -- Unofficial 6502 Instructions ------------------------------------------------
