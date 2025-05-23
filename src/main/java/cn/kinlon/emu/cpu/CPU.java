@@ -83,10 +83,46 @@ public class CPU implements Serializable {
             case 0x08, 0x48 -> PUSH();
             case 0x28, 0x68 -> PULL();
             case 0x20 -> mode.absolute_jsr(alu::jsr);
-            case 0x0A, 0x1A, 0x18, 0x2A, 0x38, 0x3A, 0x4A, 0x58, 0x5A, 0x6A, 0x78, 0x7A, 0x88, 0x8A, 0x98, 0x9A, 0xA8,
-                 0xAA, 0xB8, 0xBA, 0xC8, 0xCA, 0xD8, 0xDA, 0xE8, 0xEA, 0xF8, 0xFA -> ACCUMULATOR_OR_IMPLIED();
-            case 0x09, 0x0B, 0x2B, 0x29, 0x49, 0x4B, 0x69, 0x6B, 0x80, 0x82, 0x89, 0x8B, 0xA0, 0xA2, 0xA9, 0xAB, 0xC0,
-                 0xC2, 0xC9, 0xCB, 0xE0, 0xE2, 0xE9, 0xEB -> IMMEDIATE();
+            case 0x0A -> mode.accumulator(alu::asl);
+            case 0x2A -> mode.accumulator(alu::rol);
+            case 0x4A -> mode.accumulator(alu::lsr);
+            case 0x6A -> mode.accumulator(alu::ror);
+            case 0x18 -> mode.implied(alu::clc);
+            case 0x38 -> mode.implied(alu::sec);
+            case 0x58 -> mode.implied(alu::cli);
+            case 0x78 -> mode.implied(alu::sei);
+            case 0x88 -> mode.implied(alu::dey);
+            case 0x8A -> mode.implied(alu::txa);
+            case 0x98 -> mode.implied(alu::tya);
+            case 0x9A -> mode.implied(alu::txs);
+            case 0xA8 -> mode.implied(alu::tay);
+            case 0xAA -> mode.implied(alu::tax);
+            case 0xB8 -> mode.implied(alu::clv);
+            case 0xBA -> mode.implied(alu::tsx);
+            case 0xC8 -> mode.implied(alu::iny);
+            case 0xCA -> mode.implied(alu::dex);
+            case 0xD8 -> mode.implied(alu::cld);
+            case 0xE8 -> mode.implied(alu::inx);
+            case 0xF8 -> mode.implied(alu::sed);
+            case 0x1A, 0x3A, 0x5A, 0x7A, 0xDA, 0xEA, 0xFA -> mode.implied(alu::nop);
+            case 0x09 -> mode.immediate(alu::ora);
+            case 0x0B, 0x2B -> mode.immediate(alu::anc);
+            case 0x29 -> mode.immediate(alu::and);
+            case 0x49 -> mode.immediate(alu::eor);
+            case 0x4B -> mode.immediate(alu::alr);
+            case 0x69 -> mode.immediate(alu::adc);
+            case 0x6B -> mode.immediate(alu::arr);
+            case 0x8B -> mode.immediate(alu::xaa);
+            case 0xA0 -> mode.immediate(alu::ldy);
+            case 0xA2 -> mode.immediate(alu::ldx);
+            case 0xA9 -> mode.immediate(alu::lda);
+            case 0xAB -> mode.immediate(alu::lax);
+            case 0xC0 -> mode.immediate(alu::cpy);
+            case 0xC9 -> mode.immediate(alu::cmp);
+            case 0xCB -> mode.immediate(alu::axs);
+            case 0xE0 -> mode.immediate(alu::cpx);
+            case 0xE9, 0xEB -> mode.immediate(alu::sbc);
+            case 0x80, 0x82, 0x89, 0xC2, 0xE2 -> mode.immediate(alu::nop);
             case 0x4C -> mode.absolute_jump(alu::jmp);
             case 0x0C -> mode.absolute_read(alu::nop);
             case 0x0D -> mode.absolute_read(alu::ora);
@@ -118,20 +154,78 @@ public class CPU implements Serializable {
             case 0x8D -> mode.absolute_write(alu::sta);
             case 0x8E -> mode.absolute_write(alu::stx);
             case 0x8F -> mode.absolute_write(alu::sax);
-            case 0x04, 0x05, 0x24, 0x25, 0x44, 0x45, 0x64, 0x65, 0xA4, 0xA5, 0xA6, 0xA7, 0xC4, 0xC5, 0xE4, 0xE5 ->
-                    ZERO_PAGE_READ();
-            case 0x06, 0x07, 0x26, 0x27, 0x46, 0x47, 0x66, 0x67, 0xC6, 0xC7, 0xE6, 0xE7 ->
-                    ZERO_PAGE_READ_MODIFY_WRITE();
-            case 0x84, 0x85, 0x86, 0x87 -> ZERO_PAGE_WRITE();
+            case 0x04, 0x44, 0x64 -> mode.zero_page_read(alu::nop);
+            case 0x05 -> mode.zero_page_read(alu::ora);
+            case 0x24 -> mode.zero_page_read(alu::bit);
+            case 0x25 -> mode.zero_page_read(alu::and);
+            case 0x45 -> mode.zero_page_read(alu::eor);
+            case 0x65 -> mode.zero_page_read(alu::adc);
+            case 0xA4 -> mode.zero_page_read(alu::ldy);
+            case 0xA5 -> mode.zero_page_read(alu::lda);
+            case 0xA6 -> mode.zero_page_read(alu::ldx);
+            case 0xA7 -> mode.zero_page_read(alu::lax);
+            case 0xC4 -> mode.zero_page_read(alu::cpy);
+            case 0xC5 -> mode.zero_page_read(alu::cmp);
+            case 0xE4 -> mode.zero_page_read(alu::cpx);
+            case 0xE5 -> mode.zero_page_read(alu::sbc);
+            case 0x06 -> mode.zero_page_modify(alu::asl);
+            case 0x07 -> mode.zero_page_modify(alu::slo);
+            case 0x26 -> mode.zero_page_modify(alu::rol);
+            case 0x27 -> mode.zero_page_modify(alu::rla);
+            case 0x46 -> mode.zero_page_modify(alu::lsr);
+            case 0x47 -> mode.zero_page_modify(alu::sre);
+            case 0x66 -> mode.zero_page_modify(alu::ror);
+            case 0x67 -> mode.zero_page_modify(alu::rra);
+            case 0xC6 -> mode.zero_page_modify(alu::dec);
+            case 0xC7 -> mode.zero_page_modify(alu::dcp);
+            case 0xE6 -> mode.zero_page_modify(alu::inc);
+            case 0xE7 -> mode.zero_page_modify(alu::isc);
+            case 0x84 -> mode.zero_page_write(alu::sty);
+            case 0x85 -> mode.zero_page_write(alu::sta);
+            case 0x86 -> mode.zero_page_write(alu::stx);
+            case 0x87 -> mode.zero_page_write(alu::sax);
             case 0x14, 0x15, 0x34, 0x35, 0x54, 0x55, 0x74, 0x75, 0xB4, 0xB5, 0xB6, 0xB7, 0xD4, 0xD5, 0xF4, 0xF5 ->
                     ZERO_PAGE_INDEXED_READ();
             case 0x16, 0x17, 0x36, 0x37, 0x56, 0x57, 0x76, 0x77, 0xD6, 0xD7, 0xF6, 0xF7 ->
                     ZERO_PAGE_INDEXED_READ_MODIFY_WRITE();
             case 0x94, 0x95, 0x96, 0x97 -> ZERO_PAGE_INDEXED_WRITE();
-            case 0x19, 0x1C, 0x1D, 0x3C, 0x3D, 0x39, 0x5C, 0x5D, 0x59, 0x7C, 0x7D, 0x79, 0xBB, 0xBC, 0xB9, 0xBD, 0xBE,
-                 0xBF, 0xD9, 0xDC, 0xDD, 0xF9, 0xFC, 0xFD -> ABSOLUTE_INDEXED_READ();
-            case 0x1B, 0x1E, 0x1F, 0x3B, 0x3E, 0x3F, 0x5E, 0x5B, 0x5F, 0x7B, 0x7E, 0x7F, 0xDB, 0xDE, 0xDF, 0xFE, 0xFB,
-                 0xFF -> ABSOLUTE_INDEXED_READ_MODIFY_WRITE();
+            case 0x19 -> mode.absolute_indexed_y_read(alu::ora);
+            case 0x39 -> mode.absolute_indexed_y_read(alu::and);
+            case 0x59 -> mode.absolute_indexed_y_read(alu::eor);
+            case 0x79 -> mode.absolute_indexed_y_read(alu::adc);
+            case 0xB9 -> mode.absolute_indexed_y_read(alu::lda);
+            case 0xBB -> mode.absolute_indexed_y_read(alu::las);
+            case 0xBE -> mode.absolute_indexed_y_read(alu::ldx);
+            case 0xBF -> mode.absolute_indexed_y_read(alu::lax);
+            case 0xD9 -> mode.absolute_indexed_y_read(alu::cmp);
+            case 0xF9 -> mode.absolute_indexed_y_read(alu::sbc);
+            case 0x1D -> mode.absolute_indexed_x_read(alu::ora);
+            case 0x3D -> mode.absolute_indexed_x_read(alu::and);
+            case 0x5D -> mode.absolute_indexed_x_read(alu::eor);
+            case 0x7D -> mode.absolute_indexed_x_read(alu::adc);
+            case 0xBC -> mode.absolute_indexed_x_read(alu::ldy);
+            case 0xBD -> mode.absolute_indexed_x_read(alu::lda);
+            case 0xDD -> mode.absolute_indexed_x_read(alu::cmp);
+            case 0xFD -> mode.absolute_indexed_x_read(alu::sbc);
+            case 0x1C, 0x3C, 0x5C, 0x7C, 0xDC, 0xFC -> mode.absolute_indexed_x_read(alu::nop);
+            case 0x1B -> mode.absolute_indexed_y_modify(alu::slo);
+            case 0x3B -> mode.absolute_indexed_y_modify(alu::rla);
+            case 0x5B -> mode.absolute_indexed_y_modify(alu::sre);
+            case 0x7B -> mode.absolute_indexed_y_modify(alu::rra);
+            case 0xDB -> mode.absolute_indexed_y_modify(alu::dcp);
+            case 0xFB -> mode.absolute_indexed_y_modify(alu::isc);
+            case 0x1E -> mode.absolute_indexed_x_modify(alu::asl);
+            case 0x1F -> mode.absolute_indexed_x_modify(alu::slo);
+            case 0x3E -> mode.absolute_indexed_x_modify(alu::rol);
+            case 0x3F -> mode.absolute_indexed_x_modify(alu::rla);
+            case 0x5E -> mode.absolute_indexed_x_modify(alu::lsr);
+            case 0x5F -> mode.absolute_indexed_x_modify(alu::sre);
+            case 0x7E -> mode.absolute_indexed_x_modify(alu::ror);
+            case 0x7F -> mode.absolute_indexed_x_modify(alu::rra);
+            case 0xDE -> mode.absolute_indexed_x_modify(alu::dec);
+            case 0xDF -> mode.absolute_indexed_x_modify(alu::dcp);
+            case 0xFE -> mode.absolute_indexed_x_modify(alu::inc);
+            case 0xFF -> mode.absolute_indexed_x_modify(alu::isc);
             case 0x99, 0x9B, 0x9C, 0x9D, 0x9E, 0x9F -> ABSOLUTE_INDEXED_WRITE();
             case 0x10, 0x30, 0x50, 0x70, 0x90, 0xB0, 0xD0, 0xF0 -> RELATIVE_BRANCH();
             case 0x01, 0x21, 0x41, 0x61, 0xA1, 0xA3, 0xC1, 0xE1 -> INDEXED_INDIRECT_READ();
@@ -478,171 +572,11 @@ public class CPU implements Serializable {
         }
     }
 
-    private void JSR() {
-        // 2
-        final int address = read(reg.pc());
-        reg.pcInc1();
-        // 3
-        readStack();
-        // 4
-        writeStack(reg.pc() >> 8);
-        reg.spDec1();
-        // 5
-        writeStack(reg.pc() & 0x00FF);
-        reg.spDec1();
-        // 6
-        reg.pc((read(reg.pc()) << 8) | address);
-    }
-
     private void KIL() {
         reg.pcDec1();
         if (running) {
             running = false;
             App.cpuKilled(mapper.readCpuMemory(reg.pc()), reg.pc());
-        }
-    }
-
-    // -- Accumulator or implied addressing instructions -------------------------
-    private void ACCUMULATOR_OR_IMPLIED() {
-        // 2
-        read(reg.pc());
-        switch (opcode) {
-            case 0x0A -> reg.a(alu.asl(reg.a()));
-            case 0x18 -> alu.clc();
-            case 0x2A -> reg.a(alu.rol(reg.a()));
-            case 0x38 -> alu.sec();
-            case 0x4A -> reg.a(alu.lsr(reg.a()));
-            case 0x58 -> alu.cli();
-            case 0x6A -> reg.a(alu.ror(reg.a()));
-            case 0x78 -> alu.sei();
-            case 0x88 -> alu.dey();
-            case 0x8A -> alu.txa();
-            case 0x98 -> alu.tya();
-            case 0x9A -> alu.txs();
-            case 0xA8 -> alu.tay();
-            case 0xAA -> alu.tax();
-            case 0xB8 -> alu.clv();
-            case 0xBA -> alu.tsx();
-            case 0xC8 -> alu.iny();
-            case 0xCA -> alu.dex();
-            case 0xD8 -> alu.cld();
-            case 0xE8 -> alu.inx();
-            case 0xF8 -> alu.sed();
-            case 0x1A, 0x3A, 0x5A, 0x7A, 0xDA, 0xEA, 0xFA -> {
-            }
-        }
-    }
-
-    // -- Immediate addressing instructions --------------------------------------
-
-    private void IMMEDIATE() {
-        // 2
-        final int value = read(reg.pc());
-        reg.pcInc1();
-        switch (opcode) {
-            case 0x09 -> alu.ora(value);
-            case 0x0B, 0x2B -> alu.anc(value);
-            case 0x29 -> alu.and(value);
-            case 0x49 -> alu.eor(value);
-            case 0x4B -> alu.alr(value);
-            case 0x69 -> alu.adc(value);
-            case 0x6B -> alu.arr(value);
-            case 0x8B -> alu.xaa(value);
-            case 0xA0 -> alu.ldy(value);
-            case 0xA2 -> alu.ldx(value);
-            case 0xA9 -> alu.lda(value);
-            case 0xAB -> alu.lax(value);
-            case 0xC0 -> alu.cpy(value);
-            case 0xC9 -> alu.cmp(value);
-            case 0xCB -> alu.axs(value);
-            case 0xE0 -> alu.cpx(value);
-            case 0xE9, 0xEB -> alu.sbc(value);
-            case 0x80, 0x82, 0x89, 0xC2, 0xE2 -> {
-            }
-        }
-    }
-
-    // -- Absolute addressing instructions ---------------------------------------
-
-    private void ABSOLUTE_WRITE() {
-        // 2
-        int address = read(reg.pc());
-        reg.pcInc1();
-        // 3
-        address |= read(reg.pc()) << 8;
-        reg.pcInc1();
-        // 4       
-        switch (opcode) {
-            case 0x8C -> mode.absolute_write(alu::sty);
-            case 0x8D -> mode.absolute_write(alu::sta);
-            case 0x8E -> mode.absolute_write(alu::stx);
-            case 0x8F -> mode.absolute_write(alu::sax);
-        }
-    }
-
-    // -- Zero page addressing instructions --------------------------------------
-
-    private void ZERO_PAGE_READ() {
-        // 2
-        final int address = read(reg.pc());
-        reg.pcInc1();
-        // 3        
-        final int value = read(address);
-        switch (opcode) {
-            case 0x04, 0x44, 0x64 -> {
-            }
-            case 0x05 -> alu.ora(value);
-            case 0x24 -> alu.bit(value);
-            case 0x25 -> alu.and(value);
-            case 0x45 -> alu.eor(value);
-            case 0x65 -> alu.adc(value);
-            case 0xA4 -> alu.ldy(value);
-            case 0xA5 -> alu.lda(value);
-            case 0xA6 -> alu.ldx(value);
-            case 0xA7 -> alu.lax(value);
-            case 0xC4 -> alu.cpy(value);
-            case 0xC5 -> alu.cmp(value);
-            case 0xE4 -> alu.cpx(value);
-            case 0xE5 -> alu.sbc(value);
-        }
-    }
-
-    private void ZERO_PAGE_READ_MODIFY_WRITE() {
-        // 2
-        final int address = read(reg.pc());
-        reg.pcInc1();
-        // 3
-        int value = read(address);
-        // 4
-        write(address, value);
-        switch (opcode) {
-            case 0x06 -> value = alu.asl(value);
-            case 0x07 -> value = alu.slo(value);
-            case 0x26 -> value = alu.rol(value);
-            case 0x27 -> value = alu.rla(value);
-            case 0x46 -> value = alu.lsr(value);
-            case 0x47 -> value = alu.sre(value);
-            case 0x66 -> value = alu.ror(value);
-            case 0x67 -> value = alu.rra(value);
-            case 0xC6 -> value = alu.dec(value);
-            case 0xC7 -> value = alu.dcp(value);
-            case 0xE6 -> value = alu.inc(value);
-            case 0xE7 -> value = alu.isc(value);
-        }
-        // 5       
-        write(address, value);
-    }
-
-    private void ZERO_PAGE_WRITE() {
-        // 2
-        final int address = read(reg.pc());
-        reg.pcInc1();
-        // 3        
-        switch (opcode) {
-            case 0x84 -> alu.sty(address);
-            case 0x85 -> alu.sta(address);
-            case 0x86 -> alu.stx(address);
-            case 0x87 -> alu.sax(address);
         }
     }
 
@@ -722,80 +656,6 @@ public class CPU implements Serializable {
     }
 
     // -- Absolute indexed addressing instructions -------------------------------
-
-    private void ABSOLUTE_INDEXED_READ() {
-        // 2
-        int address1 = read(reg.pc());
-        reg.pcInc1();
-        // 3    
-        address1 |= read(reg.pc()) << 8;
-        final int offset;
-        switch (opcode) { // ORA $A5B6,Y
-            case 0x19, 0x39, 0x59, 0x79, 0xB9, 0xBB, 0xBE, 0xBF, 0xD9, 0xF9 -> offset = reg.y();
-            default -> offset = reg.x();
-        }
-        final int address2 = (address1 + offset) & 0xFFFF;
-        address1 = (address1 & 0xFF00) | (address2 & 0x00FF);
-        reg.pcInc1();
-        // 4
-        int value = read(address1);
-        if (address1 != address2) {
-            // 5
-            value = read(address2);
-        }
-        switch (opcode) {
-            case 0x19, 0x1D -> alu.ora(value);
-            case 0x3D, 0x39 -> alu.and(value);
-            case 0x5D, 0x59 -> alu.eor(value);
-            case 0x7D, 0x79 -> alu.adc(value);
-            case 0xBB -> alu.las(value);
-            case 0xBC -> alu.ldy(value);
-            case 0xB9, 0xBD -> alu.lda(value);
-            case 0xBE -> alu.ldx(value);
-            case 0xBF -> alu.lax(value);
-            case 0xD9, 0xDD -> alu.cmp(value);
-            case 0xF9, 0xFD -> alu.sbc(value);
-            case 0x1C, 0x3C, 0x5C, 0x7C, 0xDC, 0xFC -> {
-            }
-        }
-    }
-
-    private void ABSOLUTE_INDEXED_READ_MODIFY_WRITE() {
-        // 2
-        int value = read(reg.pc());
-        reg.pcInc1();
-        // 3
-        final int offset;
-        switch (opcode) {
-            case 0x1B, 0x3B, 0x5B, 0x7B, 0xDB, 0xFB -> offset = reg.y();
-            default -> offset = reg.x();
-        }
-        value |= read(reg.pc()) << 8;
-        int address = toU16(value + offset);
-        reg.pcInc1();
-        // 4
-        read((value & 0xFF00) | (address & 0x00FF));
-        // 5
-        value = read(address);
-        // 6
-        write(address, value);
-        switch (opcode) {
-            case 0x1B, 0x1F -> value = alu.slo(value);
-            case 0x1E -> value = alu.asl(value);
-            case 0x3B, 0x3F -> value = alu.rla(value);
-            case 0x3E -> value = alu.rol(value);
-            case 0x5B, 0x5F -> value = alu.sre(value);
-            case 0x5E -> value = alu.lsr(value);
-            case 0x7B, 0x7F -> value = alu.rra(value);
-            case 0x7E -> value = alu.ror(value);
-            case 0xDB, 0xDF -> value = alu.dcp(value);
-            case 0xDE -> value = alu.dec(value);
-            case 0xFB, 0xFF -> value = alu.isc(value);
-            case 0xFE -> value = alu.inc(value);
-        }
-        // 7        
-        write(address, value);
-    }
 
     private void ABSOLUTE_INDEXED_WRITE() {
         // 2

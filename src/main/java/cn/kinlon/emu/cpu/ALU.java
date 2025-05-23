@@ -20,6 +20,10 @@ public class ALU {
     public void nop(int value) {
     }
 
+    /// No Operation
+    public void nop() {
+    }
+
     /// Set Carry
     public void sec() {
         reg.c(true);
