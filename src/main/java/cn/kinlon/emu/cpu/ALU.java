@@ -334,30 +334,12 @@ public class ALU {
         tax();
     }
 
-    public int xas(int value) {
-        reg.sp(reg.x() & reg.a());
-        return reg.sp() & value;
-    }
-
     public void sax(int value) {
         cpu.write(value, reg.a() & reg.x());
     }
 
-    public void shx(int value) {
-        cpu.write(value, reg.x() & ((value >> 8) + 1));
-    }
-
-    public void shy(int value) {
-        cpu.write(value, reg.y() & ((value >> 8) + 1));
-    }
-
     public void ahx(int value) {
         cpu.write(value, reg.a() & reg.x() & ((value >> 8) + 1));
-    }
-
-    // bug
-    public void tas(int value, int page) {
-        cpu.write(value, xas(toU8(++page)));
     }
 
     public int isc(int value) {

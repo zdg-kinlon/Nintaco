@@ -184,11 +184,33 @@ public class CPU implements Serializable {
             case 0x85 -> mode.zero_page_write(alu::sta);
             case 0x86 -> mode.zero_page_write(alu::stx);
             case 0x87 -> mode.zero_page_write(alu::sax);
-            case 0x14, 0x15, 0x34, 0x35, 0x54, 0x55, 0x74, 0x75, 0xB4, 0xB5, 0xB6, 0xB7, 0xD4, 0xD5, 0xF4, 0xF5 ->
-                    ZERO_PAGE_INDEXED_READ();
-            case 0x16, 0x17, 0x36, 0x37, 0x56, 0x57, 0x76, 0x77, 0xD6, 0xD7, 0xF6, 0xF7 ->
-                    ZERO_PAGE_INDEXED_READ_MODIFY_WRITE();
-            case 0x94, 0x95, 0x96, 0x97 -> ZERO_PAGE_INDEXED_WRITE();
+            case 0xB6 -> mode.zero_page_indexed_y_read(alu::ldx);
+            case 0xB7 -> mode.zero_page_indexed_y_read(alu::lax);
+            case 0x15 -> mode.zero_page_indexed_x_read(alu::ora);
+            case 0x35 -> mode.zero_page_indexed_x_read(alu::and);
+            case 0x55 -> mode.zero_page_indexed_x_read(alu::eor);
+            case 0x75 -> mode.zero_page_indexed_x_read(alu::adc);
+            case 0xB4 -> mode.zero_page_indexed_x_read(alu::ldy);
+            case 0xB5 -> mode.zero_page_indexed_x_read(alu::lda);
+            case 0xD5 -> mode.zero_page_indexed_x_read(alu::cmp);
+            case 0xF5 -> mode.zero_page_indexed_x_read(alu::sbc);
+            case 0x14, 0x34, 0x54, 0x74, 0xD4, 0xF4 -> mode.zero_page_indexed_x_read(alu::nop);
+            case 0x16 -> mode.zero_page_indexed_x_modify(alu::asl);
+            case 0x17 -> mode.zero_page_indexed_x_modify(alu::slo);
+            case 0x36 -> mode.zero_page_indexed_x_modify(alu::rol);
+            case 0x37 -> mode.zero_page_indexed_x_modify(alu::rla);
+            case 0x56 -> mode.zero_page_indexed_x_modify(alu::lsr);
+            case 0x57 -> mode.zero_page_indexed_x_modify(alu::sre);
+            case 0x76 -> mode.zero_page_indexed_x_modify(alu::ror);
+            case 0x77 -> mode.zero_page_indexed_x_modify(alu::rra);
+            case 0xD6 -> mode.zero_page_indexed_x_modify(alu::dec);
+            case 0xD7 -> mode.zero_page_indexed_x_modify(alu::dcp);
+            case 0xF6 -> mode.zero_page_indexed_x_modify(alu::inc);
+            case 0xF7 -> mode.zero_page_indexed_x_modify(alu::isc);
+            case 0x94 -> mode.zero_page_indexed_x_write(alu::sty);
+            case 0x95 -> mode.zero_page_indexed_x_write(alu::sta);
+            case 0x96 -> mode.zero_page_indexed_y_write(alu::stx);
+            case 0x97 -> mode.zero_page_indexed_y_write(alu::sax);
             case 0x19 -> mode.absolute_indexed_y_read(alu::ora);
             case 0x39 -> mode.absolute_indexed_y_read(alu::and);
             case 0x59 -> mode.absolute_indexed_y_read(alu::eor);
@@ -228,12 +250,38 @@ public class CPU implements Serializable {
             case 0xFF -> mode.absolute_indexed_x_modify(alu::isc);
             case 0x99, 0x9B, 0x9C, 0x9D, 0x9E, 0x9F -> ABSOLUTE_INDEXED_WRITE();
             case 0x10, 0x30, 0x50, 0x70, 0x90, 0xB0, 0xD0, 0xF0 -> RELATIVE_BRANCH();
-            case 0x01, 0x21, 0x41, 0x61, 0xA1, 0xA3, 0xC1, 0xE1 -> INDEXED_INDIRECT_READ();
-            case 0x03, 0x23, 0x43, 0x63, 0xC3, 0xE3 -> INDEXED_INDIRECT_READ_MODIFY_WRITE();
-            case 0x81, 0x83 -> INDEXED_INDIRECT_WRITE();
-            case 0x11, 0x31, 0x51, 0x71, 0xB1, 0xB3, 0xD1, 0xF1 -> INDIRECT_INDEXED_READ();
-            case 0x13, 0x33, 0x53, 0x73, 0xD3, 0xF3 -> INDIRECT_INDEXED_READ_MODIFY_WRITE();
-            case 0x91, 0x93 -> INDIRECT_INDEXED_WRITE();
+            case 0x01 -> mode.indexed_indirect_read(alu::ora);
+            case 0x21 -> mode.indexed_indirect_read(alu::and);
+            case 0x41 -> mode.indexed_indirect_read(alu::eor);
+            case 0x61 -> mode.indexed_indirect_read(alu::adc);
+            case 0xA1 -> mode.indexed_indirect_read(alu::lda);
+            case 0xA3 -> mode.indexed_indirect_read(alu::lax);
+            case 0xC1 -> mode.indexed_indirect_read(alu::cmp);
+            case 0xE1 -> mode.indexed_indirect_read(alu::sbc);
+            case 0x03 -> mode.indexed_indirect_modify(alu::slo);
+            case 0x23 -> mode.indexed_indirect_modify(alu::rla);
+            case 0x43 -> mode.indexed_indirect_modify(alu::sre);
+            case 0x63 -> mode.indexed_indirect_modify(alu::rra);
+            case 0xC3 -> mode.indexed_indirect_modify(alu::dcp);
+            case 0xE3 -> mode.indexed_indirect_modify(alu::isc);
+            case 0x81 -> mode.indexed_indirect_write(alu::sta);
+            case 0x83 -> mode.indexed_indirect_write(alu::sax);
+            case 0x11 -> mode.indirect_indexed_read(alu::ora);
+            case 0x31 -> mode.indirect_indexed_read(alu::and);
+            case 0x51 -> mode.indirect_indexed_read(alu::eor);
+            case 0x71 -> mode.indirect_indexed_read(alu::adc);
+            case 0xB1 -> mode.indirect_indexed_read(alu::lda);
+            case 0xB3 -> mode.indirect_indexed_read(alu::lax);
+            case 0xD1 -> mode.indirect_indexed_read(alu::cmp);
+            case 0xF1 -> mode.indirect_indexed_read(alu::sbc);
+            case 0x13 -> mode.indirect_indexed_modify(alu::slo);
+            case 0x33 -> mode.indirect_indexed_modify(alu::rla);
+            case 0x53 -> mode.indirect_indexed_modify(alu::sre);
+            case 0x73 -> mode.indirect_indexed_modify(alu::rra);
+            case 0xD3 -> mode.indirect_indexed_modify(alu::dcp);
+            case 0xF3 -> mode.indirect_indexed_modify(alu::isc);
+            case 0x91 -> mode.indirect_indexed_write(alu::sta);
+            case 0x93 -> mode.indirect_indexed_write(alu::ahx);
             case 0x6C -> mode.absolute_indirect_jump(alu::jmp);
             case 0x02, 0x12, 0x22, 0x32, 0x42, 0x52, 0x62, 0x72, 0x92, 0xB2, 0xD2, 0xF2 -> KIL();
         }
@@ -580,121 +628,93 @@ public class CPU implements Serializable {
         }
     }
 
-    // -- Zero page indexed addressing instructions ------------------------------
-
-    private void ZERO_PAGE_INDEXED_READ() {
-        // 2
-        int address = read(reg.pc());
-        reg.pcInc1();
-        // 3
-        read(address);
-        switch (opcode) {
-            case 0xB6, 0xB7 -> address += reg.y();
-            default -> address += reg.x();
-        }
-        address &= 0x00FF;
-        // 4        
-        final int value = read(address);
-        switch (opcode) {
-            case 0x15 -> alu.ora(value);
-            case 0x35 -> alu.and(value);
-            case 0x55 -> alu.eor(value);
-            case 0x75 -> alu.adc(value);
-            case 0xB4 -> alu.ldy(value);
-            case 0xB5 -> alu.lda(value);
-            case 0xB6 -> alu.ldx(value);
-            case 0xB7 -> alu.lax(value);
-            case 0xD5 -> alu.cmp(value);
-            case 0xF5 -> alu.sbc(value);
-            case 0x14, 0x34, 0x54, 0x74, 0xD4, 0xF4 -> {
-            }
-        }
-    }
-
-    private void ZERO_PAGE_INDEXED_READ_MODIFY_WRITE() {
-        // 2
-        int address = read(reg.pc());
-        reg.pcInc1();
-        // 3
-        read(address);
-        address = toU8(address + reg.x());
-        // 4
-        int value = read(address);
-        // 5
-        write(address, value);
-        switch (opcode) {
-            case 0x16 -> value = alu.asl(value);
-            case 0x17 -> value = alu.slo(value);
-            case 0x36 -> value = alu.rol(value);
-            case 0x37 -> value = alu.rla(value);
-            case 0x56 -> value = alu.lsr(value);
-            case 0x57 -> value = alu.sre(value);
-            case 0x76 -> value = alu.ror(value);
-            case 0x77 -> value = alu.rra(value);
-            case 0xD6 -> value = alu.dec(value);
-            case 0xD7 -> value = alu.dcp(value);
-            case 0xF6 -> value = alu.inc(value);
-            case 0xF7 -> value = alu.isc(value);
-        }
-        // 6
-        write(address, value);
-    }
-
-    private void ZERO_PAGE_INDEXED_WRITE() {
-        // 2
-        int address = read(reg.pc());
-        reg.pcInc1();
-        // 3
-        read(address);
-        // 4        
-        switch (opcode) {
-            case 0x94 -> alu.sty(toU8(address + reg.x()));
-            case 0x95 -> alu.sta(toU8(address + reg.x()));
-            case 0x96 -> alu.stx(toU8(address + reg.y()));
-            case 0x97 -> alu.sax(toU8(address + reg.y()));
-        }
-    }
-
     // -- Absolute indexed addressing instructions -------------------------------
 
-    private void ABSOLUTE_INDEXED_WRITE() {
-        // 2
+    public final static int MEM_PAGE_SIZEOF = 0x100;
+
+    private boolean checkPageCrossed(int address_old, int address_new) {
+        return toU8((address_old + address_new) >>> 8) != toU8(address_old >>> 8);
+    }
+
+    private void _AhxShxShy(int bassAddr, int indexReg, int valueReg) {
+
+        // https://forums.nesdev.org/viewtopic.php?p=297765
+        boolean pageCrossed = checkPageCrossed(bassAddr, indexReg);
+
+        // cycle = 4
+        // 对齐指令执行周期的读取操作
+        read(bassAddr + indexReg - (pageCrossed ? MEM_PAGE_SIZEOF : 0));
+
+        // 被DMA中断，处理CPU与PPU的DMC交互操作，多一个指令执行周期
+        boolean hadDMA = dmcCycle > 0;
+
+        int address = bassAddr + indexReg;
+        int addrHigh = address >> 8;
+        int addrLow = toU8(address);
+        if (pageCrossed) addrHigh &= valueReg;
+
+        int value = hadDMA ? valueReg : (valueReg & ((bassAddr >> 8) + 1));
+
+        // cycle = 5
+        write((addrHigh << 8 | addrLow), value);
+    }
+
+    private int readU16() {
+        // cycle = 2
         int value = read(reg.pc());
         reg.pcInc1();
-        // 3
-        final int offset;
-        final int high = read(reg.pc());
-        value |= high << 8;
-        switch (opcode) {
-            case 0x9C, 0x9D -> offset = reg.x();
-            default -> offset = reg.y();
-        }
-        int address = toU16(value + offset);
-        value = (value & 0xFF00) | (address & 0x00FF);
+        // cycle = 3
+        value |= read(reg.pc()) << 8;
         reg.pcInc1();
-        // 4
-        read(value);
-        // 5        
+        return value;
+    }
+
+    public void shy() {
+        _AhxShxShy(readU16(), reg.x(), reg.y());
+    }
+
+    public void shx() {
+        _AhxShxShy(readU16(), reg.y(), reg.x());
+    }
+
+    public void ahx() {
+        _AhxShxShy(readU16(), reg.y(), reg.x() & reg.a());
+    }
+
+    private void ABSOLUTE_INDEXED_WRITE() {
         switch (opcode) {
-            case 0x99, 0x9D -> alu.sta(address);
-            case 0x9B -> alu.tas(address, high);
-            case 0x9C -> {
-                if ((value >> 8) != (address >> 8)) {
-                    value &= reg.y() << 8;
+            case 0x99, 0x9D -> {
+                // 2
+                int value = read(reg.pc());
+                reg.pcInc1();
+                // 3
+                int offset = 0;
+                final int high = read(reg.pc());
+                value |= high << 8;
+                switch (opcode) {
+                    case 0x9C, 0x9D -> offset = reg.x();
+                    case 0x99, 0x9B, 0x9E, 0x9F -> offset = reg.y();
                 }
-                alu.shy(value);
+                int address = toU16(value + offset);
+                value = (value & 0xFF00) | (address & 0x00FF);
+                reg.pcInc1();
+                // 4
+                read(value);
+                // 5
+                alu.sta(address);
+            }
+            case 0x9B -> {
+                ahx();
+                reg.sp(reg.x() & reg.a());
+            }
+            case 0x9C -> {
+                shy();
             }
             case 0x9E -> {
-                if ((value >> 8) != (address >> 8)) {
-                    value &= reg.x() << 8;
-                }
-                alu.shx(value);
+                shx();
             }
             case 0x9F -> {
-                if ((value >> 8) != (address >> 8)) {
-                    value &= (reg.x() & reg.a()) << 8;
-                }
-                alu.ahx(address);
+                ahx();
             }
         }
     }
@@ -740,161 +760,6 @@ public class CPU implements Serializable {
                 read(reg.pc());
                 reg.pc(jumpAddress);
             }
-        }
-    }
-
-    // -- Indexed indirect addressing instructions -------------------------------
-
-    private void INDEXED_INDIRECT_READ() {
-        // 2
-        int address1 = read(reg.pc());
-        reg.pcInc1();
-        // 3
-        read(address1);
-        address1 = toU8(address1 + reg.x());
-        // 4
-        int address2 = read(address1);
-        address1 = toU8(address1 + 1);
-        // 5
-        address2 |= read(address1) << 8;
-        // 6        
-        final int value = read(address2);
-        switch (opcode) {
-            case 0x01 -> alu.ora(value);
-            case 0x21 -> alu.and(value);
-            case 0x41 -> alu.eor(value);
-            case 0x61 -> alu.adc(value);
-            case 0xA1 -> alu.lda(value);
-            case 0xA3 -> alu.lax(value);
-            case 0xC1 -> alu.cmp(value);
-            case 0xE1 -> alu.sbc(value);
-        }
-    }
-
-    private void INDEXED_INDIRECT_READ_MODIFY_WRITE() {
-        // 2
-        int value = read(reg.pc());
-        reg.pcInc1();
-        // 3
-        read(value);
-        value = toU8(value + reg.x());
-        // 4
-        int address = read(value);
-        value = toU8(value + 1);
-        // 5
-        address |= read(value) << 8;
-        // 6
-        value = read(address);
-        // 7
-        write(address, value);
-        switch (opcode) {
-            case 0x03 -> value = alu.slo(value);
-            case 0x23 -> value = alu.rla(value);
-            case 0x43 -> value = alu.sre(value);
-            case 0x63 -> value = alu.rra(value);
-            case 0xC3 -> value = alu.dcp(value);
-            case 0xE3 -> value = alu.isc(value);
-        }
-        // 8       
-        write(address, value);
-    }
-
-    private void INDEXED_INDIRECT_WRITE() {
-        // 2
-        int value = read(reg.pc());
-        reg.pcInc1();
-        // 3
-        read(value);
-        value = toU8(value + reg.x());
-        // 4
-        int address = read(value);
-        value = toU8(value + 1);
-        // 5
-        address |= read(value) << 8;
-        // 6        
-        switch (opcode) {
-            case 0x81 -> alu.sta(address);
-            case 0x83 -> alu.sax(address);
-        }
-    }
-
-    // -- Indirect indexed addressing instructions -------------------------------
-
-    private void INDIRECT_INDEXED_READ() {
-        // 2
-        int address1 = read(reg.pc());
-        reg.pcInc1();
-        // 3
-        int address2 = read(address1);
-        address1 = toU8(++address1);
-        // 4
-        address2 |= read(address1) << 8;
-        address1 = toU16(address2 + reg.y());
-        address2 = (address2 & 0xFF00) | (address1 & 0x00FF);
-        // 5
-        int value = read(address2);
-        if (address2 != address1) {
-            // 6
-            value = read(address1);
-        }
-        switch (opcode) {
-            case 0x11 -> alu.ora(value);
-            case 0x31 -> alu.and(value);
-            case 0x51 -> alu.eor(value);
-            case 0x71 -> alu.adc(value);
-            case 0xB1 -> alu.lda(value);
-            case 0xB3 -> alu.lax(value);
-            case 0xD1 -> alu.cmp(value);
-            case 0xF1 -> alu.sbc(value);
-        }
-    }
-
-    private void INDIRECT_INDEXED_READ_MODIFY_WRITE() {
-        // 2
-        int address = read(reg.pc());
-        reg.pcInc1();
-        // 3
-        int value = read(address);
-        address = toU8(++address);
-        // 4
-        value |= read(address) << 8;
-        address = toU16(value + reg.y());
-        value = (value & 0xFF00) | (address & 0x00FF);
-        // 5
-        read(value);
-        // 6
-        value = read(address);
-        // 7
-        write(address, value);
-        switch (opcode) {
-            case 0x13 -> value = alu.slo(value);
-            case 0x33 -> value = alu.rla(value);
-            case 0x53 -> value = alu.sre(value);
-            case 0x73 -> value = alu.rra(value);
-            case 0xD3 -> value = alu.dcp(value);
-            case 0xF3 -> value = alu.isc(value);
-        }
-        // 8        
-        write(address, value);
-    }
-
-    private void INDIRECT_INDEXED_WRITE() {
-        // 2
-        int address = read(reg.pc());
-        reg.pcInc1();
-        // 3
-        int value = read(address);
-        address = toU8(++address);
-        // 4
-        value |= read(address) << 8;
-        address = toU16(value + reg.y());
-        value = (value & 0xFF00) | (address & 0x00FF);
-        // 5
-        read(value);
-        // 6        
-        switch (opcode) {
-            case 0x91 -> alu.sta(address);
-            case 0x93 -> alu.ahx(address);
         }
     }
 
