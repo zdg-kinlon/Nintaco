@@ -630,45 +630,80 @@ public class CPU implements Serializable {
 
     // -- Absolute indexed addressing instructions -------------------------------
 
-    private void ABSOLUTE_INDEXED_WRITE() {
-        // 2
+    public final static int MEM_PAGE_SIZEOF = 0x100;
+
+    private boolean checkPageCrossed(int address_old, int address_new) {
+        return toU8((address_old + address_new) >>> 8) != toU8(address_old >>> 8);
+    }
+
+    private void _AhxShxShy(int bassAddr, int indexReg, int valueReg) {
+        // https://forums.nesdev.org/viewtopic.php?p=297765
+        boolean pageCrossed = checkPageCrossed(bassAddr, indexReg);
+        // cycle = 4
+        // 对齐指令执行周期的读取操作
+        read(bassAddr + indexReg - (pageCrossed ? MEM_PAGE_SIZEOF : 0));
+        // 被DMA中断，处理CPU与PPU的DMC交互操作，多一个指令执行周期
+        boolean hadDMA = dmcCycle > 0;
+        int address = bassAddr + indexReg;
+        int addrHigh = address >> 8;
+        int addrLow = toU8(address);
+        if (pageCrossed) addrHigh &= valueReg;
+        int value = hadDMA ? valueReg : (valueReg & ((bassAddr >> 8) + 1));
+        // cycle = 5
+        write((addrHigh << 8 | addrLow), value);
+    }
+
+    private int readU16() {
+        // cycle = 2
         int value = read(reg.pc());
         reg.pcInc1();
-        // 3
-        int offset = 0;
-        final int high = read(reg.pc());
-        value |= high << 8;
-        switch (opcode) {
-            case 0x9C, 0x9D -> offset = reg.x();
-            case 0x99, 0x9B, 0x9E, 0x9F -> offset = reg.y();
-        }
-        int address = toU16(value + offset);
-        value = (value & 0xFF00) | (address & 0x00FF);
+        // cycle = 3
+        value |= read(reg.pc()) << 8;
         reg.pcInc1();
-        // 4
-        read(value);
-        // 5        
+        return value;
+    }
+
+    public void shy() {
+        _AhxShxShy(readU16(), reg.x(), reg.y());
+    }
+
+    public void shx() {
+        _AhxShxShy(readU16(), reg.y(), reg.x());
+    }
+
+    public void ahx() {
+        _AhxShxShy(readU16(), reg.y(), reg.x() & reg.a());
+    }
+
+    private void ABSOLUTE_INDEXED_WRITE() {
         switch (opcode) {
-            case 0x99, 0x9D -> alu.sta(address);
-            case 0x9B -> alu.tas(address, high);
-            case 0x9C -> {
-                if ((value >> 8) != (address >> 8)) {
-                    value &= reg.y() << 8;
+            case 0x99, 0x9D -> {
+                // 2
+                int value = read(reg.pc());
+                reg.pcInc1();
+                // 3
+                int offset = 0;
+                final int high = read(reg.pc());
+                value |= high << 8;
+                switch (opcode) {
+                    case 0x9C, 0x9D -> offset = reg.x();
+                    case 0x99, 0x9B, 0x9E, 0x9F -> offset = reg.y();
                 }
-                alu.shy(value);
+                int address = toU16(value + offset);
+                value = (value & 0xFF00) | (address & 0x00FF);
+                reg.pcInc1();
+                // 4
+                read(value);
+                // 5
+                alu.sta(address);
             }
-            case 0x9E -> {
-                if ((value >> 8) != (address >> 8)) {
-                    value &= reg.x() << 8;
-                }
-                alu.shx(value);
+            case 0x9B -> {
+                ahx();
+                reg.sp(reg.x() & reg.a());
             }
-            case 0x9F -> {
-                if ((value >> 8) != (address >> 8)) {
-                    value &= (reg.x() & reg.a()) << 8;
-                }
-                alu.ahx(address);
-            }
+            case 0x9C -> shy();
+            case 0x9E -> shx();
+            case 0x9F -> ahx();
         }
     }
 
