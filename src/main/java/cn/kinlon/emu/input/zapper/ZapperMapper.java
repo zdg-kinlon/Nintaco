@@ -91,8 +91,8 @@ public class ZapperMapper extends DeviceMapper implements Serializable {
             final TVSystem system = mapper.getTVSystem();
             if (tvSystem != system) {
                 tvSystem = system;
-                triggerScanlines = (int) Math.round(system.getScanlineCount()
-                        / (10.0 * system.getSecondsPerFrame()));
+                triggerScanlines = (int) Math.round(system.scanlineCount()
+                        / (10.0 * system.secondsPerFrame()));
             }
 
             if (triggerReleased) {

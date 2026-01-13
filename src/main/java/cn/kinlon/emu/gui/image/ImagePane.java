@@ -6,7 +6,6 @@ import cn.kinlon.emu.Colors;
 import cn.kinlon.emu.gui.adapter.ImagePaneMouseAdapter;
 import cn.kinlon.emu.gui.image.filters.VideoFilter;
 import cn.kinlon.emu.gui.image.filters.VideoFilterDescriptor;
-import cn.kinlon.emu.gui.image.preferences.View;
 import cn.kinlon.emu.gui.adapter.ImagePaneComponentAdapter;
 import cn.kinlon.emu.gui.overscan.OverscanPrefs;
 import cn.kinlon.emu.palettes.PaletteUtil;
@@ -73,7 +72,7 @@ public class ImagePane extends JComponent implements ScreenRenderer {
     private volatile BufferedImage paintImage;
     private volatile int[] palette = PaletteUtil.getExtendedPalette(NTSC);
     private volatile TVSystem tvSystem;
-    public volatile ScreenBorders screenBorders = NTSC.getScreenBorders();
+    public volatile ScreenBorders screenBorders = NTSC.screenBorders();
     private volatile PixelAspectRatio pixelAspectRatio = PixelAspectRatio.SQUARE;
     private volatile boolean useTvAspectRatio;
     private volatile boolean smoothScaling;
@@ -313,16 +312,12 @@ public class ImagePane extends JComponent implements ScreenRenderer {
             screenBorders = ScreenBorders.EMPTY_BORDERS;
         } else {
             final OverscanPrefs prefs = appPrefs.getOverscanPrefs();
-            switch (tvSystem) {
-                case NTSC:
-                    screenBorders = prefs.getNtscBorders();
-                    break;
-                case PAL:
-                    screenBorders = prefs.getPalBorders();
-                    break;
-                case Dendy:
-                    screenBorders = prefs.getDendyBorders();
-                    break;
+            if (tvSystem == TVSystem.NTSC) {
+                screenBorders = prefs.getNtscBorders();
+            } else if (tvSystem == TVSystem.PAL) {
+                screenBorders = prefs.getPalBorders();
+            } else if (tvSystem == TVSystem.Dendy) {
+                screenBorders = prefs.getDendyBorders();
             }
         }
         adjustPreferredSize();
@@ -340,7 +335,7 @@ public class ImagePane extends JComponent implements ScreenRenderer {
             if (this.tvSystem != tvSystem) {
                 this.tvSystem = tvSystem;
                 palette = PaletteUtil.getExtendedPalette(tvSystem);
-                pixelAspectRatio = tvSystem.getPixelAspectRatio();
+                pixelAspectRatio = tvSystem.pixelAspectRatio();
                 updateScreenBorders();
             }
         } else {
@@ -387,8 +382,8 @@ public class ImagePane extends JComponent implements ScreenRenderer {
 
     private void adjustPreferredSize() {
         if (EventQueue.isDispatchThread()) {
-            final double aspectRatio = useTvAspectRatio ? (pixelAspectRatio.horizontal
-                    / (double) pixelAspectRatio.vertical) : 1.0;
+            final double aspectRatio = useTvAspectRatio ? (pixelAspectRatio.horizontal()
+                    / (double) pixelAspectRatio.vertical()) : 1.0;
             setPreferredSize(new Dimension(
                     (int) Math.round(aspectRatio * screenScale
                             * (IMAGE_WIDTH - screenBorders.left() - screenBorders.right())),
@@ -538,8 +533,8 @@ public class ImagePane extends JComponent implements ScreenRenderer {
         paneWidth = getWidth();
         paneHeight = getHeight();
 
-        final double aspectRatio = useTvAspectRatio ? (pixelAspectRatio.horizontal
-                / (double) pixelAspectRatio.vertical) : 1.0;
+        final double aspectRatio = useTvAspectRatio ? (pixelAspectRatio.horizontal()
+                / (double) pixelAspectRatio.vertical()) : 1.0;
         final int IMG_WIDTH = (int) Math.round((IMAGE_WIDTH - screenBorders.left()
                 - screenBorders.right()) * aspectRatio * filterScale);
         final int IMG_HEIGHT = (IMAGE_HEIGHT - screenBorders.top()

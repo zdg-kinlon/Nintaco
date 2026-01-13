@@ -281,8 +281,8 @@ public class PPU implements Serializable {
     public void setTVSystem(final TVSystem tvSystem) {
         ntsc = tvSystem == NTSC;
         pal = tvSystem == PAL;
-        scanlineCount = tvSystem.getScanlineCount();
-        nmiScanline = tvSystem.getNmiScanline();
+        scanlineCount = tvSystem.scanlineCount();
+        nmiScanline = tvSystem.nmiScanline();
         if (scanline >= scanlineCount - 1) {
             scanline = scanlineCount - 2;
         }

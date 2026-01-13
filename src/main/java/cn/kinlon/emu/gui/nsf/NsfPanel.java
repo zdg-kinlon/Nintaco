@@ -113,7 +113,7 @@ public class NsfPanel extends javax.swing.JPanel {
             } else {
                 timeLabel.setText(String.format("%s%s",
                         toMMSS((int) (m.getSongCpuCycles()
-                                / m.getTVSystem().getCyclesPerSecond())), songLengthStr));
+                                / m.getTVSystem().cyclesPerSecond())), songLengthStr));
             }
         }
     }

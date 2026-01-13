@@ -268,13 +268,13 @@ public class NsfMapper extends Mapper {
                     initSong(requestedSong);
                     jumpSubroutine(nsfFile.getInitAddress());
 
-                    final double cyclesPerMilli = tvSystem.getCyclesPerSecond() / 1000.0;
+                    final double cyclesPerMilli = tvSystem.cyclesPerSecond() / 1000.0;
                     final long fadeMillis = nsfFile.getFadeMillis()[requestedSong];
                     if (fadeMillis >= 0) {
                         fadeCycles = max(1, round(fadeMillis * cyclesPerMilli));
                     } else {
                         fadeCycles = (long) (DEFAULT_FADE_SECONDS
-                                * tvSystem.getCyclesPerSecond());
+                                * tvSystem.cyclesPerSecond());
                     }
                     final long trackMillis = nsfFile.getTrackMillis()[requestedSong];
                     if (trackMillis >= 0) {
@@ -282,7 +282,7 @@ public class NsfMapper extends Mapper {
                         trackCycles = max(1, round(trackMillis * cyclesPerMilli));
                     } else if (defaultTrackLength) {
                         trackCycles = max(1, round(60 * trackLengthMinutes
-                                * tvSystem.getCyclesPerSecond()) - fadeCycles);
+                                * tvSystem.cyclesPerSecond()) - fadeCycles);
                     } else {
                         trackCycles = Long.MAX_VALUE;
                     }

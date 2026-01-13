@@ -150,28 +150,24 @@ public class Decimator implements Serializable {
         ACTIVITY_SAMPLES = (int) outputSamplingFrequency;
         ACTIVITY_THRESHOLD = 8 * ACTIVITY_SAMPLES;
 
-        switch (tvSystem) {
-            case PAL:
-                a1 = PAL_A1;
-                a2 = PAL_A2;
-                b1 = PAL_B1;
-                g = PAL_G;
-                break;
-            case Dendy:
-                a1 = DENDY_A1;
-                a2 = DENDY_A2;
-                b1 = DENDY_B1;
-                g = DENDY_G;
-                break;
-            default:
-                a1 = NTSC_A1;
-                a2 = NTSC_A2;
-                b1 = NTSC_B1;
-                g = NTSC_G;
-                break;
+        if (tvSystem == TVSystem.PAL) {
+            a1 = PAL_A1;
+            a2 = PAL_A2;
+            b1 = PAL_B1;
+            g = PAL_G;
+        } else if (tvSystem == TVSystem.Dendy) {
+            a1 = DENDY_A1;
+            a2 = DENDY_A2;
+            b1 = DENDY_B1;
+            g = DENDY_G;
+        } else {
+            a1 = NTSC_A1;
+            a2 = NTSC_A2;
+            b1 = NTSC_B1;
+            g = NTSC_G;
         }
 
-        this.inputSamplingFrequency = (float) tvSystem.getCyclesPerSecond();
+        this.inputSamplingFrequency = (float) tvSystem.cyclesPerSecond();
         this.outputSamplingFrequency = (float) outputSamplingFrequency;
         inputSamplingPeriod = (float) (1.0 / inputSamplingFrequency);
         outputSamplingPeriod = (float) (1.0 / outputSamplingFrequency);

@@ -18,7 +18,7 @@ public class OverscanPrefs implements Serializable {
     public ScreenBorders getNtscBorders() {
         synchronized (AppPrefs.class) {
             if (ntscBorders == null) {
-                ntscBorders = NTSC.getScreenBorders();
+                ntscBorders = NTSC.screenBorders();
             }
             return ntscBorders;
         }
@@ -33,7 +33,7 @@ public class OverscanPrefs implements Serializable {
     public ScreenBorders getPalBorders() {
         synchronized (AppPrefs.class) {
             if (palBorders == null) {
-                palBorders = PAL.getScreenBorders();
+                palBorders = PAL.screenBorders();
             }
             return palBorders;
         }
@@ -48,7 +48,7 @@ public class OverscanPrefs implements Serializable {
     public ScreenBorders getDendyBorders() {
         synchronized (AppPrefs.class) {
             if (dendyBorders == null) {
-                dendyBorders = Dendy.getScreenBorders();
+                dendyBorders = Dendy.screenBorders();
             }
             return dendyBorders;
         }

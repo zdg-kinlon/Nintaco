@@ -53,7 +53,7 @@ public final class Sunsoft5BAudio extends Audio {
             tvSystem = TVSystem.NTSC;
         }
 
-        final double cyclesPerSecond = tvSystem.getCyclesPerSecond();
+        final double cyclesPerSecond = tvSystem.cyclesPerSecond();
         dividerStep = (float) (cyclesPerSecond / RATE);
         psg = PSG_new((int) cyclesPerSecond, (int) RATE);
 

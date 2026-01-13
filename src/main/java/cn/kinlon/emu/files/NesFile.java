@@ -334,11 +334,13 @@ public class NesFile implements CartFile, Serializable, Cloneable {
     protected int chrRomLength;
     protected Cart cart;
     protected VsGame vsGame;
+
     public NesFile(final DataInputStream in, final long fileSize,
                    final String entryFileName, final String archiveFileName)
             throws Throwable {
         this(in, fileSize, entryFileName, archiveFileName, true);
     }
+
     public NesFile(final DataInputStream in, final long fileSize,
                    final String entryFileName, final String archiveFileName,
                    final boolean modifyHeader) throws Throwable {
@@ -936,13 +938,14 @@ public class NesFile implements CartFile, Serializable, Cloneable {
         }
 
         static int fromTVSystem(final TVSystem tvSystem) {
-            switch (tvSystem) {
-                case PAL:
-                    return PAL;
-                case Dendy:
-                    return DENDY;
-                default:
-                    return NTSC;
+            if (tvSystem == TVSystem.PAL) {
+                return PAL;
+            } else if (tvSystem == TVSystem.Dendy) {
+                return DENDY;
+            } else if (tvSystem == TVSystem.NTSC) {
+                return NTSC;
+            } else {
+                return NTSC;
             }
         }
     }

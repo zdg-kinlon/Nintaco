@@ -93,7 +93,8 @@ public class ImageFrame extends javax.swing.JFrame implements StyleListener {
     }
 
     private final JRadioButtonMenuItem[] speedMenuItems
-            = new JRadioButtonMenuItem[SpeedValues.length];    private final KeyListener NoMenuBarKeyListener = new KeyAdapter() {
+            = new JRadioButtonMenuItem[SpeedValues.length];
+    private final KeyListener NoMenuBarKeyListener = new KeyAdapter() {
         @Override
         public void keyPressed(final KeyEvent e) {
             e.consume();
@@ -713,7 +714,7 @@ public class ImageFrame extends javax.swing.JFrame implements StyleListener {
             final IpsUtil.OpenFileHandle handle = IpsUtil.getOpenFileHandle(fileName);
             in = new DataInputStream(new BufferedInputStream(handle
                     .getInputStream()));
-            
+
             App.setStepPause(false);
             final Mapper m = App.loadFile(in, handle.getFileSize(), fileName);
 
@@ -1402,7 +1403,7 @@ public class ImageFrame extends javax.swing.JFrame implements StyleListener {
             }
         });
         machineMenu.add(ejectDiskMenuItem);
-        
+
         machineMenu.add(jSeparator22);
 
         eraseBatterySaveMenuItem.setMnemonic('a');
@@ -2039,10 +2040,10 @@ public class ImageFrame extends javax.swing.JFrame implements StyleListener {
         }
 
         final boolean machineExists = machine != null;
-       
+
         runProgramMenuItem.setText("Run Program...");
         startProgramServerMenuItem.setEnabled(notNetplay);
-        
+
         startProgramServerMenuItem.setText("Start Program Server...");
         runProgramMenuItem.setEnabled(notNetplay);
 
@@ -2099,16 +2100,13 @@ public class ImageFrame extends javax.swing.JFrame implements StyleListener {
     private void tvSystemMenuMenuSelected(javax.swing.event.MenuEvent evt) {//GEN-FIRST:event_tvSystemMenuMenuSelected
         final Machine m = App.getMachine();
         if (m != null) {
-            switch (m.getMapper().getTVSystem()) {
-                case NTSC:
-                    ntscRegionRadioButtonMenuItem.setSelected(true);
-                    break;
-                case PAL:
-                    palRegionRadioButtonMenuItem.setSelected(true);
-                    break;
-                case Dendy:
-                    dendyRegionRadioButtonMenuItem.setSelected(true);
-                    break;
+            TVSystem tvSystem = m.getMapper().getTVSystem();
+            if (tvSystem == NTSC) {
+                ntscRegionRadioButtonMenuItem.setSelected(true);
+            } else if (tvSystem == PAL) {
+                palRegionRadioButtonMenuItem.setSelected(true);
+            } else if (tvSystem == Dendy) {
+                dendyRegionRadioButtonMenuItem.setSelected(true);
             }
         }
     }//GEN-LAST:event_tvSystemMenuMenuSelected
@@ -2182,7 +2180,7 @@ public class ImageFrame extends javax.swing.JFrame implements StyleListener {
         asmDasmMenuItem.setEnabled(machineExists);
         ramSearchMenuItem.setEnabled(machineExists);
         ramWatchMenuItem.setEnabled(machineExists);
-        
+
         startTraceLoggerMenuItem.setEnabled(machineExists);
     }//GEN-LAST:event_debugMenuMenuSelected
 

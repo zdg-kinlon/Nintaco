@@ -15,7 +15,7 @@ public final class FdsAudio extends Audio {
     private static final float SMOOTH;
     
     static {
-        final double SAMPLE_PERIOD = NTSC.getSecondsPerCycle();
+        final double SAMPLE_PERIOD = NTSC.secondsPerCycle();
         final double X = 2.0 * Math.PI * SAMPLE_PERIOD * CUTOFF_FREQUENCY;
         SMOOTH = (float) (X / (X + 1));
     }

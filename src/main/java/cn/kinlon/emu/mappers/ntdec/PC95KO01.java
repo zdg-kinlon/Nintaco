@@ -11,7 +11,7 @@ import static cn.kinlon.emu.utils.StreamUtil.readByteArray;
 
 public class PC95KO01 extends MMC3 {
 
-    private static final double MAX_SAMPLE_COUNT = NTSC.getCyclesPerSecond()
+    private static final double MAX_SAMPLE_COUNT = NTSC.cyclesPerSecond()
             / 4000.0;
 
     private transient int[] queue = new int[0x1000];

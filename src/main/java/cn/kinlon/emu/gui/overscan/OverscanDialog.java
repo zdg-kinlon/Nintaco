@@ -155,9 +155,9 @@ public class OverscanDialog extends javax.swing.JDialog {
     }//GEN-LAST:event_formWindowClosing
 
     private void defaultsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_defaultsButtonActionPerformed
-        ntscPanel.setScreenBorders(NTSC.getScreenBorders());
-        palPanel.setScreenBorders(PAL.getScreenBorders());
-        dendyPanel.setScreenBorders(Dendy.getScreenBorders());
+        ntscPanel.setScreenBorders(NTSC.screenBorders());
+        palPanel.setScreenBorders(PAL.screenBorders());
+        dendyPanel.setScreenBorders(Dendy.screenBorders());
     }//GEN-LAST:event_defaultsButtonActionPerformed
     // End of variables declaration//GEN-END:variables
 }

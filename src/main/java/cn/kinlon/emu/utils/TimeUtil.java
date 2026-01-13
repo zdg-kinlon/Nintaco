@@ -34,7 +34,7 @@ public class TimeUtil {
                 .isFastForwardDuringDiskAccess())) {
             nanosPerFrame = 0;
         } else {
-            nanosPerFrame = tvSystem.getNanosPerFrame() * 100L / percent;
+            nanosPerFrame = tvSystem.nanosPerFrame() * 100L / percent;
         }
         updateFrameLostThreshold();
     }
