@@ -11,8 +11,8 @@ This repository uses the latest released JDK for development and the latest publ
 # Installation
 
 1. Download the source code of this repository.
-2. Download Java v23 from https://adoptium.net/temurin/releases/ and configure the `JAVA_HOME` system variable path.
-3. Download Gradle version 8.11 or above from https://gradle.org/releases/ and configure the `GRADLE_HOME` system variable path.
+2. Download Java v25 from https://adoptium.net/temurin/releases/ and configure the `JAVA_HOME` system variable path.
+3. Download Gradle version 9.2.1 or above from https://gradle.org/releases/ and configure the `GRADLE_HOME` system variable path.
 4. Open the Nintaco folder using IntelliJ IDEA or Visual Studio Code.
 5. The project will load automatically.
 
