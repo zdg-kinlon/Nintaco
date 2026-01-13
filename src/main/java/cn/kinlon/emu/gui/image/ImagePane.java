@@ -37,7 +37,6 @@ public class ImagePane extends JComponent implements ScreenRenderer {
     public static final int IMAGE_HEIGHT = 240;
 
     private static final int CURSOR_TIMEOUT = 120;
-    private static final int MESSAGE_TIMEOUT = 120;
 
     private final Toolkit toolkit = Toolkit.getDefaultToolkit();
     private final Cursor crosshairsCursor;
@@ -647,13 +646,6 @@ public class ImagePane extends JComponent implements ScreenRenderer {
 //                frameTime = System.nanoTime();
 //            }
 //        }
-    }
-
-    private enum Bars {
-        NONE,
-        LEFT_RIGHT,
-        TOP_BOTTOM,
-        ALL_SIDES,
     }
 
     private class FilterThread extends Thread {

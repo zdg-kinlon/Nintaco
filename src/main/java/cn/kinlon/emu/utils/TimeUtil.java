@@ -7,8 +7,9 @@ import cn.kinlon.emu.mappers.Mapper;
 import cn.kinlon.emu.preferences.AppPrefs;
 import cn.kinlon.emu.tv.TVSystem;
 
+import java.util.concurrent.locks.LockSupport;
+
 import static cn.kinlon.emu.tv.TVSystem.*;
-import static java.util.concurrent.locks.LockSupport.*;
 
 public class TimeUtil {
 
@@ -18,7 +19,7 @@ public class TimeUtil {
     private static volatile boolean diskActivity;
     private static volatile boolean highSpeed;
     private static volatile int maxLagFrames;
-    private static volatile InterframeDelay interframeDelay;
+    private static volatile DelayStrategy delayStrategy;
     private static volatile long frameLostThreshold;
 
     static {
@@ -63,7 +64,21 @@ public class TimeUtil {
     }
 
     public static void setInterframeDelay(final InterframeDelay interframeDelay) {
-        TimeUtil.interframeDelay = interframeDelay;
+        switch (interframeDelay) {
+            case Sleep -> delayStrategy = (nanoTime) -> {
+                LockSupport.parkNanos(nanoTime - System.nanoTime());
+            };
+            case Yield -> delayStrategy = (nanoTime) -> {
+                while (nanoTime - System.nanoTime() > 0) {
+                    Thread.yield();
+                }
+            };
+            case Spin -> delayStrategy = (nanoTime) -> {
+                while (nanoTime - System.nanoTime() > 0) {
+                    Thread.onSpinWait();
+                }
+            };
+        }
     }
 
     private static void updateFrameLostThreshold() {
@@ -92,28 +107,16 @@ public class TimeUtil {
             if (System.nanoTime() - next > frameLostThreshold) {
                 next = System.nanoTime(); // frame lost
             } else {
-                delayUntil(next);
+                delayStrategy.delay(next);
             }
         } else {
             next = System.nanoTime();
         }
         return next;
     }
-    
-    private static void delayUntil(final long nanoTime) {
-        switch (interframeDelay) {
-            case Sleep:
-                parkNanos(nanoTime - System.nanoTime());
-                break;
-            case Yield:
-                while (nanoTime - System.nanoTime() > 0) {
-                    Thread.yield();
-                }
-                break;
-            case Spin:
-                while (nanoTime - System.nanoTime() > 0) {
-                }
-                break;
-        }
+
+    @FunctionalInterface
+    public interface DelayStrategy {
+        void delay(long nano);
     }
 }
