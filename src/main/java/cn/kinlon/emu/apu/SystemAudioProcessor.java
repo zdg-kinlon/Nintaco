@@ -13,7 +13,7 @@ import java.util.concurrent.Executors;
 
 import static java.lang.Math.clamp;
 import static java.lang.Math.log10;
-import static cn.kinlon.emu.utils.StringUtil.*;
+import static cn.kinlon.emu.utils.StringUtils.*;
 
 public class SystemAudioProcessor implements AudioProcessor {
 

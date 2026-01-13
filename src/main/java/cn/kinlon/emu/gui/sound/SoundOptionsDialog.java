@@ -7,8 +7,8 @@ import javax.swing.*;
 import java.awt.*;
 
 import static cn.kinlon.emu.utils.GuiUtil.scaleFonts;
-import static cn.kinlon.emu.utils.StringUtil.findMatch;
-import static cn.kinlon.emu.utils.StringUtil.isBlank;
+import static cn.kinlon.emu.utils.StringUtils.findMatch;
+import static cn.kinlon.emu.utils.StringUtils.isBlank;
 
 public class SoundOptionsDialog extends javax.swing.JDialog {
 

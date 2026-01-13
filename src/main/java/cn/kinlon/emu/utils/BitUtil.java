@@ -71,5 +71,6 @@ public final class BitUtil {
     }
 
     private BitUtil() {
+        throw new UnsupportedOperationException("This is a utility class and cannot be instantiated.");
     }
 }

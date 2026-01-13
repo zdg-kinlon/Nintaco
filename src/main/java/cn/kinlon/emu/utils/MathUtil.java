@@ -3,6 +3,7 @@ package cn.kinlon.emu.utils;
 public final class MathUtil {
 
     private MathUtil() {
+        throw new UnsupportedOperationException("This is a utility class and cannot be instantiated.");
     }
 
     public static int clamp(final int value, final int min, final int max) {

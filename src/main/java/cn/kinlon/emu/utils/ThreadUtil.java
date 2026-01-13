@@ -6,6 +6,7 @@ import java.util.List;
 public final class ThreadUtil {
 
     private ThreadUtil() {
+        throw new UnsupportedOperationException("This is a utility class and cannot be instantiated.");
     }
 
     public static void threadJoin(final Thread thread) {

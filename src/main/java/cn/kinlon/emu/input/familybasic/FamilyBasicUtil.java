@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Locale;
 
 import static cn.kinlon.emu.utils.MathUtil.clamp;
-import static cn.kinlon.emu.utils.StringUtil.isBlank;
+import static cn.kinlon.emu.utils.StringUtils.isBlank;
 
 public final class FamilyBasicUtil {
 

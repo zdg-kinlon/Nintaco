@@ -24,8 +24,8 @@ import java.util.zip.ZipFile;
 import static cn.kinlon.emu.files.FileType.*;
 import static cn.kinlon.emu.utils.StreamUtil.readByteArray;
 import static cn.kinlon.emu.utils.StreamUtil.readString;
-import static cn.kinlon.emu.utils.StringUtil.compareStrings;
-import static cn.kinlon.emu.utils.StringUtil.isBlank;
+import static cn.kinlon.emu.utils.StringUtils.compareStrings;
+import static cn.kinlon.emu.utils.StringUtils.isBlank;
 
 public final class FileUtil {
 
@@ -102,6 +102,7 @@ public final class FileUtil {
     }
 
     private FileUtil() {
+        throw new UnsupportedOperationException("This is a utility class and cannot be instantiated.");
     }
 
     public static void getInputStream(final FilePath filePath,

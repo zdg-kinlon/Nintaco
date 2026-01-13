@@ -1,8 +1,9 @@
 package cn.kinlon.emu.utils;
 
-public final class StringUtil {
+public final class StringUtils {
     
-    private StringUtil() {
+    private StringUtils() {
+        throw new UnsupportedOperationException("This is a utility class and cannot be instantiated.");
     }
 
     public static String makeEmpty(final String str) {

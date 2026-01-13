@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static cn.kinlon.emu.files.FileUtil.*;
-import static cn.kinlon.emu.utils.StringUtil.isBlank;
+import static cn.kinlon.emu.utils.StringUtils.isBlank;
 
 public class Paths implements Serializable {
 

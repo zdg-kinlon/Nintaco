@@ -52,7 +52,7 @@ import java.util.List;
 import static cn.kinlon.emu.files.FileUtil.*;
 import static cn.kinlon.emu.tv.TVSystem.*;
 import static cn.kinlon.emu.utils.GuiUtil.*;
-import static cn.kinlon.emu.utils.StringUtil.isBlank;
+import static cn.kinlon.emu.utils.StringUtils.isBlank;
 import static java.awt.event.KeyEvent.*;
 import static javax.swing.UIManager.getInstalledLookAndFeels;
 import static javax.swing.UIManager.getSystemLookAndFeelClassName;

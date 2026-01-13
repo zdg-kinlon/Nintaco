@@ -8,8 +8,8 @@ import java.util.Locale;
 import static java.lang.Math.max;
 import static cn.kinlon.emu.utils.MathUtil.clamp;
 import static cn.kinlon.emu.utils.StreamUtil.*;
-import static cn.kinlon.emu.utils.StringUtil.appendLine;
-import static cn.kinlon.emu.utils.StringUtil.compareStrings;
+import static cn.kinlon.emu.utils.StringUtils.appendLine;
+import static cn.kinlon.emu.utils.StringUtils.compareStrings;
 
 public class FdsFile implements IFile, Serializable {
 

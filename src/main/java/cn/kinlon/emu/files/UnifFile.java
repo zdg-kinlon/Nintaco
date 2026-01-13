@@ -6,7 +6,7 @@ import cn.kinlon.emu.mappers.NametableMirroring;
 import cn.kinlon.emu.mappers.nintendo.vs.VsGame;
 import cn.kinlon.emu.mappers.nintendo.vs.VsHardware;
 import cn.kinlon.emu.tv.TVSystem;
-import cn.kinlon.emu.utils.StringUtil;
+import cn.kinlon.emu.utils.StringUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
@@ -24,7 +24,7 @@ import static cn.kinlon.emu.utils.BitUtil.ceilBase2;
 import static cn.kinlon.emu.utils.CollectionsUtil.toIntArray;
 import static cn.kinlon.emu.utils.MathUtil.clamp;
 import static cn.kinlon.emu.utils.StreamUtil.*;
-import static cn.kinlon.emu.utils.StringUtil.*;
+import static cn.kinlon.emu.utils.StringUtils.*;
 
 public class UnifFile implements CartFile {
 
@@ -202,15 +202,15 @@ public class UnifFile implements CartFile {
                         i, chrROMs[i].length, chrCRCs[i]);
             }
         }
-        StringUtil.append(sb, "PRG ROM size: %d bytes", prgRomLength);
+        StringUtils.append(sb, "PRG ROM size: %d bytes", prgRomLength);
         if (prgRomLength != prgROM.length) {
-            StringUtil.append(sb, ", %d bytes (adjusted)", prgROM.length);
+            StringUtils.append(sb, ", %d bytes (adjusted)", prgROM.length);
         }
         appendLine(sb);
         appendLine(sb, "PRG ROM CRC: %08X", prgRomCRC);
-        StringUtil.append(sb, "CHR ROM size: %d bytes", chrRomLength);
+        StringUtils.append(sb, "CHR ROM size: %d bytes", chrRomLength);
         if (chrRomLength != chrROM.length) {
-            StringUtil.append(sb, ", %d bytes (adjusted)", chrROM.length);
+            StringUtils.append(sb, ", %d bytes (adjusted)", chrROM.length);
         }
         appendLine(sb);
         appendLine(sb, "CHR ROM CRC: %08X", chrRomCRC);

@@ -5,7 +5,7 @@ import java.util.Objects;
 
 import static cn.kinlon.emu.files.FileUtil.getCanonicalName;
 import static cn.kinlon.emu.files.FileUtil.getFileName;
-import static cn.kinlon.emu.utils.StringUtil.isBlank;
+import static cn.kinlon.emu.utils.StringUtils.isBlank;
 
 public class FilePath implements Serializable {
 

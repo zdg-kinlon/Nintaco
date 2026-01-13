@@ -19,7 +19,7 @@ import static cn.kinlon.emu.tv.TVSystem.NTSC;
 import static cn.kinlon.emu.utils.BitUtil.ceilBase2;
 import static cn.kinlon.emu.utils.BitUtil.getBitBool;
 import static cn.kinlon.emu.utils.StreamUtil.*;
-import static cn.kinlon.emu.utils.StringUtil.*;
+import static cn.kinlon.emu.utils.StringUtils.*;
 
 public class NesFile implements CartFile, Serializable, Cloneable {
 

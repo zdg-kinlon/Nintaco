@@ -39,7 +39,7 @@ import static cn.kinlon.emu.utils.BitUtil.setBit;
 import static cn.kinlon.emu.utils.BitUtil.toggleBit;
 import static cn.kinlon.emu.utils.GuiUtil.*;
 import static cn.kinlon.emu.utils.StreamUtil.readByteArray;
-import static cn.kinlon.emu.utils.StringUtil.isBlank;
+import static cn.kinlon.emu.utils.StringUtils.isBlank;
 
 public final class App {
 

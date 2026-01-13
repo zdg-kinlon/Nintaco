@@ -57,5 +57,6 @@ public final class InstanceUtil {
     }
 
     private InstanceUtil() {
+        throw new UnsupportedOperationException("This is a utility class and cannot be instantiated.");
     }
 }

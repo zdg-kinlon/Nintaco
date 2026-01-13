@@ -8,8 +8,8 @@ import java.util.*;
 
 import static java.lang.Math.max;
 import static cn.kinlon.emu.utils.StreamUtil.readBytes;
-import static cn.kinlon.emu.utils.StringUtil.compareStrings;
-import static cn.kinlon.emu.utils.StringUtil.isBlank;
+import static cn.kinlon.emu.utils.StringUtils.compareStrings;
+import static cn.kinlon.emu.utils.StringUtils.isBlank;
 
 public final class IpsUtil {
 

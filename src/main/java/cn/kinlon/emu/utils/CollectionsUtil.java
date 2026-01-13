@@ -6,6 +6,7 @@ import java.util.*;
 public final class CollectionsUtil {
 
     private CollectionsUtil() {
+        throw new UnsupportedOperationException("This is a utility class and cannot be instantiated.");
     }
 
     public static boolean isBlank(final Object array) {

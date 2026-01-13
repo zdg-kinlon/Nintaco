@@ -1,5 +1,6 @@
 package cn.kinlon.emu.input;
 
+import cn.kinlon.emu.utils.PathUtils;
 import net.java.games.input.*;
 import net.java.games.input.Component.Identifier.Axis;
 import net.java.games.input.Component.POV;

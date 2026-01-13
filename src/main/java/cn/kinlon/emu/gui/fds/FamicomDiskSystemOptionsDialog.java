@@ -13,7 +13,7 @@ import java.io.FileNotFoundException;
 import static cn.kinlon.emu.files.FileUtil.*;
 import static cn.kinlon.emu.gui.fds.DiskActivityIndicator.*;
 import static cn.kinlon.emu.utils.GuiUtil.*;
-import static cn.kinlon.emu.utils.StringUtil.isBlank;
+import static cn.kinlon.emu.utils.StringUtils.isBlank;
 
 public class FamicomDiskSystemOptionsDialog extends javax.swing.JDialog {
 

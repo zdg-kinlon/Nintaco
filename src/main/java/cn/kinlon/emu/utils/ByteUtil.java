@@ -19,4 +19,8 @@ public class ByteUtil {
     public static int toU16(int i16) {
         return i16 & U16_MAX_VALUE;
     }
+    
+    private ByteUtil() {
+        throw new UnsupportedOperationException("This is a utility class and cannot be instantiated.");
+    }
 }

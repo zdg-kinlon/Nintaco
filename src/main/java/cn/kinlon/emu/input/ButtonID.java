@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.Objects;
 
 import static cn.kinlon.emu.utils.CollectionsUtil.compare;
-import static cn.kinlon.emu.utils.StringUtil.isBlank;
+import static cn.kinlon.emu.utils.StringUtils.isBlank;
 
 public class ButtonID implements Serializable, Comparable<ButtonID> {
 

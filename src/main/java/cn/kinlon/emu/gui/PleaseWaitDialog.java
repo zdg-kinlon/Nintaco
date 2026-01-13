@@ -3,7 +3,7 @@ package cn.kinlon.emu.gui;
 import java.awt.*;
 
 import static cn.kinlon.emu.utils.GuiUtil.scaleFonts;
-import static cn.kinlon.emu.utils.StringUtil.isBlank;
+import static cn.kinlon.emu.utils.StringUtils.isBlank;
 import static cn.kinlon.emu.utils.ThreadUtil.threadWait;
 
 public class PleaseWaitDialog extends javax.swing.JDialog {

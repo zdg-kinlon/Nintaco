@@ -3,7 +3,7 @@ package cn.kinlon.emu.input.familybasic.keyboard;
 import cn.kinlon.emu.input.DeviceDescriptor;
 import cn.kinlon.emu.input.Ports;
 
-import static cn.kinlon.emu.utils.StringUtil.replaceNewlines;
+import static cn.kinlon.emu.utils.StringUtils.replaceNewlines;
 
 public class KeyboardPaster {
 

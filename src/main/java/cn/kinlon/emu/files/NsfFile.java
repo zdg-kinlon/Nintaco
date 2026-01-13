@@ -11,7 +11,7 @@ import static java.lang.Math.min;
 import static cn.kinlon.emu.utils.BitUtil.getBitBool;
 import static cn.kinlon.emu.utils.MathUtil.roundUp;
 import static cn.kinlon.emu.utils.StreamUtil.*;
-import static cn.kinlon.emu.utils.StringUtil.*;
+import static cn.kinlon.emu.utils.StringUtils.*;
 
 public class NsfFile implements IFile, Serializable {
 

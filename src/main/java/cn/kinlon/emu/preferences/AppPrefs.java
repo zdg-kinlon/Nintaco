@@ -12,8 +12,11 @@ import cn.kinlon.emu.gui.sound.volumemixer.VolumeMixerPrefs;
 import cn.kinlon.emu.gui.userinterface.UserInterfacePrefs;
 import cn.kinlon.emu.input.Inputs;
 import cn.kinlon.emu.palettes.Palettes;
+import cn.kinlon.emu.utils.PathUtils;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

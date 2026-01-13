@@ -19,6 +19,7 @@ public final class StreamUtil {
     private static final int SPARSE_THRESHOLD = SPARSE_BLOCK_SIZE / 3;
 
     private StreamUtil() {
+        throw new UnsupportedOperationException("This is a utility class and cannot be instantiated.");
     }
 
     public static String readNullTerminatedString(final InputStream in,
