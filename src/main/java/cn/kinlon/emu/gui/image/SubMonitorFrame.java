@@ -49,8 +49,6 @@ public class SubMonitorFrame extends javax.swing.JFrame {
         imagePane.setHideInactiveMouseCursor(other.isHideInactiveMouseCursor());
         imagePane.setPaused(other.isPaused());
         imagePane.setRewinding(other.isRewinding());
-        imagePane.setShowFPS(other.isShowFPS());
-        imagePane.setShowStatusMessages(other.isShowStatusMessages());
         imagePane.setSmoothScaling(other.isSmoothScaling());
         imagePane.setUseTvAspectRatio(other.isUseTvAspectRatio());
         imagePane.setTVSystem(other.getTVSystem());

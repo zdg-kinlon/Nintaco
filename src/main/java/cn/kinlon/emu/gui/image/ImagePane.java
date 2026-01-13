@@ -3,12 +3,12 @@ package cn.kinlon.emu.gui.image;
 import cn.kinlon.emu.App;
 import cn.kinlon.emu.ScreenRenderer;
 import cn.kinlon.emu.Colors;
-import cn.kinlon.emu.gui.fonts.FontUtil;
+import cn.kinlon.emu.gui.adapter.ImagePaneMouseAdapter;
 import cn.kinlon.emu.gui.image.filters.VideoFilter;
 import cn.kinlon.emu.gui.image.filters.VideoFilterDescriptor;
 import cn.kinlon.emu.gui.image.preferences.View;
+import cn.kinlon.emu.gui.adapter.ImagePaneComponentAdapter;
 import cn.kinlon.emu.gui.overscan.OverscanPrefs;
-import cn.kinlon.emu.input.InputUtil;
 import cn.kinlon.emu.palettes.PaletteUtil;
 import cn.kinlon.emu.preferences.AppPrefs;
 import cn.kinlon.emu.tv.PixelAspectRatio;
@@ -18,7 +18,6 @@ import cn.kinlon.emu.utils.GuiUtil;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
@@ -41,9 +40,6 @@ public class ImagePane extends JComponent implements ScreenRenderer {
     private static final int CURSOR_TIMEOUT = 120;
     private static final int MESSAGE_TIMEOUT = 120;
 
-    private static final long FPS_INTERVAL = 1_250_000_000L;
-    private static final String DEFAULT_FPS_STRING = "         ";
-
     private final Toolkit toolkit = Toolkit.getDefaultToolkit();
     private final Cursor crosshairsCursor;
     private final Cursor blankCursor;
@@ -63,10 +59,10 @@ public class ImagePane extends JComponent implements ScreenRenderer {
     private int lastWriteIndex;
     private int readIndex;
     private volatile BufferStrategy bufferStrategy;
-    private volatile int imageX;
-    private volatile int imageY;
-    private volatile int imageWidth;
-    private volatile int imageHeight;
+    public volatile int imageX;
+    public volatile int imageY;
+    public volatile int imageWidth;
+    public volatile int imageHeight;
     private volatile int imageTop;
     private volatile int imageBottom;
     private volatile int imageLeft;
@@ -77,12 +73,12 @@ public class ImagePane extends JComponent implements ScreenRenderer {
     private volatile BufferedImage paintImage;
     private volatile int[] palette = PaletteUtil.getExtendedPalette(NTSC);
     private volatile TVSystem tvSystem;
-    private volatile ScreenBorders screenBorders = NTSC.getScreenBorders();
+    public volatile ScreenBorders screenBorders = NTSC.getScreenBorders();
     private volatile PixelAspectRatio pixelAspectRatio = PixelAspectRatio.SQUARE;
     private volatile boolean useTvAspectRatio;
     private volatile boolean smoothScaling;
     private volatile boolean uniformPixelScaling;
-    private volatile int screenScale = 2;
+    private volatile int screenScale = 1;
     private int lastFrameColor;
     private volatile Color frameColor = Color.BLACK;
     private volatile VideoFilterDescriptor videoFilterDescriptor
@@ -95,25 +91,13 @@ public class ImagePane extends JComponent implements ScreenRenderer {
     private double filterScaleY = 1;
     private boolean repaintRequested;
     private volatile boolean rendering = true;
-    private volatile boolean showFPS;
-    private volatile boolean showStatusMessages;
     private volatile boolean rewinding;
     private volatile boolean paused;
-    private volatile String message;
-    private volatile int messageTimer;
-    private int generatedFrames;
-    private int displayedFrames;
-    private long frameTime;
-    private String fpsStr = DEFAULT_FPS_STRING;
+
     private final Thread renderThread = new Thread(this::renderLoop,
             "Render Thread");
 
     public ImagePane() {
-
-        final View view = AppPrefs.getInstance().getView();
-        setShowFPS(view.isShowFPS());
-        setShowStatusMessages(view.isShowStatusMessages());
-
         renderThread.start();
         createVideoFilterThreads();
 
@@ -123,54 +107,11 @@ public class ImagePane extends JComponent implements ScreenRenderer {
                     .BLACK]);
         }
 
-        addComponentListener(new ComponentAdapter() {
-            @Override
-            public void componentShown(final ComponentEvent e) {
-                paneResized();
-            }
-
-            @Override
-            public void componentResized(final ComponentEvent e) {
-                paneResized();
-            }
-        });
-
-        addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseExited(final MouseEvent e) {
-                InputUtil.setMouseCoordinates(-1);
-                showCursor();
-            }
-
-            @Override
-            public void mousePressed(final MouseEvent e) {
-                showCursor();
-            }
-        });
-
-        addMouseMotionListener(new MouseMotionListener() {
-            @Override
-            public void mouseDragged(MouseEvent e) {
-                mouseMoved(e);
-            }
-
-            @Override
-            public void mouseMoved(MouseEvent e) {
-                int x = e.getX();
-                int y = e.getY();
-                if (x >= imageX && y >= imageY && x < imageX + imageWidth
-                        && y < imageY + imageHeight) {
-                    x = screenBorders.left + (x - imageX) * (IMAGE_WIDTH
-                            - screenBorders.left - screenBorders.right) / imageWidth;
-                    y = screenBorders.top + (y - imageY) * (IMAGE_HEIGHT
-                            - screenBorders.top - screenBorders.bottom) / imageHeight;
-                    InputUtil.setMouseCoordinates(IMAGE_WIDTH * y + x);
-                } else {
-                    InputUtil.setMouseCoordinates(-1);
-                }
-                showCursor();
-            }
-        });
+        ImagePaneComponentAdapter imagePaneComponentAdapter = new ImagePaneComponentAdapter(this);
+        ImagePaneMouseAdapter imagePaneMouseAdapter = new ImagePaneMouseAdapter(this);
+        addComponentListener(imagePaneComponentAdapter);
+        addMouseListener(imagePaneMouseAdapter);
+        addMouseMotionListener(imagePaneMouseAdapter);
 
         adjustPreferredSize();
 
@@ -268,28 +209,6 @@ public class ImagePane extends JComponent implements ScreenRenderer {
         }
     }
 
-    public boolean isShowFPS() {
-        return showFPS;
-    }
-
-    public void setShowFPS(final boolean showFPS) {
-        App.runVsDualImagePane(this, p -> p.setShowFPS(showFPS));
-        this.showFPS = showFPS;
-        frameTime = System.nanoTime();
-        generatedFrames = 0;
-        displayedFrames = 0;
-        fpsStr = DEFAULT_FPS_STRING;
-    }
-
-    public boolean isShowStatusMessages() {
-        return showStatusMessages;
-    }
-
-    public void setShowStatusMessages(final boolean showStatusMessages) {
-        App.runVsDualImagePane(this, p -> p.setShowStatusMessages(showFPS));
-        this.showStatusMessages = showStatusMessages;
-    }
-
     public boolean isRewinding() {
         return rewinding;
     }
@@ -306,12 +225,6 @@ public class ImagePane extends JComponent implements ScreenRenderer {
     public void setPaused(final boolean paused) {
         App.runVsDualImagePane(this, p -> p.setPaused(paused));
         this.paused = paused;
-    }
-
-    public void showMessage(final String message) {
-        App.runVsDualImagePane(this, p -> p.showMessage(message));
-        this.message = message;
-        this.messageTimer = message == null ? 0 : MESSAGE_TIMEOUT;
     }
 
     public CursorType getCursorType() {
@@ -368,7 +281,7 @@ public class ImagePane extends JComponent implements ScreenRenderer {
         }
     }
 
-    private void showCursor() {
+    public void showCursor() {
         cursorCounter = CURSOR_TIMEOUT;
         if (bufferStrategy == null || !hideFullscreenMouseCursor) {
             setCursorVisible(true);
@@ -478,9 +391,9 @@ public class ImagePane extends JComponent implements ScreenRenderer {
                     / (double) pixelAspectRatio.vertical) : 1.0;
             setPreferredSize(new Dimension(
                     (int) Math.round(aspectRatio * screenScale
-                            * (IMAGE_WIDTH - screenBorders.left - screenBorders.right)),
-                    screenScale * (IMAGE_HEIGHT - screenBorders.top
-                            - screenBorders.bottom)));
+                            * (IMAGE_WIDTH - screenBorders.left() - screenBorders.right())),
+                    screenScale * (IMAGE_HEIGHT - screenBorders.top()
+                            - screenBorders.bottom())));
             invalidate();
         } else {
             invokeAndWait(this::adjustPreferredSize);
@@ -527,7 +440,6 @@ public class ImagePane extends JComponent implements ScreenRenderer {
     @Override
     public int[] render() {
         synchronized (screenMonitor) {
-            generatedFrames++;
             lastWriteIndex = writeIndex;      // Commit current screen.
             do {
                 ++writeIndex;
@@ -547,20 +459,6 @@ public class ImagePane extends JComponent implements ScreenRenderer {
                 }
                 readIndex = lastWriteIndex;
                 screen = screens[readIndex];
-            }
-
-            if (showStatusMessages) {
-                if (rewinding) {
-                    FontUtil.drawString(screen, "REWIND", screenBorders.left + 8,
-                            screenBorders.top + 8, false);
-                } else if (message != null) {
-                    FontUtil.drawString(screen, message, screenBorders.left + 8,
-                            screenBorders.top + 8, false);
-                }
-            }
-            if (showFPS) {
-                FontUtil.drawString(screen, fpsStr, 248 - screenBorders.right
-                        - (fpsStr.length() << 3), screenBorders.top + 8, true);
             }
 
             if (videoFilterDescriptor == VideoFilterDescriptor.Ntsc) {
@@ -609,10 +507,6 @@ public class ImagePane extends JComponent implements ScreenRenderer {
                     setCursorVisible(false);
                 }
             }
-            if (--messageTimer <= 0) {
-                messageTimer = 0;
-                message = null;
-            }
         }
     }
 
@@ -620,8 +514,6 @@ public class ImagePane extends JComponent implements ScreenRenderer {
         final int BLACK = PaletteUtil.getPalettePPU().getMap()[Colors.BLACK];
         App.runVsDualImagePane(this, ImagePane::clearScreen);
         rewinding = false;
-        messageTimer = 0;
-        message = null;
         for (int i = screens.length - 1; i >= 0; i--) {
             Arrays.fill(render(), BLACK);
         }
@@ -648,10 +540,10 @@ public class ImagePane extends JComponent implements ScreenRenderer {
 
         final double aspectRatio = useTvAspectRatio ? (pixelAspectRatio.horizontal
                 / (double) pixelAspectRatio.vertical) : 1.0;
-        final int IMG_WIDTH = (int) Math.round((IMAGE_WIDTH - screenBorders.left
-                - screenBorders.right) * aspectRatio * filterScale);
-        final int IMG_HEIGHT = (IMAGE_HEIGHT - screenBorders.top
-                - screenBorders.bottom) * filterScale;
+        final int IMG_WIDTH = (int) Math.round((IMAGE_WIDTH - screenBorders.left()
+                - screenBorders.right()) * aspectRatio * filterScale);
+        final int IMG_HEIGHT = (IMAGE_HEIGHT - screenBorders.top()
+                - screenBorders.bottom()) * filterScale;
 
         if (uniformPixelScaling
                 && paneWidth >= IMG_WIDTH && paneHeight >= IMG_HEIGHT) {
@@ -691,11 +583,11 @@ public class ImagePane extends JComponent implements ScreenRenderer {
             }
         }
 
-        imageTop = (int) Math.round(screenBorders.top * filterScaleY);
-        imageBottom = (int) Math.round((IMAGE_HEIGHT - screenBorders.bottom)
+        imageTop = (int) Math.round(screenBorders.top() * filterScaleY);
+        imageBottom = (int) Math.round((IMAGE_HEIGHT - screenBorders.bottom())
                 * filterScaleY);
-        imageLeft = (int) Math.round(screenBorders.left * filterScaleX);
-        imageRight = (int) Math.round((IMAGE_WIDTH - screenBorders.right)
+        imageLeft = (int) Math.round(screenBorders.left() * filterScaleX);
+        imageRight = (int) Math.round((IMAGE_WIDTH - screenBorders.right())
                 * filterScaleX);
 
         if (bufferStrategy == null && App.getImageFrame().isVisible()) {
@@ -748,18 +640,18 @@ public class ImagePane extends JComponent implements ScreenRenderer {
                 imageLeft, imageTop, imageRight, imageBottom,
                 null);
 
-        if (showFPS) {
-            displayedFrames++;
-            final long duration = System.nanoTime() - frameTime;
-            if (duration > FPS_INTERVAL) {
-                final double seconds = duration * 1.0E-9;
-                fpsStr = String.format("%.1f/%.1f", displayedFrames / seconds,
-                        generatedFrames / seconds);
-                generatedFrames = 0;
-                displayedFrames = 0;
-                frameTime = System.nanoTime();
-            }
-        }
+//        if (showFPS) {
+//            displayedFrames++;
+//            final long duration = System.nanoTime() - frameTime;
+//            if (duration > FPS_INTERVAL) {
+//                final double seconds = duration * 1.0E-9;
+//                fpsStr = String.format("%.1f/%.1f", displayedFrames / seconds,
+//                        generatedFrames / seconds);
+//                generatedFrames = 0;
+//                displayedFrames = 0;
+//                frameTime = System.nanoTime();
+//            }
+//        }
     }
 
     private enum Bars {

@@ -30,10 +30,10 @@ public class OverscanPanel extends javax.swing.JPanel {
     }
 
     public void setScreenBorders(final ScreenBorders borders) {
-        setTop(borders.getTop());
-        setBottom(borders.getBottom());
-        setLeft(borders.getLeft());
-        setRight(borders.getRight());
+        setTop(borders.top());
+        setBottom(borders.bottom());
+        setLeft(borders.left());
+        setRight(borders.right());
     }
 
     public int getTop() {
