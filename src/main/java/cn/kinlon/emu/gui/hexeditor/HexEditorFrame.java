@@ -23,6 +23,7 @@ import java.util.List;
 import static cn.kinlon.emu.files.FileUtil.getFileName;
 import static cn.kinlon.emu.gui.hexeditor.DataSource.*;
 import static cn.kinlon.emu.utils.GuiUtil.*;
+import static cn.kinlon.emu.utils.ThreadUtils.async_io;
 
 public class HexEditorFrame
         extends javax.swing.JFrame implements StyleListener {
@@ -516,7 +517,7 @@ public class HexEditorFrame
                 == JFileChooser.APPROVE_OPTION) {
             final File selectedFile = chooser.getSelectedFile();
             final PleaseWaitDialog pleaseWaitDialog = new PleaseWaitDialog(this);
-            new Thread(() -> loadCharTable(pleaseWaitDialog, selectedFile)).start();
+            async_io(() -> loadCharTable(pleaseWaitDialog, selectedFile));
             pleaseWaitDialog.showAfterDelay();
         } else {
             App.setNoStepPause(false);

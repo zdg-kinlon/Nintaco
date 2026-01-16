@@ -3,6 +3,7 @@ package cn.kinlon.emu.task;
 import java.util.*;
 
 import static cn.kinlon.emu.utils.ThreadUtil.*;
+import static cn.kinlon.emu.utils.ThreadUtils.async_calc;
 
 public class TaskScheduler {
 
@@ -12,8 +13,7 @@ public class TaskScheduler {
     private volatile boolean running = true;
 
     public TaskScheduler() {
-        thread = new Thread(this::run, "Task Secheduler Thread");
-        thread.start();
+        thread = async_calc(this::run);
     }
 
     private void run() {

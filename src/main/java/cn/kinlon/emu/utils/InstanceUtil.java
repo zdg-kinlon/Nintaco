@@ -4,6 +4,7 @@ import java.io.*;
 import java.nio.channels.*;
 
 import static cn.kinlon.emu.files.FileUtil.*;
+import static cn.kinlon.emu.utils.ThreadUtils.async_io;
 
 public final class InstanceUtil {
 
@@ -29,8 +30,7 @@ public final class InstanceUtil {
             }
             return true;
         }
-        Runtime.getRuntime().addShutdownHook(
-                new Thread(InstanceUtil::unlockFile));
+        Runtime.getRuntime().addShutdownHook(Thread.ofVirtual().unstarted(InstanceUtil::unlockFile));
 
         return false;
     }

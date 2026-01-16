@@ -15,6 +15,7 @@ import static cn.kinlon.emu.files.FileUtil.*;
 import static cn.kinlon.emu.gui.fds.DiskActivityIndicator.*;
 import static cn.kinlon.emu.utils.GuiUtil.*;
 import static cn.kinlon.emu.utils.StringUtils.isBlank;
+import static cn.kinlon.emu.utils.ThreadUtils.async_io;
 
 public class FamicomDiskSystemOptionsDialog extends javax.swing.JDialog {
 
@@ -398,7 +399,7 @@ public class FamicomDiskSystemOptionsDialog extends javax.swing.JDialog {
         loadingsBIOS = true;
         final PleaseWaitDialog pleaseWaitDialog = new PleaseWaitDialog(this);
         pleaseWaitDialog.setMessage("Loading BIOS file...");
-        new Thread(() -> loadBIOS(biosFilePath, pleaseWaitDialog)).start();
+        async_io(() -> loadBIOS(biosFilePath, pleaseWaitDialog));
         pleaseWaitDialog.showAfterDelay();
     }//GEN-LAST:event_okButtonActionPerformed
     // End of variables declaration//GEN-END:variables

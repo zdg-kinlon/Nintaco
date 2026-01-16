@@ -23,6 +23,7 @@ import java.util.List;
 
 import static cn.kinlon.emu.files.FileUtil.getWorkingDirectory;
 import static cn.kinlon.emu.utils.ThreadUtil.joinAll;
+import static cn.kinlon.emu.utils.ThreadUtils.async_io;
 
 public final class AppPrefs implements Serializable {
 
@@ -32,8 +33,6 @@ public final class AppPrefs implements Serializable {
             getWorkingDirectory("nintaco.preferences"));
 
     private static AppPrefs instance;
-    private static final List<Thread> threads = Collections.synchronizedList(
-            new ArrayList<>());
 
     private Paths paths;
     private View view;
@@ -136,12 +135,8 @@ public final class AppPrefs implements Serializable {
         return instance;
     }
 
-    public static void flush() {
-        joinAll(threads);
-    }
-
     private static void dispose() {
-        joinAll(threads);
+        save();
         synchronized (AppPrefs.class) {
             instance = null;
         }
@@ -171,7 +166,7 @@ public final class AppPrefs implements Serializable {
             prefs = instance;
         }
 
-        final Thread thread = new Thread(() -> {
+        async_io(() -> {
             synchronized (AppPrefs.class) {
                 try (final ObjectOutputStream out = new ObjectOutputStream(
                         new BufferedOutputStream(
@@ -181,13 +176,7 @@ public final class AppPrefs implements Serializable {
                     //t.printStackTrace();
                 }
             }
-            threads.remove(Thread.currentThread());
-        }, "AppPrefs Save Thread");
-
-        synchronized (threads) {
-            thread.start();
-            threads.add(thread);
-        }
+        });
     }
 
     private AppPrefs() {

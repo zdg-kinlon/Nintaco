@@ -526,8 +526,7 @@ public class ImageFrame extends javax.swing.JFrame implements StyleListener {
                 DefaultMetalTheme.class.getCanonicalName().equals(themeClassName));
     }
 
-    private void addMetalLookAndFeelMenuItem(String label, Runnable run,
-                                             boolean isSelectedTheme) {
+    private void addMetalLookAndFeelMenuItem(String label, Runnable run, boolean isSelectedTheme) {
         final JRadioButtonMenuItem menuItem = new JRadioButtonMenuItem(label);
         lookAndFeelButtonGroup.add(menuItem);
         if (isSelectedTheme) {
@@ -804,7 +803,7 @@ public class ImageFrame extends javax.swing.JFrame implements StyleListener {
         try {
             App.close();
             App.destroyFrames();
-            AppPrefs.flush();
+            AppPrefs.save();
             dispose();
         } catch (Throwable t) {
         }

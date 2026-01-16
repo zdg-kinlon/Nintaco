@@ -10,14 +10,19 @@ public class EDT {
     private static final Runnable EMPTY_RUN = () -> {
     };
 
-    public static void sync(Runnable run) {
+    private static boolean runIfEDT(Runnable run) {
         if (run == null) {
             run = EMPTY_RUN;
         }
         if (EventQueue.isDispatchThread()) {
             run.run();
-            return;
+            return true;
         }
+        return false;
+    }
+
+    public static void sync(Runnable run) {
+        if (runIfEDT(run)) return;
         try {
             EventQueue.invokeAndWait(run);
         } catch (InterruptedException e) {
@@ -28,13 +33,7 @@ public class EDT {
     }
 
     public static void async(Runnable run) {
-        if (run == null) {
-            run = EMPTY_RUN;
-        }
-        if (EventQueue.isDispatchThread()) {
-            run.run();
-            return;
-        }
+        if (runIfEDT(run)) return;
         EventQueue.invokeLater(run);
     }
 

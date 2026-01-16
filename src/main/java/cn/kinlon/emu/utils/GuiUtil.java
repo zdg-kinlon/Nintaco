@@ -445,8 +445,7 @@ public final class GuiUtil {
                 });
     }
 
-    public static DocumentListener createDocumentListener(
-            final Runnable runnable) {
+    public static DocumentListener createDocumentListener(final Runnable runnable) {
         return new DocumentListener() {
             @Override
             public void changedUpdate(DocumentEvent e) {
@@ -465,16 +464,14 @@ public final class GuiUtil {
         };
     }
 
-    public static void addTextFieldEditListener(final JTextField textField,
-                                                final Runnable runnable) {
-        textField.getDocument().addDocumentListener(
-                createDocumentListener(runnable));
+    public static void addTextFieldEditListener(final JTextField textField, final Runnable runnable) {
+        textField.getDocument().addDocumentListener(createDocumentListener(runnable));
     }
 
-    private static void scrollTo(final int y, final int rowCount,
-                                 final JViewport viewport, final Rectangle r, final Rectangle viewRect) {
-        viewport.setViewPosition(new Point(0,
-                clamp(y, 0, max(0, rowCount * r.height - viewRect.height))));
+    private static void scrollTo(final int y, final int rowCount, final JViewport viewport, final Rectangle r, final Rectangle viewRect) {
+        int pY = clamp(y, 0, max(0, rowCount * r.height - viewRect.height));
+        Point p = new Point(0, pY);
+        viewport.setViewPosition(p);
     }
 
     public static void scrollToCenter(final JTable table, final int rowIndex) {

@@ -1,6 +1,7 @@
 package cn.kinlon.emu.preferences;
 
 import cn.kinlon.emu.gui.hexeditor.preferences.HexEditorGamePrefs;
+import cn.kinlon.emu.utils.ThreadUtils;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -12,6 +13,7 @@ import static cn.kinlon.emu.files.FileUtil.mkdir;
 import static cn.kinlon.emu.utils.StreamUtil.readSparseByteArray;
 import static cn.kinlon.emu.utils.StreamUtil.writeSparseByteArray;
 import static cn.kinlon.emu.utils.ThreadUtil.joinAll;
+import static cn.kinlon.emu.utils.ThreadUtils.async_io;
 
 public final class GamePrefs implements Serializable {
 
@@ -130,7 +132,7 @@ public final class GamePrefs implements Serializable {
             prefs = instance;
         }
 
-        final Thread thread = new Thread(() -> {
+        async_io(() -> {
             synchronized (GamePrefs.class) {
                 mkdir(AppPrefs.getInstance().getPaths().getGamePreferencesDir());
                 try (final ObjectOutputStream out = new ObjectOutputStream(
@@ -140,13 +142,7 @@ public final class GamePrefs implements Serializable {
                     //t.printStackTrace();
                 }
             }
-            threads.remove(Thread.currentThread());
-        }, "GamePrefs Save Thread");
-
-        synchronized (threads) {
-            thread.start();
-            threads.add(thread);
-        }
+        });
     }
 
     public static synchronized GamePrefs getInstance() {

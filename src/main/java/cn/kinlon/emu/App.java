@@ -28,6 +28,7 @@ import cn.kinlon.emu.utils.*;
 import java.awt.*;
 import java.io.*;
 
+import static cn.kinlon.emu.utils.ThreadUtils.async_calc;
 import static java.awt.event.KeyEvent.*;
 import static cn.kinlon.emu.files.FileType.*;
 import static cn.kinlon.emu.files.FileUtil.*;
@@ -538,7 +539,7 @@ public final class App {
 
         updateFrames(machineRunner);
         InputUtil.pollControllers(machine);
-        new Thread(machineRunner, "Machine Runner Thread").start();
+        async_calc(machineRunner);
 
         final StringBuilder sb = new StringBuilder();
         sb.append(getFile());
@@ -833,7 +834,6 @@ public final class App {
         }
         imageFrame.updateContentPane(null, null);
         imageFrame.setHistoryTracking(false);
-        EDT.sync(null);
         dispose();
         setSpeed(100);
         imageFrame.getImagePane().setCursorType(CursorType.Default);

@@ -23,6 +23,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import java.util.Arrays;
 
+import static cn.kinlon.emu.utils.ThreadUtils.async_calc;
 import static java.awt.RenderingHints.KEY_INTERPOLATION;
 import static java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR;
 import static java.lang.Math.max;
@@ -92,11 +93,9 @@ public class ImagePane extends JComponent implements ScreenRenderer {
     private volatile boolean rewinding;
     private volatile boolean paused;
 
-    private final Thread renderThread = new Thread(this::renderLoop,
-            "Render Thread");
-
     public ImagePane() {
-        renderThread.start();
+        async_calc(this::renderLoop);
+        
         createVideoFilterThreads();
 
         paintImage = image;
