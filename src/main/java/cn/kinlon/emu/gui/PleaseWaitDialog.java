@@ -1,5 +1,7 @@
 package cn.kinlon.emu.gui;
 
+import cn.kinlon.emu.utils.EDT;
+
 import java.awt.*;
 
 import static cn.kinlon.emu.utils.GuiUtil.scaleFonts;
@@ -34,7 +36,7 @@ public class PleaseWaitDialog extends javax.swing.JDialog {
 
     // Blocks the event dispatch thread for up to DISPLAY_MILLIS
     public void showAfterDelay() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (!disposed) {
                 synchronized (this) {
                     final long displayTime = System.currentTimeMillis() + DISPLAY_MILLIS;
@@ -50,9 +52,7 @@ public class PleaseWaitDialog extends javax.swing.JDialog {
                     setVisible(true);
                 }
             }
-        } else {
-            EventQueue.invokeLater(this::showAfterDelay);
-        }
+        });
     }
 
     // This should be called from a worker thread, not the event dispatch thread.
@@ -67,7 +67,7 @@ public class PleaseWaitDialog extends javax.swing.JDialog {
                 disposed = true;
                 notifyAll();
             }
-            EventQueue.invokeLater(super::dispose);
+            EDT.async(super::dispose);
         }
     }
 

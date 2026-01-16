@@ -13,6 +13,7 @@ import cn.kinlon.emu.input.other.SetSongPaused;
 import cn.kinlon.emu.mappers.Mapper;
 import cn.kinlon.emu.mappers.nsf.NsfMapper;
 import cn.kinlon.emu.preferences.AppPrefs;
+import cn.kinlon.emu.utils.EDT;
 
 import javax.swing.*;
 import java.awt.*;
@@ -88,14 +89,12 @@ public class NsfPanel extends javax.swing.JPanel {
     }
 
     private void close() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             mapper = null;
             nsfFile = null;
             songLengthStr = DEFAULT_SONG_LENGTH_STR;
             timer.stop();
-        } else {
-            EventQueue.invokeLater(this::close);
-        }
+        });
     }
 
     public void updateClock() {

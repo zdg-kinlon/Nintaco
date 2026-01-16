@@ -10,6 +10,7 @@ import cn.kinlon.emu.gui.StyleListener;
 import cn.kinlon.emu.gui.hexeditor.preferences.Bookmark;
 import cn.kinlon.emu.preferences.AppPrefs;
 import cn.kinlon.emu.preferences.GamePrefs;
+import cn.kinlon.emu.utils.EDT;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -176,7 +177,7 @@ public class HexEditorFrame
 
     public void setMachine(final Machine machine) {
         hexEditorView.setMachine(machine);
-        EventQueue.invokeLater(() -> {
+        EDT.async(() -> {
             machineUpdated(machine != null);
             updateBookmarksMenu();
             hexEditorView.colorBookmarks();

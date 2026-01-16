@@ -2,6 +2,7 @@ package cn.kinlon.emu.gui.input.buttonmapping;
 
 
 import cn.kinlon.emu.input.ButtonID;
+import cn.kinlon.emu.utils.EDT;
 
 import javax.swing.*;
 import java.awt.*;
@@ -78,7 +79,7 @@ public class PressButtonDialog extends javax.swing.JDialog {
         }
 
         if (!pressedButtons.isEmpty()) {
-            EventQueue.invokeLater(() -> {
+            EDT.async(() -> {
                 if (!(canceled || skipped)) {
                     updatePressLabel();
                     if (heldButtons.isEmpty()) {
@@ -128,7 +129,7 @@ public class PressButtonDialog extends javax.swing.JDialog {
     private void closeDialog() {
         timer.stop();
         clearEventQueues();
-        EventQueue.invokeLater(this::dispose);
+        EDT.async(this::dispose);
     }
 
     public ButtonID[] getButtonIds() {

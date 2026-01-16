@@ -4,6 +4,7 @@ import cn.kinlon.emu.App;
 import cn.kinlon.emu.Machine;
 import cn.kinlon.emu.mappers.nintendo.vs.DualAPU;
 import cn.kinlon.emu.mappers.nintendo.vs.MainCPU;
+import cn.kinlon.emu.utils.EDT;
 
 import java.awt.*;
 
@@ -90,8 +91,10 @@ public class SubMonitorFrame extends javax.swing.JFrame {
             device.setFullScreenWindow(this);
             createBufferStrategy(3);
             imagePane.setBufferStrategy(getBufferStrategy());
-            EventQueue.invokeLater(() -> setVisible(true));
-            EventQueue.invokeLater(imagePane::redraw);
+            EDT.async(() -> {
+                setVisible(true);
+                imagePane.redraw();
+            });
         }
     }
 
@@ -106,8 +109,10 @@ public class SubMonitorFrame extends javax.swing.JFrame {
                 maximize(this);
             }
             requestVsync(this, true);
-            EventQueue.invokeLater(() -> setVisible(true));
-            EventQueue.invokeLater(imagePane::redraw);
+            EDT.async(() -> {
+                setVisible(true);
+                imagePane.redraw();
+            });
         }
     }
 

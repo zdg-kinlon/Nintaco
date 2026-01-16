@@ -3,6 +3,7 @@ package cn.kinlon.emu.input.other;
 import cn.kinlon.emu.App;
 import cn.kinlon.emu.Machine;
 import cn.kinlon.emu.input.OtherInput;
+import cn.kinlon.emu.utils.EDT;
 
 import java.awt.*;
 
@@ -19,7 +20,6 @@ public class RequestSong implements OtherInput {
     @Override
     public void run(final Machine machine) {
         machine.getMapper().requestSong(songNumber);
-        EventQueue.invokeLater(() -> App.getImageFrame().getNsfPanel()
-                .fireTrackChanged(songNumber));
+        EDT.async(() -> App.getImageFrame().getNsfPanel().fireTrackChanged(songNumber));
     }
 }

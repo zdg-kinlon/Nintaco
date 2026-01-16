@@ -11,6 +11,7 @@ import cn.kinlon.emu.gui.hexeditor.preferences.HexEditorAppPrefs;
 import cn.kinlon.emu.gui.hexeditor.preferences.HexEditorGamePrefs;
 import cn.kinlon.emu.preferences.AppPrefs;
 import cn.kinlon.emu.preferences.GamePrefs;
+import cn.kinlon.emu.utils.EDT;
 
 import javax.swing.*;
 import java.awt.*;
@@ -110,7 +111,7 @@ public class HexEditorView extends JComponent implements StyleListener {
     public void setHexEditorFrame(HexEditorFrame hexEditorFrame) {
         this.hexEditorFrame = hexEditorFrame;
     }
-    
+
     public void keyPressed(final KeyEvent e) {
         if (selecting || (e.getModifiers() & (InputEvent.ALT_MASK
                 | InputEvent.CTRL_MASK | InputEvent.META_MASK)) != 0) {
@@ -249,8 +250,8 @@ public class HexEditorView extends JComponent implements StyleListener {
                 final int x = MARGIN + (9 + 3 * nibble) * charWidth;
                 final int y = MARGIN + (i >> 4) * charHeight;
                 final int x2 = MARGIN + (60 + nibble) * charWidth;
-                EventQueue.invokeLater(() -> repaint(x, y, charWidth << 1, charHeight));
-                EventQueue.invokeLater(() -> repaint(x2, y, charWidth, charHeight));
+                EDT.async(() -> repaint(x, y, charWidth << 1, charHeight));
+                EDT.async(() -> repaint(x2, y, charWidth, charHeight));
             }
         }
     }
@@ -422,25 +423,21 @@ public class HexEditorView extends JComponent implements StyleListener {
     }
 
     private void setDataSource(final DataSource dataSource) {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             dataSource.refreshCache();
             this.dataSource = dataSource;
             metrics = null;
             editing = false;
             selecting = false;
             repaint();
-        } else {
-            EventQueue.invokeLater(() -> setDataSource(dataSource));
-        }
+        });
     }
 
     public void setCharTable(final CharTable charTable) {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             this.charTable = charTable;
             repaint();
-        } else {
-            EventQueue.invokeLater(() -> setCharTable(charTable));
-        }
+        });
     }
 
     public void toggleBookmark() {
@@ -623,14 +620,10 @@ public class HexEditorView extends JComponent implements StyleListener {
 
             scrollBar.setUnitIncrement(charHeight);
             scrollBar.setBlockIncrement(16 * charHeight);
-            EventQueue.invokeLater(() -> {
+            EDT.async(() -> {
                 scrollPane.setViewportView(null);
-            });
-            EventQueue.invokeLater(() -> {
                 scrollPane.setViewportView(this);
-            });
-            EventQueue.invokeLater(scrollPane::updateUI);
-            EventQueue.invokeLater(() -> {
+                scrollPane.updateUI();
                 scrollBar.setValue(source.getScrollY());
             });
         } else {

@@ -71,21 +71,4 @@ public final class ThreadUtil {
             join(thread);
         }
     }
-
-    // https://bugs.java.com/view_bug.do?bug_id=6435126
-    public static void forceHighResolutionTime() {
-        new Thread() {
-            {
-                this.setDaemon(true);
-                this.start();
-            }
-
-            @Override
-            public void run() {
-                while (true) {
-                    ThreadUtil.sleep(Integer.MAX_VALUE);
-                }
-            }
-        };
-    }
 }

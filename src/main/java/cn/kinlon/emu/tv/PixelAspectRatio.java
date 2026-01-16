@@ -2,7 +2,7 @@ package cn.kinlon.emu.tv;
 
 import java.io.*;
 
-public record PixelAspectRatio(int horizontal, int vertical) implements Serializable {
+public record PixelAspectRatio(int h, int v) implements Serializable {
 
     private static final long serialVersionUID = 0;
 

@@ -5,6 +5,7 @@ import cn.kinlon.emu.files.FilePath;
 import cn.kinlon.emu.gui.FileExtensionFilter;
 import cn.kinlon.emu.gui.PleaseWaitDialog;
 import cn.kinlon.emu.preferences.AppPrefs;
+import cn.kinlon.emu.utils.EDT;
 
 import javax.swing.*;
 import java.awt.*;
@@ -118,7 +119,7 @@ public class FamicomDiskSystemOptionsDialog extends javax.swing.JDialog {
                     return;
                 }
                 pleaseWaitDialog.dispose();
-                EventQueue.invokeLater(this::biosLoadCompleted);
+                EDT.async(this::biosLoadCompleted);
             });
         } catch (final FileNotFoundException f) {
             displayLoadBiosError(pleaseWaitDialog, "BIOS file not found.");
@@ -126,9 +127,7 @@ public class FamicomDiskSystemOptionsDialog extends javax.swing.JDialog {
             displayLoadBiosError(pleaseWaitDialog);
         } finally {
             pleaseWaitDialog.dispose();
-            EventQueue.invokeLater(() -> {
-                loadingsBIOS = false;
-            });
+            EDT.async(() -> loadingsBIOS = false);
         }
     }
 

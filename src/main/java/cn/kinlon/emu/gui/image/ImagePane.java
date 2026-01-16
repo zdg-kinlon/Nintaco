@@ -13,6 +13,7 @@ import cn.kinlon.emu.preferences.AppPrefs;
 import cn.kinlon.emu.tv.PixelAspectRatio;
 import cn.kinlon.emu.tv.ScreenBorders;
 import cn.kinlon.emu.tv.TVSystem;
+import cn.kinlon.emu.utils.EDT;
 import cn.kinlon.emu.utils.GuiUtil;
 
 import javax.swing.*;
@@ -27,7 +28,6 @@ import static java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static cn.kinlon.emu.tv.TVSystem.NTSC;
-import static cn.kinlon.emu.utils.GuiUtil.invokeAndWait;
 import static cn.kinlon.emu.utils.ThreadUtil.joinAll;
 import static cn.kinlon.emu.utils.ThreadUtil.threadWait;
 
@@ -230,15 +230,13 @@ public class ImagePane extends JComponent implements ScreenRenderer {
     }
 
     public void setCursorType(final CursorType cursorType) {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             App.runVsDualImagePane(this, p -> p.setCursorType(cursorType));
             if (this.cursorType != cursorType) {
                 this.cursorType = cursorType;
                 updateCursor();
             }
-        } else {
-            EventQueue.invokeLater(() -> setCursorType(cursorType));
-        }
+        });
     }
 
     public boolean isHideInactiveMouseCursor() {
@@ -269,14 +267,10 @@ public class ImagePane extends JComponent implements ScreenRenderer {
 
     public void setCursorVisible(final boolean cursorVisible) {
         App.runVsDualImagePane(this, p -> p.setCursorVisible(cursorVisible));
-        if (this.cursorVisible != cursorVisible) {
-            if (EventQueue.isDispatchThread()) {
-                this.cursorVisible = cursorVisible;
-                updateCursor();
-            } else {
-                EventQueue.invokeLater(() -> setCursorVisible(cursorVisible));
-            }
-        }
+        EDT.async(() -> {
+            this.cursorVisible = cursorVisible;
+            updateCursor();
+        });
     }
 
     public void showCursor() {
@@ -289,15 +283,9 @@ public class ImagePane extends JComponent implements ScreenRenderer {
     private void updateCursor() {
         if (cursorVisible || cursorType == CursorType.Crosshairs) {
             switch (cursorType) {
-                case Crosshairs:
-                    setCursor(crosshairsCursor);
-                    break;
-                case Blank:
-                    setCursor(blankCursor);
-                    break;
-                default:
-                    setCursor(Cursor.getDefaultCursor());
-                    break;
+                case Crosshairs -> setCursor(crosshairsCursor);
+                case Blank -> setCursor(blankCursor);
+                default -> setCursor(Cursor.getDefaultCursor());
             }
         } else {
             setCursor(blankCursor);
@@ -329,7 +317,7 @@ public class ImagePane extends JComponent implements ScreenRenderer {
     }
 
     public void setTVSystem(final TVSystem tvSystem) {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             App.runVsDualImagePane(this, p -> p.setTVSystem(tvSystem));
             if (this.tvSystem != tvSystem) {
                 this.tvSystem = tvSystem;
@@ -337,9 +325,7 @@ public class ImagePane extends JComponent implements ScreenRenderer {
                 pixelAspectRatio = tvSystem.pixelAspectRatio();
                 updateScreenBorders();
             }
-        } else {
-            EventQueue.invokeLater(() -> setTVSystem(tvSystem));
-        }
+        });
     }
 
     public boolean isUseTvAspectRatio() {
@@ -380,18 +366,14 @@ public class ImagePane extends JComponent implements ScreenRenderer {
     }
 
     private void adjustPreferredSize() {
-        if (EventQueue.isDispatchThread()) {
-            final double aspectRatio = useTvAspectRatio ? (pixelAspectRatio.horizontal()
-                    / (double) pixelAspectRatio.vertical()) : 1.0;
-            setPreferredSize(new Dimension(
-                    (int) Math.round(aspectRatio * screenScale
-                            * (IMAGE_WIDTH - screenBorders.left() - screenBorders.right())),
-                    screenScale * (IMAGE_HEIGHT - screenBorders.top()
-                            - screenBorders.bottom())));
+        EDT.sync(() -> {
+            double aspectRatio = useTvAspectRatio ? (pixelAspectRatio.h() / (double) pixelAspectRatio.v()) : 1.0;
+            int w = (int) Math.round(aspectRatio * screenScale * (IMAGE_WIDTH - screenBorders.left() - screenBorders.right()));
+            int h = screenScale * (IMAGE_HEIGHT - screenBorders.top() - screenBorders.bottom());
+            Dimension size = new Dimension(w, h);
+            setPreferredSize(size);
             invalidate();
-        } else {
-            invokeAndWait(this::adjustPreferredSize);
-        }
+        });
     }
 
     public BufferStrategy getBufferStrategy() {
@@ -403,7 +385,7 @@ public class ImagePane extends JComponent implements ScreenRenderer {
         if (bufferStrategy != null && hideFullscreenMouseCursor) {
             setCursorVisible(false);
         }
-        EventQueue.invokeLater(this::redraw);
+        EDT.async(this::redraw);
     }
 
     public void redraw() {
@@ -489,8 +471,7 @@ public class ImagePane extends JComponent implements ScreenRenderer {
                         toolkit.sync();
                     }
                 } else {
-                    EventQueue.invokeAndWait(
-                            () -> paintImmediately(0, 0, paneWidth, paneHeight));
+                    EDT.sync(() -> paintImmediately(0, 0, paneWidth, paneHeight));
                 }
             } catch (final Throwable t) {
             }
@@ -519,7 +500,7 @@ public class ImagePane extends JComponent implements ScreenRenderer {
         if (filters != null) {
             filters[0].reset();
         }
-        invokeAndWait((Runnable) this::repaint);
+        EDT.sync(this::repaint);
     }
 
     public void requestRepaint() {
@@ -532,8 +513,8 @@ public class ImagePane extends JComponent implements ScreenRenderer {
         paneWidth = getWidth();
         paneHeight = getHeight();
 
-        final double aspectRatio = useTvAspectRatio ? (pixelAspectRatio.horizontal()
-                / (double) pixelAspectRatio.vertical()) : 1.0;
+        final double aspectRatio = useTvAspectRatio ? (pixelAspectRatio.h()
+                / (double) pixelAspectRatio.v()) : 1.0;
         final int IMG_WIDTH = (int) Math.round((IMAGE_WIDTH - screenBorders.left()
                 - screenBorders.right()) * aspectRatio * filterScale);
         final int IMG_HEIGHT = (IMAGE_HEIGHT - screenBorders.top()

@@ -23,10 +23,7 @@ import cn.kinlon.emu.palettes.PaletteUtil;
 import cn.kinlon.emu.ppu.PPU;
 import cn.kinlon.emu.preferences.AppPrefs;
 import cn.kinlon.emu.preferences.GamePrefs;
-import cn.kinlon.emu.utils.GuiUtil;
-import cn.kinlon.emu.utils.InstanceUtil;
-import cn.kinlon.emu.utils.ThreadUtil;
-import cn.kinlon.emu.utils.TimeUtil;
+import cn.kinlon.emu.utils.*;
 
 import java.awt.*;
 import java.io.*;
@@ -60,7 +57,7 @@ public final class App {
     private static UnifFile unifFile;
     private static NsfFile nsfFile;
     private static String entryFileName;
-    
+
     private static int[] fdsBIOS;
 
     private static volatile int rewindTimeValue;
@@ -78,7 +75,7 @@ public final class App {
     private static boolean pausedOnFocusLoss;
 
     public static void init(final String... args) throws Throwable {
-        ThreadUtil.forceHighResolutionTime();
+        ThreadUtils.enableHighResolutionTimer();
         AppPrefs.load();
         if (!AppPrefs.getInstance().getUserInterfacePrefs()
                 .isAllowMultipleInstances() && InstanceUtil.isAlreadyRunning()) {
@@ -87,7 +84,7 @@ public final class App {
         systemAudioProcessor = new SystemAudioProcessor();
         CartDB.init();
         PaletteUtil.init();
-        EventQueue.invokeAndWait(() -> {
+        EDT.sync(() -> {
             initApplicationFocusListener();
             imageFrame = new ImageFrame();
             imageFrame.init();
@@ -134,8 +131,10 @@ public final class App {
 
     private static void initApplicationFocusListener() {
         KeyboardFocusManager.getCurrentKeyboardFocusManager()
-                .addPropertyChangeListener("activeWindow", e -> EventQueue.invokeLater(
-                        App::applicationFocusChanged));
+                .addPropertyChangeListener(
+                        "activeWindow",
+                        _ -> EDT.async(App::applicationFocusChanged)
+                );
     }
 
     private static void applicationFocusChanged() {
@@ -180,7 +179,7 @@ public final class App {
     }
 
     public static void cpuKilled(final int opcode, final int address) {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             final FourButtonDialog dialog = new FourButtonDialog(imageFrame,
                     String.format("<html>The processor executed a KIL (<tt>$%02X</tt>) "
                             + "instruction at <tt>$%04X</tt>.</html>", opcode, address),
@@ -191,19 +190,11 @@ public final class App {
             dialog.setButtonText(3, "Ignore", 'I');
             dialog.setVisible(true);
             switch (dialog.getSelection()) {
-                case 0:
-                    powerCycle();
-                    break;
-                case 1:
-                    reset();
-                    break;
-                case 2:
-                    close();
-                    break;
+                case 0 -> powerCycle();
+                case 1 -> reset();
+                case 2 -> close();
             }
-        } else {
-            EventQueue.invokeLater(() -> cpuKilled(opcode, address));
-        }
+        });
     }
 
     public static int getFileIndex(final int address, final boolean cpuMemory) {
@@ -341,6 +332,7 @@ public final class App {
     public static SubMonitorFrame getSubMonitorFrame() {
         return subMonitorFrame;
     }
+
     public static MachineRunner getMachineRunner() {
         return machineRunner;
     }
@@ -569,7 +561,7 @@ public final class App {
     }
 
     public static void fireStepPausedChanged(final boolean stepPause) {
-        EventQueue.invokeLater(() -> {
+        EDT.async(() -> {
             final ImageFrame image = imageFrame;
             if (image != null) {
                 image.onStepPausedChanged(stepPause);
@@ -578,7 +570,7 @@ public final class App {
     }
 
     public static void createHexEditorFrame() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (hexEditorFrame == null) {
                 hexEditorFrame = new HexEditorFrame();
                 hexEditorFrame.setMachine(getRunningMachine());
@@ -586,58 +578,48 @@ public final class App {
             } else {
                 GuiUtil.toFront(hexEditorFrame);
             }
-        } else {
-            EventQueue.invokeLater(App::createHexEditorFrame);
-        }
+        });
     }
 
     public static void destroyHexEditorFrame() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (hexEditorFrame != null) {
                 hexEditorFrame.destroy();
                 hexEditorFrame = null;
             }
-        } else {
-            EventQueue.invokeLater(App::destroyHexEditorFrame);
-        }
+        });
     }
 
     public static void destroyVolumeMixerFrame() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (volumeMixerFrame != null) {
                 volumeMixerFrame.destroy();
                 volumeMixerFrame = null;
             }
-        } else {
-            EventQueue.invokeLater(App::destroyVolumeMixerFrame);
-        }
+        });
     }
 
     public static void createSubMonitorFrame() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (subMonitorFrame == null) {
                 subMonitorFrame = new SubMonitorFrame();
                 forwardKeyEvents(subMonitorFrame, imageFrame);
                 subMonitorFrame.setVisible(true);
-                EventQueue.invokeLater(() -> GuiUtil.toFront(imageFrame));
+                GuiUtil.toFront(imageFrame);
             } else {
                 GuiUtil.toFront(subMonitorFrame);
             }
             subMonitorFrame.init();
-        } else {
-            EventQueue.invokeLater(App::createSubMonitorFrame);
-        }
+        });
     }
 
     public static void destroySubMonitorFrame() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (subMonitorFrame != null) {
                 subMonitorFrame.destroy();
                 subMonitorFrame = null;
             }
-        } else {
-            EventQueue.invokeLater(App::destroySubMonitorFrame);
-        }
+        });
     }
 
     public static void runSubMonitorFrame(final SubMonitorFrameFunction function) {
@@ -668,10 +650,10 @@ public final class App {
 
         final MachineRunner r = machineRunner;
         if (r != null) {
-                r.getMapper().updateButtons(0);
-                SystemAudioProcessor.setMovie(null);
-                imageFrame.setHistoryTracking(false);
-            
+            r.getMapper().updateButtons(0);
+            SystemAudioProcessor.setMovie(null);
+            imageFrame.setHistoryTracking(false);
+
         } else {
             imageFrame.setHistoryTracking(false);
         }
@@ -851,8 +833,7 @@ public final class App {
         }
         imageFrame.updateContentPane(null, null);
         imageFrame.setHistoryTracking(false);
-        invokeAndWait(() -> {
-        });
+        EDT.sync(null);
         dispose();
         setSpeed(100);
         imageFrame.getImagePane().setCursorType(CursorType.Default);
