@@ -3,6 +3,7 @@ package cn.kinlon.emu.gui.image;
 import cn.kinlon.emu.App;
 import cn.kinlon.emu.ScreenRenderer;
 import cn.kinlon.emu.Colors;
+import cn.kinlon.emu.cache.FrameCache;
 import cn.kinlon.emu.gui.adapter.ImagePaneMouseAdapter;
 import cn.kinlon.emu.gui.image.filters.VideoFilter;
 import cn.kinlon.emu.gui.image.filters.VideoFilterDescriptor;
@@ -43,8 +44,7 @@ public class ImagePane extends JComponent implements ScreenRenderer {
     private final Cursor crosshairsCursor;
     private final Cursor blankCursor;
 
-    private final Object screenMonitor = new Object();
-    private final int[][] screens = new int[4][IMAGE_WIDTH * IMAGE_HEIGHT];
+    private final FrameCache cache = new FrameCache(3);
     private final BufferedImage image = new BufferedImage(IMAGE_WIDTH,
             IMAGE_HEIGHT, BufferedImage.TYPE_INT_RGB);
     private final int[] data = ((DataBufferInt) image.getRaster().getDataBuffer())
@@ -54,9 +54,6 @@ public class ImagePane extends JComponent implements ScreenRenderer {
     private volatile int cursorCounter = CURSOR_TIMEOUT;
     private volatile boolean hideInactiveMouseCursor;
     private volatile boolean hideFullscreenMouseCursor;
-    private int writeIndex;
-    private int lastWriteIndex;
-    private int readIndex;
     private volatile BufferStrategy bufferStrategy;
     public volatile int imageX;
     public volatile int imageY;
@@ -95,14 +92,12 @@ public class ImagePane extends JComponent implements ScreenRenderer {
 
     public ImagePane() {
         async_calc(this::renderLoop);
-        
+
         createVideoFilterThreads();
 
         paintImage = image;
-        for (int i = screens.length - 1; i >= 0; i--) {
-            Arrays.fill(screens[i], PaletteUtil.getPalettePPU().getMap()[Colors
-                    .BLACK]);
-        }
+        int BLACK = PaletteUtil.getPalettePPU().getMap()[Colors.BLACK];
+        cache.reset(IMAGE_WIDTH, IMAGE_HEIGHT, BLACK);
 
         ImagePaneComponentAdapter imagePaneComponentAdapter = new ImagePaneComponentAdapter(this);
         ImagePaneMouseAdapter imagePaneMouseAdapter = new ImagePaneMouseAdapter(this);
@@ -414,27 +409,12 @@ public class ImagePane extends JComponent implements ScreenRenderer {
     // Returns writable screen.
     @Override
     public int[] render() {
-        synchronized (screenMonitor) {
-            lastWriteIndex = writeIndex;      // Commit current screen.
-            do {
-                ++writeIndex;
-                writeIndex &= 3;
-            } while (writeIndex == readIndex); // Obtain next available screen. 
-            screenMonitor.notifyAll();
-            return screens[writeIndex];
-        }
+        return cache.getWriteFrame();
     }
 
     private void renderLoop() {
         while (rendering) {
-            final int[] screen;
-            synchronized (screenMonitor) {
-                while (lastWriteIndex == readIndex) {
-                    threadWait(screenMonitor);
-                }
-                readIndex = lastWriteIndex;
-                screen = screens[readIndex];
-            }
+            final int[] screen = cache.getReadFrame();
 
             if (videoFilterDescriptor == VideoFilterDescriptor.Ntsc) {
                 System.arraycopy(screen, 0, data, 0, screen.length);
@@ -488,13 +468,8 @@ public class ImagePane extends JComponent implements ScreenRenderer {
         final int BLACK = PaletteUtil.getPalettePPU().getMap()[Colors.BLACK];
         App.runVsDualImagePane(this, ImagePane::clearScreen);
         rewinding = false;
-        for (int i = screens.length - 1; i >= 0; i--) {
-            Arrays.fill(render(), BLACK);
-        }
+        cache.reset(IMAGE_WIDTH, IMAGE_HEIGHT, BLACK);
         Arrays.fill(data, 0);
-        for (int i = screens.length - 1; i >= 0; i--) {
-            Arrays.fill(screens[i], BLACK);
-        }
         final VideoFilter[] filters = videoFilters;
         if (filters != null) {
             filters[0].reset();
