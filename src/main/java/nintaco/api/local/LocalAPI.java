@@ -20,6 +20,7 @@ import nintaco.mappers.nintendo.vs.VsSystem;
 import nintaco.palettes.PalettePPU;
 import nintaco.palettes.PaletteUtil;
 import nintaco.preferences.AppPrefs;
+import nintaco.util.EDT;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -1578,14 +1579,14 @@ public class LocalAPI implements API {
     @Override
     @ApiMethod(134)
     public void saveState(final String stateFileName) {
-        EventQueue.invokeLater(() -> App.getImageFrame().saveState(new File(
+        EDT.async(() -> App.getImageFrame().saveState(new File(
                 stateFileName)));
     }
 
     @Override
     @ApiMethod(135)
     public void loadState(final String stateFileName) {
-        EventQueue.invokeLater(() -> App.getImageFrame().loadState(new File(
+        EDT.async(() -> App.getImageFrame().loadState(new File(
                 stateFileName)));
     }
 
@@ -1593,7 +1594,7 @@ public class LocalAPI implements API {
     @ApiMethod(136)
     public void quickSaveState(final int slot) {
         if (slot >= 0 && slot <= 9) {
-            EventQueue.invokeLater(() -> App.getImageFrame().quickSaveState(slot));
+            EDT.async(() -> App.getImageFrame().quickSaveState(slot));
         }
     }
 
@@ -1601,7 +1602,7 @@ public class LocalAPI implements API {
     @ApiMethod(137)
     public void quickLoadState(final int slot) {
         if (slot >= 0 && slot <= 9) {
-            EventQueue.invokeLater(() -> App.getImageFrame().quickLoadState(slot));
+            EDT.async(() -> App.getImageFrame().quickLoadState(slot));
         }
     }
 
@@ -1710,7 +1711,7 @@ public class LocalAPI implements API {
     @Override
     @ApiMethod(149)
     public void setFullscreenMode(final boolean fullscreenMode) {
-        EventQueue.invokeLater(() -> App.getImageFrame()
+        EDT.async(() -> App.getImageFrame()
                 .setFullscreenMode(fullscreenMode));
     }
 

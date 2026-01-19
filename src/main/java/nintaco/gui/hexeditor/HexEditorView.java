@@ -21,6 +21,7 @@ import nintaco.gui.hexeditor.preferences.HexEditorAppPrefs;
 import nintaco.gui.hexeditor.preferences.HexEditorGamePrefs;
 import nintaco.preferences.AppPrefs;
 import nintaco.preferences.GamePrefs;
+import nintaco.util.EDT;
 import nintaco.util.GuiUtil;
 
 import javax.swing.*;
@@ -377,7 +378,7 @@ public class HexEditorView extends JComponent implements StyleListener {
         }
         searchDialog.setShowReplace(replace);
         searchDialog.setLocationRelativeTo(hexEditorFrame);
-        EventQueue.invokeLater(() -> searchDialog.find());
+        EDT.async(() -> searchDialog.find());
         if (searchDialog.isVisible()) {
             GuiUtil.toFront(searchDialog);
         } else {
@@ -513,7 +514,7 @@ public class HexEditorView extends JComponent implements StyleListener {
                 hexEditorFrame.setDataSource(source.getIndex());
                 setDataSource(source);
             }
-            EventQueue.invokeLater(() -> {
+            EDT.async(() -> {
                 centerAddressIfNotVisible(source, result.getStart());
                 repaint();
             });
@@ -563,8 +564,10 @@ public class HexEditorView extends JComponent implements StyleListener {
                 final int x = MARGIN + (9 + 3 * nibble) * charWidth;
                 final int y = MARGIN + (i >> 4) * charHeight;
                 final int x2 = MARGIN + (60 + nibble) * charWidth;
-                EventQueue.invokeLater(() -> repaint(x, y, charWidth << 1, charHeight));
-                EventQueue.invokeLater(() -> repaint(x2, y, charWidth, charHeight));
+                EDT.async(() -> {
+                    repaint(x, y, charWidth << 1, charHeight);
+                    repaint(x2, y, charWidth, charHeight);
+                });
             }
         }
     }
@@ -736,16 +739,14 @@ public class HexEditorView extends JComponent implements StyleListener {
     }
 
     private void setDataSource(final DataSource dataSource) {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             dataSource.refreshCache();
             this.dataSource = dataSource;
             metrics = null;
             editing = false;
             selecting = false;
             repaint();
-        } else {
-            EventQueue.invokeLater(() -> setDataSource(dataSource));
-        }
+        });
     }
 
     public CharTable getCharTable() {
@@ -753,12 +754,10 @@ public class HexEditorView extends JComponent implements StyleListener {
     }
 
     public void setCharTable(final CharTable charTable) {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             this.charTable = charTable;
             repaint();
-        } else {
-            EventQueue.invokeLater(() -> setCharTable(charTable));
-        }
+        });
     }
 
     public void toggleBookmark() {
@@ -977,14 +976,10 @@ public class HexEditorView extends JComponent implements StyleListener {
 
             scrollBar.setUnitIncrement(charHeight);
             scrollBar.setBlockIncrement(16 * charHeight);
-            EventQueue.invokeLater(() -> {
+            EDT.async(() -> {
                 scrollPane.setViewportView(null);
-            });
-            EventQueue.invokeLater(() -> {
                 scrollPane.setViewportView(this);
-            });
-            EventQueue.invokeLater(scrollPane::updateUI);
-            EventQueue.invokeLater(() -> {
+                scrollPane.updateUI();
                 scrollBar.setValue(source.getScrollY());
             });
         } else {

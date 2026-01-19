@@ -8,6 +8,7 @@ import nintaco.gui.ImagePanel;
 import nintaco.gui.MaxLengthDocument;
 import nintaco.palettes.PaletteUtil;
 import nintaco.preferences.AppPrefs;
+import nintaco.util.EDT;
 
 import javax.swing.event.DocumentListener;
 import java.awt.*;
@@ -421,7 +422,7 @@ public class PatternTablesFrame extends javax.swing.JFrame {
         }
         imagePanel.render();
 
-        EventQueue.invokeLater(() -> mouseUpdated(mouseX, mouseY));
+        EDT.async(() -> mouseUpdated(mouseX, mouseY));
     }
 
     /**

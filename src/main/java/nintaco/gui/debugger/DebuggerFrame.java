@@ -16,6 +16,7 @@ import nintaco.gui.image.QuickSaveStateInfo;
 import nintaco.mappers.Mapper;
 import nintaco.preferences.AppPrefs;
 import nintaco.preferences.GamePrefs;
+import nintaco.util.EDT;
 
 import javax.swing.*;
 import java.awt.*;
@@ -319,7 +320,7 @@ public class DebuggerFrame extends javax.swing.JFrame {
             requestTextAreaRefresh();
         }
         initAddressLabels();
-        EventQueue.invokeLater(this::enableComponents);
+        EDT.async(this::enableComponents);
     }
 
     private void updateVisibleLines() {
@@ -334,7 +335,7 @@ public class DebuggerFrame extends javax.swing.JFrame {
                               final int nextScanlineCycle, final int scanline,
                               final int scanlineCycle, final int ppu2002, final int ppu2004,
                               final int ppu2007) {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             stepToTextField.setText(String.format("%04X", address));
             scanlineTextField.setText(Integer.toString(nextScanline));
             dotTextField.setText(Integer.toString(nextScanlineCycle));
@@ -343,11 +344,7 @@ public class DebuggerFrame extends javax.swing.JFrame {
             ppu2002Label.setText(String.format("%02X", ppu2002));
             ppu2004Label.setText(String.format("%02X", ppu2004));
             ppu2007Label.setText(String.format("%02X", ppu2007));
-        } else {
-            EventQueue.invokeLater(() -> updateFields(address, nextScanline,
-                    nextScanlineCycle, scanline, scanlineCycle, ppu2002, ppu2004,
-                    ppu2007));
-        }
+        });
     }
 
     private void updateStackTextArea() {
@@ -363,7 +360,7 @@ public class DebuggerFrame extends javax.swing.JFrame {
         for (int s = c.getS(); s <= 0xFF; s++) {
             sb.append(String.format("%02X ", m.peekCpuMemory(0x0100 | s)));
         }
-        EventQueue.invokeLater(() -> stackTextArea.setText(sb.toString()));
+        EDT.async(() -> stackTextArea.setText(sb.toString()));
     }
 
     private void acquireFields() {
@@ -515,12 +512,12 @@ public class DebuggerFrame extends javax.swing.JFrame {
         if (scrollToPC) {
             if (pcLine >= indexOfLastVisibleInstruction - 1) {
                 if (pcLine == indexOfLastVisibleInstruction) {
-                    EventQueue.invokeLater(this::onScrollDown);
+                    EDT.async(this::onScrollDown);
                 }
-                EventQueue.invokeLater(this::onScrollDown);
+                EDT.async(this::onScrollDown);
             } else if (pcLine < 0) {
                 scrollValue = Disassembler.getPriorAddress(m, PC, officialsOnly);
-                EventQueue.invokeLater(() -> setScrollBarValue(scrollValue));
+                EDT.async(() -> setScrollBarValue(scrollValue));
                 refreshDebugTextArea(false);
             } else {
                 updateDebugTextArea(sb.toString());
@@ -531,13 +528,11 @@ public class DebuggerFrame extends javax.swing.JFrame {
     }
 
     private void updateDebugTextArea(final String text) {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             lastRange = null;
             debugTextArea.setText(text);
             debugTextArea.setCaretPosition(0);
-        } else {
-            EventQueue.invokeLater(() -> updateDebugTextArea(text));
-        }
+        });
     }
 
     private void onScrollBarAdjusted() {
@@ -871,7 +866,7 @@ public class DebuggerFrame extends javax.swing.JFrame {
                 cameraYValue = p.getScrollY();
                 valuesAcquired = true;
 
-                EventQueue.invokeLater(this::assignFields);
+                EDT.async(this::assignFields);
                 updateFields(Disassembler.getSuccessiveAddress(m, c.getPC(),
                                 officialsOnly), p.getNextScanline(), p.getNextScanlineCycle(),
                         p.getScanline(), p.getScanlineCycle(),
@@ -954,7 +949,7 @@ public class DebuggerFrame extends javax.swing.JFrame {
             }
         }
 
-        EventQueue.invokeLater(this::enableComponents);
+        EDT.async(this::enableComponents);
         App.flushTraceLogger();
     }
 
@@ -2370,10 +2365,10 @@ public class DebuggerFrame extends javax.swing.JFrame {
                 && lastRange.getAddress() <= 0xFFFF) {
             App.createHexEditorFrame();
             if (lastRange.getBank() < 0) {
-                EventQueue.invokeLater(() -> App.getHexEditorFrame().goToAddress(
+                EDT.async(() -> App.getHexEditorFrame().goToAddress(
                         CpuMemory, lastRange.getAddress()));
             } else {
-                EventQueue.invokeLater(() -> App.getHexEditorFrame()
+                EDT.async(() -> App.getHexEditorFrame()
                         .goToFileContents(lastRange.getAddress()));
             }
         }

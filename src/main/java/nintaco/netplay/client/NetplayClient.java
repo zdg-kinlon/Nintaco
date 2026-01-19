@@ -200,7 +200,7 @@ public class NetplayClient implements Runnable {
                 setState(DISCONNECTED);
             } finally {
                 closeSocket();
-                EventQueue.invokeLater(() -> {
+                EDT.async(() -> {
                     if (window != null) {
                         window.dispose();
                         window = null;
@@ -391,7 +391,7 @@ public class NetplayClient implements Runnable {
     private void handleQuickSaveStateMenuNames(
             final String[] quickSaveStateMenuNames) {
         quickSaveNames = quickSaveStateMenuNames;
-        EventQueue.invokeLater(() -> App.getImageFrame()
+        EDT.async(() -> App.getImageFrame()
                 .handleQuickSaveStateMenuNames(quickSaveStateMenuNames,
                         quickSavesEnabled));
     }
@@ -520,7 +520,7 @@ public class NetplayClient implements Runnable {
         if (!VersionUtil.getVersion().equals(version)) {
             addActivity("Incompatible software versions detected.");
             kill();
-            EventQueue.invokeLater(() -> displayIncompatibilityError(version));
+            EDT.async(() -> displayIncompatibilityError(version));
         } else if (passwordRequired) {
             setState(AUTHENTICATE);
         } else {
@@ -679,7 +679,7 @@ public class NetplayClient implements Runnable {
     }
 
     private void choosePlayer() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             final NetplayClientFrame clientFrame = getClientFrame();
             if (playerResponse == 0x00) {
                 displayAccessDenied(clientFrame);
@@ -691,13 +691,11 @@ public class NetplayClient implements Runnable {
                     displayMultiplePlayersPrompt(clientFrame);
                 }
             }
-        } else {
-            EventQueue.invokeLater(this::choosePlayer);
-        }
+        });
     }
 
     private void displayPasswordPrompt(final boolean authenticationRequired) {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             final String title = authenticationRequired ? "Authentication Required"
                     : "Invalid Password";
             addActivity("User prompted for password.");
@@ -741,10 +739,7 @@ public class NetplayClient implements Runnable {
                 kill();
             }
             window = null;
-        } else {
-            EventQueue.invokeLater(
-                    () -> displayPasswordPrompt(authenticationRequired));
-        }
+        });
     }
 
     private void setState(final ClientState state) {

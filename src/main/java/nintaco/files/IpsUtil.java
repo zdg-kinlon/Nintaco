@@ -2,7 +2,7 @@ package nintaco.files;
 
 import nintaco.MessageException;
 import nintaco.preferences.AppPrefs;
-import nintaco.util.InvocationContainer;
+import nintaco.util.Reference;
 
 import java.io.*;
 import java.util.*;
@@ -23,15 +23,15 @@ public final class IpsUtil {
 
     private static IpsFile loadIpsFile(final FilePath filePath)
             throws Throwable {
-        final InvocationContainer<IpsFile> container = new InvocationContainer<>();
+        final Reference<IpsFile> container = new Reference<>();
         try {
             getInputStream(filePath, (in, fileSize) -> {
-                container.setObject(loadIpsFile(in, fileSize));
+                container.set(loadIpsFile(in, fileSize));
             });
         } catch (final FileNotFoundException e) {
             throw new MessageException("The patch file does not exist.");
         }
-        return container.getObject();
+        return container.get();
     }
 
     private static IpsFile loadIpsFile(final String fileName) throws Throwable {
@@ -109,15 +109,15 @@ public final class IpsUtil {
 
     private static byte[] loadFileData(final String fileType,
                                        final FilePath filePath, final int minFileSize) throws Throwable {
-        final InvocationContainer<byte[]> container = new InvocationContainer<>();
+        final Reference<byte[]> container = new Reference<>();
         try {
             getInputStream(filePath, (in, fileSize) -> {
-                container.setObject(loadFileData(fileType, in, fileSize, minFileSize));
+                container.set(loadFileData(fileType, in, fileSize, minFileSize));
             });
         } catch (final FileNotFoundException e) {
             throw new MessageException("The %s file does not exist.", fileType);
         }
-        return container.getObject();
+        return container.get();
     }
 
     private static byte[] loadFileData(final String fileType,

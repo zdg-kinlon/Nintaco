@@ -79,9 +79,9 @@ public final class ThreadUtil {
                     target, targetClass.getMethod(method.getName(),
                     method.getParameterTypes()), args);
             if (method.getReturnType() == void.class) {
-                EventQueue.invokeLater(targetInvoker);
+                EDT.async(targetInvoker);
             } else {
-                EventQueue.invokeAndWait(targetInvoker);
+                EDT.sync(targetInvoker);
                 if (targetInvoker.threwException()) {
                     throw targetInvoker.getException();
                 } else {

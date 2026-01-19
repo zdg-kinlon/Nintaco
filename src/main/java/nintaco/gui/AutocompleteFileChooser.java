@@ -4,6 +4,7 @@ import nintaco.gui.archive.EntryElement;
 import nintaco.gui.archive.SearchTask;
 import nintaco.preferences.AppPrefs;
 import nintaco.task.TaskScheduler;
+import nintaco.util.EDT;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
@@ -115,7 +116,7 @@ public class AutocompleteFileChooser extends JFileChooser {
             final TableModel model = table.getModel();
             model.addTableModelListener(e -> {
                 if (oldDir != null && e.getFirstRow() >= 0 && e.getLastRow() >= 0) {
-                    EventQueue.invokeLater(() -> {
+                    EDT.async(() -> {
                         for (int row = model.getRowCount() - 1; row >= 0; --row) {
                             if (oldDir.equals(model.getValueAt(row, 0))) {
                                 scrollToCenter(table, row);
@@ -344,7 +345,7 @@ public class AutocompleteFileChooser extends JFileChooser {
             }
             super.loop();
             if (canceled) {
-                EventQueue.invokeLater(() -> {
+                EDT.async(() -> {
                     if (popup != null) {
                         popup.hide();
                         popup = null;

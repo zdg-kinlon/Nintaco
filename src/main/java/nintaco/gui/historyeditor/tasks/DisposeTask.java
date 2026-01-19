@@ -7,6 +7,7 @@ import nintaco.gui.historyeditor.HistoryTableModel;
 import nintaco.gui.image.SubMonitorFrame;
 import nintaco.mappers.nintendo.vs.MainCPU;
 import nintaco.movie.Movie;
+import nintaco.util.EDT;
 
 import java.awt.*;
 
@@ -24,7 +25,7 @@ public class DisposeTask extends SaveStateTask {
 
     @Override
     protected void saveState(final MachineRunner machineRunner) {
-        EventQueue.invokeLater(historyEditorFrame::closeFrame);
+        EDT.async(historyEditorFrame::closeFrame);
         movie.truncate();
         machineRunner.setMovie(movie);
         machineRunner.getPPU().setScreenRenderer(App.getImageFrame()

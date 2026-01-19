@@ -13,6 +13,7 @@ import nintaco.input.other.SetSongPaused;
 import nintaco.mappers.Mapper;
 import nintaco.mappers.nsf.NsfMapper;
 import nintaco.preferences.AppPrefs;
+import nintaco.util.EDT;
 
 import javax.swing.*;
 import java.awt.*;
@@ -88,14 +89,12 @@ public class NsfPanel extends javax.swing.JPanel {
     }
 
     private void close() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             mapper = null;
             nsfFile = null;
             songLengthStr = DEFAULT_SONG_LENGTH_STR;
             timer.stop();
-        } else {
-            EventQueue.invokeLater(this::close);
-        }
+        });
     }
 
     public void updateClock() {

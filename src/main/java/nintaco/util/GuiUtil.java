@@ -325,12 +325,6 @@ public final class GuiUtil {
         }
     }
 
-    ;
-
-    public static interface Invocation<T> {
-        T run();
-    }
-
     public static final NoBorderLabelRenderer NO_BORDER_LABEL_RENDERER
             = new NoBorderLabelRenderer();
     public static final NoBorderBooleanRenderer NO_BORDER_BOOLEAN_RENDERER
@@ -384,7 +378,7 @@ public final class GuiUtil {
 
     public static void displayMessage(final String title, final Window parent,
                                       final String message, final InformationDialog.IconType iconType) {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (!isBlank(message)) {
                 App.setNoStepPause(true);
                 InformationDialog dialog = new InformationDialog(parent, message, title,
@@ -392,10 +386,7 @@ public final class GuiUtil {
                 dialog.setVisible(true);
                 App.setNoStepPause(false);
             }
-        } else {
-            EventQueue.invokeLater(() -> displayMessage(title, parent, message,
-                    iconType));
-        }
+        });
     }
 
     public static <T extends Component> List<T> findComponents(
@@ -712,28 +703,24 @@ public final class GuiUtil {
     }
 
     public static void toFront(final JDialog dialog) {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             dialog.setVisible(true);
             dialog.setAlwaysOnTop(true);
             dialog.toFront();
             dialog.requestFocus();
             dialog.setAlwaysOnTop(false);
-        } else {
-            EventQueue.invokeLater(() -> toFront(dialog));
-        }
+        });
     }
 
     public static void toFront(final JFrame frame) {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             frame.setVisible(true);
             frame.setExtendedState(frame.getExtendedState() & ~JFrame.ICONIFIED);
             frame.setAlwaysOnTop(true);
             frame.toFront();
             frame.requestFocus();
             frame.setAlwaysOnTop(false);
-        } else {
-            EventQueue.invokeLater(() -> toFront(frame));
-        }
+        });
     }
 
     public static void setClipboardString(final Object value) {
@@ -1280,7 +1267,7 @@ public final class GuiUtil {
 
     public static void normalize(final Frame frame) {
         frame.setExtendedState(frame.getExtendedState() & ~Frame.MAXIMIZED_BOTH);
-        EventQueue.invokeLater(() -> {
+        EDT.async(() -> {
             frame.invalidate();
             frame.validate();
             frame.repaint();
@@ -1294,7 +1281,7 @@ public final class GuiUtil {
         } else {
             frame.pack();
         }
-        EventQueue.invokeLater(() -> {
+        EDT.async(() -> {
             frame.invalidate();
             frame.validate();
             frame.repaint();
@@ -1303,7 +1290,7 @@ public final class GuiUtil {
 
     public static void maximize(final Frame frame) {
         frame.setExtendedState(frame.getExtendedState() | Frame.MAXIMIZED_BOTH);
-        EventQueue.invokeLater(() -> {
+        EDT.async(() -> {
             frame.invalidate();
             frame.validate();
             frame.repaint();
@@ -1383,7 +1370,7 @@ public final class GuiUtil {
     }
 
     private static void resizeImagePane(final Dimension imagePaneSize) {
-        EventQueue.invokeLater(() -> {
+        EDT.async(() -> {
             final ImageFrame imageFrame = App.getImageFrame();
             final ImagePane imagePane = imageFrame.getImagePane();
             imagePane.setSize(imagePaneSize);
@@ -1416,7 +1403,7 @@ public final class GuiUtil {
 
     public static void requestVsync(final JFrame frame,
                                     final boolean enableVsync) {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             final boolean frameDisplayable = frame.isDisplayable();
             if (frameDisplayable) {
                 frame.dispose();
@@ -1433,9 +1420,7 @@ public final class GuiUtil {
             if (frameDisplayable) {
                 toFront(frame);
             }
-        } else {
-            EventQueue.invokeLater(() -> requestVsync(frame, enableVsync));
-        }
+        });
     }
 
     public static void drawRect(final int[] screen, final int x, final int y,
@@ -1493,24 +1478,6 @@ public final class GuiUtil {
         for (int y = yMin; y <= yMax; y++) {
             screen[(y << 8) | x] = color;
         }
-    }
-
-    public static void invokeAndWait(final Runnable runnable) {
-        if (EventQueue.isDispatchThread()) {
-            runnable.run();
-        } else {
-            try {
-                EventQueue.invokeAndWait(runnable);
-            } catch (final Throwable t) {
-                //t.printStackTrace();
-            }
-        }
-    }
-
-    public static <T> T invokeAndWait(final Invocation<T> invocation) {
-        final InvocationContainer<T> container = new InvocationContainer<>();
-        invokeAndWait(() -> container.setObject(invocation.run()));
-        return container.getObject();
     }
 
     public static boolean sharesGraphicsDevice(final Component c1,

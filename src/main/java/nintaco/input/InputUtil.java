@@ -16,6 +16,7 @@ import nintaco.input.multitap.Famicom4PlayersAdapterMapper;
 import nintaco.input.multitap.NESFourScoreMapper;
 import nintaco.mappers.nintendo.vs.VsGame;
 import nintaco.preferences.AppPrefs;
+import nintaco.util.EDT;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -343,7 +344,7 @@ public final class InputUtil {
 
         final NetplayServerFrame serverFrame = App.getNetworkServerFrame();
         if (serverFrame != null) {
-            java.awt.EventQueue.invokeLater(serverFrame::enableComponents);
+            EDT.async(serverFrame::enableComponents);
         }
         if (App.getAppMode() == AppMode.NetplayServer) {
             ports = adjustNetplayServerPorts(ports);

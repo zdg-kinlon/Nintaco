@@ -2,6 +2,7 @@ package nintaco.gui;
 
 import nintaco.App;
 import nintaco.preferences.AppPrefs;
+import nintaco.util.EDT;
 
 import javax.swing.*;
 import javax.swing.event.MenuEvent;
@@ -31,7 +32,7 @@ public final class PauseMenuListener implements MenuListener {
 
     @Override
     public void menuDeselected(MenuEvent e) {
-        EventQueue.invokeLater(() -> menuSelectionChanged(-1));
+        EDT.async(() -> menuSelectionChanged(-1));
     }
 
     @Override

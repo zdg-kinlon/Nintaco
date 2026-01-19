@@ -15,6 +15,7 @@ import nintaco.preferences.AppPrefs;
 import nintaco.tv.PixelAspectRatio;
 import nintaco.tv.ScreenBorders;
 import nintaco.tv.TVSystem;
+import nintaco.util.EDT;
 import nintaco.util.GuiUtil;
 
 import javax.swing.*;
@@ -30,7 +31,6 @@ import static java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static nintaco.tv.TVSystem.NTSC;
-import static nintaco.util.GuiUtil.invokeAndWait;
 import static nintaco.util.ThreadUtil.joinAll;
 import static nintaco.util.ThreadUtil.threadWait;
 
@@ -321,15 +321,13 @@ public class ImagePane extends JComponent implements ScreenRenderer {
     }
 
     public void setCursorType(final CursorType cursorType) {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             App.runVsDualImagePane(this, p -> p.setCursorType(cursorType));
             if (this.cursorType != cursorType) {
                 this.cursorType = cursorType;
                 updateCursor();
             }
-        } else {
-            EventQueue.invokeLater(() -> setCursorType(cursorType));
-        }
+        });
     }
 
     public boolean isHideInactiveMouseCursor() {
@@ -361,12 +359,10 @@ public class ImagePane extends JComponent implements ScreenRenderer {
     public void setCursorVisible(final boolean cursorVisible) {
         App.runVsDualImagePane(this, p -> p.setCursorVisible(cursorVisible));
         if (this.cursorVisible != cursorVisible) {
-            if (EventQueue.isDispatchThread()) {
+            EDT.async(() -> {
                 this.cursorVisible = cursorVisible;
                 updateCursor();
-            } else {
-                EventQueue.invokeLater(() -> setCursorVisible(cursorVisible));
-            }
+            });
         }
     }
 
@@ -424,7 +420,7 @@ public class ImagePane extends JComponent implements ScreenRenderer {
     }
 
     public void setTVSystem(final TVSystem tvSystem) {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             App.runVsDualImagePane(this, p -> p.setTVSystem(tvSystem));
             if (this.tvSystem != tvSystem) {
                 this.tvSystem = tvSystem;
@@ -432,9 +428,7 @@ public class ImagePane extends JComponent implements ScreenRenderer {
                 pixelAspectRatio = tvSystem.getPixelAspectRatio();
                 updateScreenBorders();
             }
-        } else {
-            EventQueue.invokeLater(() -> setTVSystem(tvSystem));
-        }
+        });
     }
 
     public boolean isUseTvAspectRatio() {
@@ -479,7 +473,7 @@ public class ImagePane extends JComponent implements ScreenRenderer {
     }
 
     private void adjustPreferredSize() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.sync(() -> {
             final double aspectRatio = useTvAspectRatio ? (pixelAspectRatio.horizontal
                     / (double) pixelAspectRatio.vertical) : 1.0;
             setPreferredSize(new Dimension(
@@ -488,9 +482,7 @@ public class ImagePane extends JComponent implements ScreenRenderer {
                     screenScale * (IMAGE_HEIGHT - screenBorders.top
                             - screenBorders.bottom)));
             invalidate();
-        } else {
-            invokeAndWait(this::adjustPreferredSize);
-        }
+        });
     }
 
     public BufferStrategy getBufferStrategy() {
@@ -502,7 +494,7 @@ public class ImagePane extends JComponent implements ScreenRenderer {
         if (bufferStrategy != null && hideFullscreenMouseCursor) {
             setCursorVisible(false);
         }
-        EventQueue.invokeLater(this::redraw);
+        EDT.async(this::redraw);
     }
 
     public void redraw() {
@@ -621,8 +613,7 @@ public class ImagePane extends JComponent implements ScreenRenderer {
                         toolkit.sync();
                     }
                 } else {
-                    EventQueue.invokeAndWait(
-                            () -> paintImmediately(0, 0, paneWidth, paneHeight));
+                    EDT.sync(() -> paintImmediately(0, 0, paneWidth, paneHeight));
                 }
             } catch (final Throwable t) {
             }
@@ -666,7 +657,7 @@ public class ImagePane extends JComponent implements ScreenRenderer {
         if (filters != null) {
             filters[0].reset();
         }
-        invokeAndWait((Runnable) this::repaint);
+        EDT.sync(() -> repaint());
     }
 
     public void requestRepaint() {

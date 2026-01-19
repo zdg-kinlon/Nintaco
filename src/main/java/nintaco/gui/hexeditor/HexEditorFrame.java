@@ -13,6 +13,7 @@ import nintaco.gui.image.ImageFrame;
 import nintaco.gui.image.preferences.Paths;
 import nintaco.preferences.AppPrefs;
 import nintaco.preferences.GamePrefs;
+import nintaco.util.EDT;
 
 import javax.swing.*;
 import javax.swing.event.MenuEvent;
@@ -205,7 +206,7 @@ public class HexEditorFrame
 
     public void setMachine(final Machine machine) {
         hexEditorView.setMachine(machine);
-        EventQueue.invokeLater(() -> {
+        EDT.async(() -> {
             machineUpdated(machine != null);
             updateBookmarksMenu();
             hexEditorView.colorBookmarks();
@@ -290,7 +291,7 @@ public class HexEditorFrame
 
     public void goToFileContents(final int address) {
         goToAddress(CpuMemory, address);
-        EventQueue.invokeLater(() -> {
+        EDT.async(() -> {
             hexEditorView.goToAddress(FileContents, fileIndex);
             setDataSource(FileContents);
         });

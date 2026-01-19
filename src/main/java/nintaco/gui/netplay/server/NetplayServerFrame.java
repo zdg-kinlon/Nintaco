@@ -4,6 +4,7 @@ import nintaco.App;
 import nintaco.gui.LocalIPAddressRenderer;
 import nintaco.input.Ports;
 import nintaco.preferences.AppPrefs;
+import nintaco.util.EDT;
 import nintaco.util.PasswordUtil;
 
 import javax.swing.*;
@@ -217,15 +218,11 @@ public class NetplayServerFrame extends javax.swing.JFrame {
     }
 
     public void addActivity(final String activity, final Object... params) {
-        if (EventQueue.isDispatchThread()) {
-            activityTextArea.append(String.format(activity, params) + "\n");
-        } else {
-            EventQueue.invokeLater(() -> addActivity(activity, params));
-        }
+        EDT.async(() -> activityTextArea.append(String.format(activity, params) + "\n"));
     }
 
     public void setServerStatus(final boolean serverUp) {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             startServerButton.setSelected(serverUp);
             if (serverUp) {
                 statusLabel.setBackground(GREEN);
@@ -235,9 +232,7 @@ public class NetplayServerFrame extends javax.swing.JFrame {
                 statusLabel.setText("<html><b>DOWN</b></html>");
             }
             enableComponents();
-        } else {
-            EventQueue.invokeLater(() -> setServerStatus(serverUp));
-        }
+        });
     }
 
     /**

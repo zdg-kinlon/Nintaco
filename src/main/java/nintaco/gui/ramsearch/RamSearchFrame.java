@@ -14,6 +14,7 @@ import nintaco.gui.ramwatch.RamWatchRow;
 import nintaco.mappers.Mapper;
 import nintaco.preferences.AppPrefs;
 import nintaco.preferences.GamePrefs;
+import nintaco.util.EDT;
 
 import javax.swing.*;
 import java.awt.*;
@@ -495,7 +496,7 @@ public class RamSearchFrame extends javax.swing.JFrame {
     }
 
     private void updateButtons() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             final Mapper m = mapper;
             final boolean enabled = m != null;
             filterButton.setEnabled(enabled);
@@ -515,9 +516,7 @@ public class RamSearchFrame extends javax.swing.JFrame {
             updateLoadButton();
             nextFrameButton.setEnabled(pauseButton.isEnabled()
                     && pauseButton.isSelected());
-        } else {
-            EventQueue.invokeLater(this::updateButtons);
-        }
+        });
     }
 
     public final void setMachine(final Machine machine) {
@@ -655,7 +654,7 @@ public class RamSearchFrame extends javax.swing.JFrame {
         }
         resetCountsRequest = false;
 
-        EventQueue.invokeLater(this::updateTable);
+        EDT.async(this::updateTable);
     }
 
     private void updateTable() {
@@ -732,7 +731,7 @@ public class RamSearchFrame extends javax.swing.JFrame {
     }
 
     private void showAllRows() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             watchAddresses = null;
             final List<RamSearchTableRow> tableRows = new ArrayList<>();
             for (final MemoryRange range : RANGES[memoryRange]) {
@@ -747,9 +746,7 @@ public class RamSearchFrame extends javax.swing.JFrame {
             }
             tableModel.setRows(tableRows);
             tableModel.fireTableDataChanged();
-        } else {
-            EventQueue.invokeLater(this::showAllRows);
-        }
+        });
     }
 
     public void onStepPausedChanged(boolean paused) {

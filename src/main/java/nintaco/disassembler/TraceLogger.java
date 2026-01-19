@@ -8,6 +8,7 @@ import nintaco.gui.debugger.logger.LoggerAppPrefs;
 import nintaco.mappers.Mapper;
 import nintaco.preferences.AppPrefs;
 import nintaco.preferences.GamePrefs;
+import nintaco.util.EDT;
 
 import java.awt.*;
 import java.io.BufferedWriter;
@@ -137,7 +138,7 @@ public class TraceLogger {
                     App.disposeTraceLogger();
                     final DebuggerFrame debugger = App.getDebuggerFrame();
                     if (debugger != null) {
-                        EventQueue.invokeLater(debugger::updateLoggerButton);
+                        EDT.async(debugger::updateLoggerButton);
                     }
                 }
             }

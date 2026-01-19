@@ -2,7 +2,7 @@ package nintaco.gui.api.local;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.IOException;
+import nintaco.util.EDT;
 import java.io.OutputStream;
 
 public class TextAreaOutputStream extends OutputStream {
@@ -14,16 +14,7 @@ public class TextAreaOutputStream extends OutputStream {
     }
 
     @Override
-    public void write(final int b) throws IOException {
-        if (EventQueue.isDispatchThread()) {
-            textArea.append(String.valueOf((char) b));
-        } else {
-            EventQueue.invokeLater(() -> {
-                try {
-                    write(b);
-                } catch (final Throwable t) {
-                }
-            });
-        }
+    public void write(final int b) {
+        EDT.async(() -> textArea.append(String.valueOf((char) b)));
     }
 }

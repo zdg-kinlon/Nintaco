@@ -1,5 +1,7 @@
 package nintaco.gui.rob;
 
+import nintaco.util.EDT;
+
 import java.awt.*;
 
 import static nintaco.gui.rob.RobGame.*;
@@ -35,7 +37,7 @@ public class RobFrame extends javax.swing.JFrame {
     public void render(final RobState state) {
         final int robGame = state.game;
         if (game != robGame) {
-            EventQueue.invokeLater(() -> setGame(robGame));
+            EDT.async(() -> setGame(robGame));
         }
         switch (robGame) {
             case GYROMITE:

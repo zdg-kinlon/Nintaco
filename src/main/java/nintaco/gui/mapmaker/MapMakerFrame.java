@@ -8,6 +8,7 @@ import nintaco.mappers.Mapper;
 import nintaco.palettes.PaletteUtil;
 import nintaco.preferences.AppPrefs;
 import nintaco.preferences.GamePrefs;
+import nintaco.util.EDT;
 import nintaco.util.GuiUtil;
 
 import javax.imageio.ImageIO;
@@ -180,7 +181,7 @@ public class MapMakerFrame extends javax.swing.JFrame {
     }
 
     private void updateStartIndex() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             filePrefix = filePrefixTextField.getText().trim();
             outputDir = outputDirTextField.getText().trim();
             final String prefix = filePrefix;
@@ -188,15 +189,13 @@ public class MapMakerFrame extends javax.swing.JFrame {
             if (!(isBlank(prefix) || isBlank(outDir))) {
                 new Thread(() -> {
                     final int index = getSuggestedStartIndex(prefix, outDir);
-                    EventQueue.invokeLater(() -> {
+                    EDT.async(() -> {
                         fileIndex = index;
                         startIndexTextField.setText(Integer.toString(fileIndex));
                     });
                 }).start();
             }
-        } else {
-            EventQueue.invokeLater(this::updateStartIndex);
-        }
+        });
     }
 
     private void saveImage(final PPU ppu, final Map<IntPoint, MapTile> tiles,
@@ -245,7 +244,7 @@ public class MapMakerFrame extends javax.swing.JFrame {
                 }
             }
             ImageIO.write(image, fileFormat, file);
-            EventQueue.invokeLater(() -> {
+            EDT.async(() -> {
                 if (running) {
                     statusLabel.setText("Saved: " + fileName);
                 }
@@ -359,7 +358,7 @@ public class MapMakerFrame extends javax.swing.JFrame {
             flush();
         }
 
-        invokeAndWait(this::captureFields);
+        EDT.sync(this::captureFields);
         saveGamePrefs();
 
         final MapMakerAppPrefs prefs = AppPrefs.getInstance().getMapMakerAppPrefs();
@@ -399,7 +398,7 @@ public class MapMakerFrame extends javax.swing.JFrame {
         startTileRow = prefs.getStartTileRow();
         endTileRow = prefs.getEndTileRow();
 
-        EventQueue.invokeLater(() -> {
+        EDT.async(() -> {
             filePrefixTextField.setText(filePrefix);
             captureComboBox.setSelectedIndex(captureType);
             maxDiffTextField.setText(Integer.toString(maxDifferences));
@@ -437,14 +436,12 @@ public class MapMakerFrame extends javax.swing.JFrame {
     }
 
     private void setAutoFlush(final boolean autoFlush) {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             this.autoFlush = autoFlush;
             autoFlushCheckBox.setSelected(autoFlush);
             maxDiffLabel.setEnabled(autoFlush);
             maxDiffTextField.setEnabled(autoFlush);
-        } else {
-            EventQueue.invokeLater(() -> setAutoFlush(autoFlush));
-        }
+        });
     }
 
     private void captureFields() {
@@ -528,7 +525,7 @@ public class MapMakerFrame extends javax.swing.JFrame {
     }
 
     private void setRunning(final boolean running) {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (!running && autoFlush) {
                 flush();
             }
@@ -541,9 +538,7 @@ public class MapMakerFrame extends javax.swing.JFrame {
             flushTimer = 0;
             this.running = running;
             enableComponents();
-        } else {
-            EventQueue.invokeLater(() -> setRunning(running));
-        }
+        });
     }
 
     private void setScanlineComponentsEnabled(final boolean enabled) {
@@ -566,7 +561,7 @@ public class MapMakerFrame extends javax.swing.JFrame {
             mapper = machine.getMapper();
             loadGamePrefs();
         }
-        EventQueue.invokeLater(this::enableComponents);
+        EDT.async(this::enableComponents);
     }
 
     public void update(final int scanline) {
@@ -654,13 +649,13 @@ public class MapMakerFrame extends javax.swing.JFrame {
     private void setPaused(final boolean paused) {
         this.paused = paused;
         if (paused) {
-            EventQueue.invokeLater(() -> {
+            EDT.async(() -> {
                 pauseToggleButton.setSelected(true);
                 pauseToggleButton.setMnemonic('R');
                 pauseToggleButton.setText("Resume");
             });
         } else {
-            EventQueue.invokeLater(() -> {
+            EDT.async(() -> {
                 pauseToggleButton.setSelected(false);
                 pauseToggleButton.setMnemonic('P');
                 pauseToggleButton.setText("Pause");

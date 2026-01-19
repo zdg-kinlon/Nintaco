@@ -1,6 +1,7 @@
 package nintaco.gui.hexeditor;
 
 import nintaco.gui.StyleListener;
+import nintaco.util.EDT;
 
 import javax.swing.*;
 import java.awt.*;
@@ -27,7 +28,7 @@ public class HexEditorColumnHeader extends JComponent implements StyleListener {
     }
 
     public final void setDataSource(final int dataSource) {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             switch (dataSource) {
                 case CpuMemory:
                     dataSourceName = " CPU";
@@ -40,9 +41,7 @@ public class HexEditorColumnHeader extends JComponent implements StyleListener {
                     break;
             }
             repaint();
-        } else {
-            EventQueue.invokeLater(() -> setDataSource(dataSource));
-        }
+        });
     }
 
     @Override
@@ -65,7 +64,7 @@ public class HexEditorColumnHeader extends JComponent implements StyleListener {
             charAscent = metrics.getAscent();
             preferredSize = new Dimension((MARGIN << 1) + 76 * charWidth,
                     (MARGIN << 1) + charHeight);
-            EventQueue.invokeLater(scrollPane::updateUI);
+            EDT.async(scrollPane::updateUI);
         }
 
         g.setColor(Color.WHITE);

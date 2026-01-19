@@ -4,6 +4,7 @@ import nintaco.gui.CustomFocusTraversalPolicy;
 import nintaco.gui.InformationDialog;
 import nintaco.gui.hexeditor.preferences.Search;
 import nintaco.preferences.AppPrefs;
+import nintaco.util.EDT;
 
 import javax.swing.*;
 import javax.swing.text.JTextComponent;
@@ -183,15 +184,13 @@ public class SearchDialog extends javax.swing.JDialog {
     }
 
     public void setCharTable(final CharTable charTable) {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             this.charTable = charTable;
             final Search search = AppPrefs.getInstance()
                     .getHexEditorPrefs().getSearch();
             updateComboBoxModel(findComboBox, search.getRecentFinds());
             updateComboBoxModel(replaceComboBox, search.getRecentReplaces());
-        } else {
-            EventQueue.invokeLater(() -> setCharTable(charTable));
-        }
+        });
     }
 
     public void setHexEditorView(final HexEditorView hexEditorView) {

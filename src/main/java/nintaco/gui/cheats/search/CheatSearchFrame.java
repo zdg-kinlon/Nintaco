@@ -11,6 +11,7 @@ import nintaco.gui.image.ImageFrame;
 import nintaco.gui.image.QuickSaveListener;
 import nintaco.gui.image.QuickSaveStateInfo;
 import nintaco.mappers.Mapper;
+import nintaco.util.EDT;
 
 import javax.swing.*;
 import javax.swing.event.DocumentListener;
@@ -179,7 +180,7 @@ public class CheatSearchFrame extends javax.swing.JFrame {
         }
         updateR(0, mapper);
         updateR(1, mapper);
-        EventQueue.invokeLater(() -> {
+        EDT.async(() -> {
             final CartFile cartFile = App.getCartFile();
             if (cartFile != null) {
                 nvramCheckBox.setSelected(cartFile.isNonVolatilePrgRamPresent());
@@ -395,15 +396,13 @@ public class CheatSearchFrame extends javax.swing.JFrame {
     }
 
     private void rUpdated() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (requestPause) {
                 App.setStepPause(true);
                 requestPause = false;
             }
             updateRamTableModel();
-        } else {
-            EventQueue.invokeLater(this::rUpdated);
-        }
+        });
     }
 
     private void updateRamTableModel() {

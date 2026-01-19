@@ -1,5 +1,7 @@
 package nintaco.gui.rob;
 
+import nintaco.util.EDT;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
@@ -83,7 +85,7 @@ public abstract class RobPane extends JComponent {
     public void render(final RobState state) {
         if (this.state.modifications != state.modifications) {
             this.state.init(state);
-            EventQueue.invokeLater(this::repaint);
+            EDT.async(this::repaint);
         }
     }
 

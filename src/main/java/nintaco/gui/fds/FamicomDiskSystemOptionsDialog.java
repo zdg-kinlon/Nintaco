@@ -6,6 +6,7 @@ import nintaco.gui.FileExtensionFilter;
 import nintaco.gui.PleaseWaitDialog;
 import nintaco.gui.archive.ArchiveFileChooser;
 import nintaco.preferences.AppPrefs;
+import nintaco.util.EDT;
 
 import javax.swing.*;
 import java.awt.*;
@@ -120,7 +121,7 @@ public class FamicomDiskSystemOptionsDialog extends javax.swing.JDialog {
                     return;
                 }
                 pleaseWaitDialog.dispose();
-                EventQueue.invokeLater(this::biosLoadCompleted);
+                EDT.async(this::biosLoadCompleted);
             });
         } catch (final FileNotFoundException f) {
             displayLoadBiosError(pleaseWaitDialog, "BIOS file not found.");
@@ -128,7 +129,7 @@ public class FamicomDiskSystemOptionsDialog extends javax.swing.JDialog {
             displayLoadBiosError(pleaseWaitDialog);
         } finally {
             pleaseWaitDialog.dispose();
-            EventQueue.invokeLater(() -> {
+            EDT.async(() -> {
                 loadingsBIOS = false;
             });
         }
@@ -171,13 +172,13 @@ public class FamicomDiskSystemOptionsDialog extends javax.swing.JDialog {
                     displayError(this, "The archive does not contain any files.");
                     break;
                 case 1:
-                    EventQueue.invokeLater(() -> {
+                    EDT.async(() -> {
                         fileTextField.setText(new FilePath(
                                 files.get(0), archiveFileName).toLongString());
                     });
                     break;
                 default:
-                    EventQueue.invokeLater(() -> showArchiveFileChooser(archiveFileName,
+                    EDT.async(() -> showArchiveFileChooser(archiveFileName,
                             files));
                     break;
             }

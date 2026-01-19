@@ -11,6 +11,7 @@ import nintaco.gui.ToolTipsTable;
 import nintaco.gui.cheats.search.CheatSearchFrame;
 import nintaco.gui.image.preferences.Paths;
 import nintaco.preferences.AppPrefs;
+import nintaco.util.EDT;
 
 import javax.swing.*;
 import java.awt.*;
@@ -126,7 +127,7 @@ public class CheatsDialog extends javax.swing.JDialog {
             displayError(this, "The file does not contain any valid cheats.");
         } else {
             final List<Cheat> cs = cheats;
-            EventQueue.invokeLater(() -> {
+            EDT.async(() -> {
                 tableModel.addCheats(cs, true);
                 updateButtons();
             });
@@ -196,7 +197,7 @@ public class CheatsDialog extends javax.swing.JDialog {
     private void addCheat(final Cheat cheat) {
         if (cheat != null) {
             tableModel.addCheat(cheat);
-            EventQueue.invokeLater(() -> {
+            EDT.async(() -> {
                 scrollToBottom(cheatsScrollPane);
                 cheatsTable.getSelectionModel().setSelectionInterval(tableModel
                         .getRowCount() - 1, tableModel.getRowCount() - 1);

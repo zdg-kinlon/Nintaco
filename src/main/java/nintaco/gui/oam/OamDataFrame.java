@@ -8,6 +8,7 @@ import nintaco.gui.ImagePanel;
 import nintaco.gui.MaxLengthDocument;
 import nintaco.palettes.PaletteUtil;
 import nintaco.preferences.AppPrefs;
+import nintaco.util.EDT;
 
 import javax.swing.*;
 import javax.swing.event.DocumentListener;
@@ -219,7 +220,7 @@ public class OamDataFrame extends javax.swing.JFrame {
             }
         }
         final boolean enabled = machine != null;
-        EventQueue.invokeLater(() -> enableComponents(enabled));
+        EDT.async(() -> enableComponents(enabled));
     }
 
     public void update(final int scanline) {
@@ -330,7 +331,7 @@ public class OamDataFrame extends javax.swing.JFrame {
             priority = xFlip = yFlip = false;
             PPU.clearHighlightedSprite();
         }
-        EventQueue.invokeLater(() -> {
+        EDT.async(() -> {
             if (x >= 0) {
                 updateSpriteFields(x, y, tile, attribute, oamAddress, tileAddress,
                         priority, xFlip, yFlip);

@@ -4,6 +4,7 @@ import nintaco.gui.historyeditor.HistoryEditorFrame;
 import nintaco.gui.historyeditor.HistoryTableModel;
 import nintaco.gui.historyeditor.change.DeleteChange;
 import nintaco.movie.Movie;
+import nintaco.util.EDT;
 
 import java.awt.*;
 
@@ -23,7 +24,7 @@ public class TrimTopTask extends SaveStateTask {
         change.setSaveState(saveState);
         change.setDescription(HistoryTableModel.createRange("Trim top", 0,
                 endFrameIndex));
-        EventQueue.invokeLater(() -> {
+        EDT.async(() -> {
             historyTableModel.addChange(change);
             historyEditorFrame.runToLastClickedRow(0);
         });

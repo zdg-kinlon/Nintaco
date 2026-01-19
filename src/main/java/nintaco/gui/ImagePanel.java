@@ -1,5 +1,7 @@
 package nintaco.gui;
 
+import nintaco.util.EDT;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -207,7 +209,7 @@ public class ImagePanel extends JPanel {
 
     public void clearScreen() {
         Arrays.fill(screen, 0);
-        EventQueue.invokeLater(this::repaint);
+        EDT.async(this::repaint);
     }
 
     public void render() {

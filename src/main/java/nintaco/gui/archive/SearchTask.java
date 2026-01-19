@@ -1,6 +1,7 @@
 package nintaco.gui.archive;
 
 import nintaco.task.Task;
+import nintaco.util.EDT;
 
 import javax.swing.*;
 import java.awt.*;
@@ -116,7 +117,7 @@ public class SearchTask extends Task {
             }
         }
         if (!canceled) {
-            EventQueue.invokeLater(() -> updateModel(model));
+            EDT.async(() -> updateModel(model));
         }
     }
 
@@ -142,7 +143,7 @@ public class SearchTask extends Task {
             if (selectedIndex >= 0) {
                 list.setSelectedIndex(selectedIndex);
                 final int index = selectedIndex;
-                EventQueue.invokeLater(() -> scrollToCenter(list, index));
+                EDT.async(() -> scrollToCenter(list, index));
             } else {
                 list.clearSelection();
             }

@@ -4,6 +4,7 @@ import nintaco.App;
 import nintaco.palettes.PalettePPU;
 import nintaco.palettes.PaletteUtil;
 import nintaco.preferences.AppPrefs;
+import nintaco.util.EDT;
 
 import javax.swing.event.DocumentListener;
 import java.awt.*;
@@ -178,15 +179,11 @@ public class NetplayClientFrame extends javax.swing.JFrame {
     }
 
     public void addActivity(final String activity, final Object... params) {
-        if (EventQueue.isDispatchThread()) {
-            activityTextArea.append(String.format(activity, params) + "\n");
-        } else {
-            EventQueue.invokeLater(() -> addActivity(activity, params));
-        }
+        EDT.async(() -> activityTextArea.append(String.format(activity, params) + "\n"));
     }
 
     public void setClientStatus(final ClientStatus status) {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             connectButton.setSelected(status != OFFLINE);
             switch (status) {
                 case OFFLINE:
@@ -203,9 +200,7 @@ public class NetplayClientFrame extends javax.swing.JFrame {
                     break;
             }
             enableComponents();
-        } else {
-            EventQueue.invokeLater(() -> setClientStatus(status));
-        }
+        });
     }
 
     /**

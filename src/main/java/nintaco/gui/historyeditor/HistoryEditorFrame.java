@@ -13,6 +13,7 @@ import nintaco.movie.Movie;
 import nintaco.preferences.AppPrefs;
 import nintaco.task.Task;
 import nintaco.task.TaskScheduler;
+import nintaco.util.EDT;
 
 import javax.swing.*;
 import java.awt.*;
@@ -197,8 +198,7 @@ public class HistoryEditorFrame extends javax.swing.JFrame
     }
 
     public void setMachineRunner(final MachineRunner machineRunner) {
-
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (machineRunner == null || machineRunner.getMachine() == null) {
                 closeProject();
             } else {
@@ -228,9 +228,7 @@ public class HistoryEditorFrame extends javax.swing.JFrame
                 resetProgressBar();
                 saveSlotsComboBox.setSelectedIndex(0);
             }
-        } else {
-            EventQueue.invokeLater(() -> setMachineRunner(machineRunner));
-        }
+        });
     }
 
     private void initHistoryTable() {
@@ -556,11 +554,7 @@ public class HistoryEditorFrame extends javax.swing.JFrame
     }
 
     public void movieUpdated(final int frameIndex) {
-        if (EventQueue.isDispatchThread()) {
-            historyTableModel.fireTableRowsUpdated(frameIndex, frameIndex);
-        } else {
-            EventQueue.invokeLater(() -> movieUpdated(frameIndex));
-        }
+        EDT.async(() -> historyTableModel.fireTableRowsUpdated(frameIndex, frameIndex));
     }
 
     private void updateViewPlayers() {
@@ -652,19 +646,17 @@ public class HistoryEditorFrame extends javax.swing.JFrame
     }
 
     public void setProgressBar(final Task task, final int value) {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (!task.isCanceled()) {
                 progressBar.setValue(value);
             }
-        } else {
-            EventQueue.invokeLater(() -> setProgressBar(task, value));
-        }
+        });
     }
 
     @Override
     public void framePlayed(final Task task, final int frameIndex,
                             final MachineRunner machineRunner) {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (!task.isCanceled()) {
                 progressBar.setValue(frameIndex);
                 historyTableModel.setHeadIndex(frameIndex);
@@ -672,27 +664,21 @@ public class HistoryEditorFrame extends javax.swing.JFrame
                     historyTableModel.setTailIndex(frameIndex);
                 }
             }
-        } else {
-            EventQueue.invokeLater(() -> framePlayed(task, frameIndex,
-                    machineRunner));
-        }
+        });
     }
 
     public void handleRewoundFrame(final Task task, final int frameIndex) {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (!task.isCanceled()) {
                 historyTableModel.setHeadIndex(frameIndex);
                 scrollTo(frameIndex);
             }
-        } else {
-            EventQueue.invokeLater(() -> handleRewoundFrame(task, frameIndex));
-        }
+        });
     }
 
     public void handleRecordedFrame(final Task task, final int frameIndex,
                                     final boolean newFrame) {
-
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (!task.isCanceled()) {
                 if (newFrame) {
                     historyTableModel.fireTableRowsInserted(frameIndex, frameIndex);
@@ -701,10 +687,7 @@ public class HistoryEditorFrame extends javax.swing.JFrame
                 historyTableModel.setTailIndex(frameIndex);
                 scrollTo(frameIndex);
             }
-        } else {
-            EventQueue.invokeLater(() -> handleRecordedFrame(task, frameIndex,
-                    newFrame));
-        }
+        });
     }
 
     private void toggleRecording() {
@@ -726,14 +709,12 @@ public class HistoryEditorFrame extends javax.swing.JFrame
     }
 
     public void handleEndRecord(final int[] priorButtons) {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             historyTableModel.handleEndRecord(priorButtons, priorRowCount,
                     priorHeadIndex);
             priorRowCount = historyTableModel.getRowCount();
             priorHeadIndex = historyTableModel.getHeadIndex();
-        } else {
-            EventQueue.invokeLater(() -> handleEndRecord(priorButtons));
-        }
+        });
     }
 
     private boolean[] getRecordPlayers() {
@@ -1055,7 +1036,7 @@ public class HistoryEditorFrame extends javax.swing.JFrame
         final int lastRowIndex = rowIndex + rowCount - 1;
         historyTable.getSelectionModel().setSelectionInterval(rowIndex,
                 lastRowIndex);
-        EventQueue.invokeLater(() -> scrollToVisible(historyTable, lastRowIndex));
+        EDT.async(() -> scrollToVisible(historyTable, lastRowIndex));
         runToLastClickedRow(rowIndex);
     }
 
@@ -1082,7 +1063,7 @@ public class HistoryEditorFrame extends javax.swing.JFrame
         historyTableModel.insertButtons(rowIndex, toIntArray(buttons));
         selectIntervals(rowIndex, buttons);
         final int lastRowIndex = rowIndex + buttons.length - 1;
-        EventQueue.invokeLater(() -> scrollToVisible(historyTable, lastRowIndex));
+        EDT.async(() -> scrollToVisible(historyTable, lastRowIndex));
         runToLastClickedRow(rowIndex);
     }
 
@@ -1231,7 +1212,7 @@ public class HistoryEditorFrame extends javax.swing.JFrame
         historyTableModel.insertButtons(rowIndex, toIntArray(buttons));
         selectIntervals(rowIndex, buttons);
         final int lastRowIndex = rowIndex + buttons.length - 1;
-        EventQueue.invokeLater(() -> scrollToVisible(historyTable, lastRowIndex));
+        EDT.async(() -> scrollToVisible(historyTable, lastRowIndex));
         runToLastClickedRow(rowIndex);
     }
 
@@ -1414,7 +1395,7 @@ public class HistoryEditorFrame extends javax.swing.JFrame
         } finally {
             final boolean showError = failed;
             pleaseWaitDialog.dispose();
-            EventQueue.invokeLater(() -> {
+            EDT.async(() -> {
                 priorSaveFile = file;
                 setDisking(false);
                 if (showError) {
@@ -1449,7 +1430,7 @@ public class HistoryEditorFrame extends javax.swing.JFrame
             final boolean showError = failed;
             final HistoryProject p = project;
             pleaseWaitDialog.dispose();
-            EventQueue.invokeLater(() -> {
+            EDT.async(() -> {
                 priorSaveFile = file;
                 setDisking(false);
                 if (showError) {

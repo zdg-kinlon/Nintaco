@@ -8,6 +8,7 @@ import nintaco.gui.PleaseWaitDialog;
 import nintaco.preferences.AppPrefs;
 import nintaco.preferences.GamePrefs;
 import nintaco.util.CollectionsUtil;
+import nintaco.util.EDT;
 
 import javax.swing.*;
 import java.awt.*;
@@ -139,7 +140,7 @@ public class ProgramFrame extends javax.swing.JFrame {
         } else {
             loadedJarFileName = fileName;
             final String[] names = mainClassNames;
-            EventQueue.invokeLater(() -> setRunConfiguration(names));
+            EDT.async(() -> setRunConfiguration(names));
         }
     }
 
@@ -308,7 +309,7 @@ public class ProgramFrame extends javax.swing.JFrame {
         final File file = new File(jarFileName);
         if (!file.isFile() || !file.exists()) {
             displayError(this, "JAR file not found.");
-            EventQueue.invokeLater(this::stopButtonPressed);
+            EDT.async(this::stopButtonPressed);
             return;
         }
 

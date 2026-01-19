@@ -4,6 +4,7 @@ import nintaco.files.FilePath;
 import nintaco.files.FileUtil;
 import nintaco.gui.archive.ArchiveFileChooser;
 import nintaco.gui.image.preferences.Paths;
+import nintaco.util.EDT;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
@@ -198,7 +199,7 @@ public class BrowsePanel extends javax.swing.JPanel {
                     displayError(window, "The archive does not contain any files.");
                     break;
                 case 1:
-                    EventQueue.invokeLater(() -> {
+                    EDT.async(() -> {
                         fileTextField.setText(new FilePath(files.get(0), archiveFileName)
                                 .toLongString());
                         if (browseButtonListener != null) {
@@ -210,7 +211,7 @@ public class BrowsePanel extends javax.swing.JPanel {
                     });
                     break;
                 default:
-                    EventQueue.invokeLater(() -> showArchiveFileChooser(archiveFileName,
+                    EDT.async(() -> showArchiveFileChooser(archiveFileName,
                             files));
                     break;
             }

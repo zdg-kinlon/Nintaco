@@ -1,6 +1,7 @@
 package nintaco.gui.archive;
 
 import nintaco.task.TaskScheduler;
+import nintaco.util.EDT;
 
 import javax.swing.*;
 import java.awt.*;
@@ -212,7 +213,7 @@ public class ArchiveFileChooser extends javax.swing.JDialog {
     private void formComponentShown(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentShown
         if (fileList.getSelectedIndex() >= 0) {
             fileList.requestFocusInWindow();
-            EventQueue.invokeLater(() -> scrollToCenter(fileList,
+            EDT.async(() -> scrollToCenter(fileList,
                     fileList.getSelectedIndex()));
         } else {
             requestFocusInWindow();

@@ -12,6 +12,7 @@ import nintaco.gui.ramsearch.RamSearchFrame;
 import nintaco.mappers.Mapper;
 import nintaco.preferences.AppPrefs;
 import nintaco.preferences.GamePrefs;
+import nintaco.util.EDT;
 
 import javax.swing.*;
 import java.awt.*;
@@ -134,7 +135,7 @@ public class RamWatchFrame extends javax.swing.JFrame {
     private void loadGamePrefs() {
         final List<RamWatchRow> rows = GamePrefs.getInstance()
                 .getRamWatchGamePrefs().getRows();
-        EventQueue.invokeLater(() -> {
+        EDT.async(() -> {
             synchronized (GamePrefs.class) {
                 tableModel.copyRows(rows);
             }
@@ -281,7 +282,7 @@ public class RamWatchFrame extends javax.swing.JFrame {
     public final void setMachine(final Machine machine) {
         if (machine == null) {
             mapper = null;
-            EventQueue.invokeLater(this::clearTable);
+            EDT.async(this::clearTable);
         } else {
             mapper = machine.getMapper();
             loadGamePrefs();
@@ -317,7 +318,7 @@ public class RamWatchFrame extends javax.swing.JFrame {
                 }
             }
         }
-        EventQueue.invokeLater(this::updateTable);
+        EDT.async(this::updateTable);
     }
 
     private void updateTable() {
@@ -361,7 +362,7 @@ public class RamWatchFrame extends javax.swing.JFrame {
     }
 
     private void updateButtons() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             final boolean enabled = mapper != null;
             final int selectedIndex = table.getSelectedRow();
             final boolean rowSelected = enabled && selectedIndex >= 0
@@ -398,9 +399,7 @@ public class RamWatchFrame extends javax.swing.JFrame {
             searchMenuItem.setEnabled(searchButton.isEnabled());
             addCheatMenuItem.setEnabled(addCheatButton.isEnabled());
             hexEditorMenuItem.setEnabled(hexEditorButton.isEnabled());
-        } else {
-            EventQueue.invokeLater(this::updateButtons);
-        }
+        });
     }
 
     private void importWatchList(final PleaseWaitDialog pleaseWaitDialog,
@@ -460,7 +459,7 @@ public class RamWatchFrame extends javax.swing.JFrame {
         if (error) {
             displayError(this, "Failed to import watch list.");
         } else {
-            EventQueue.invokeLater(() -> {
+            EDT.async(() -> {
                 tableModel.setRows(rows);
                 tableModel.fireTableDataChanged();
                 onTableRowsChanged();

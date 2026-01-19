@@ -15,6 +15,7 @@ import nintaco.movie.Movie;
 import nintaco.movie.MovieFrame;
 import nintaco.task.Task;
 import nintaco.task.TaskScheduler;
+import nintaco.util.EDT;
 
 import javax.swing.*;
 import javax.swing.JSpinner.NumberEditor;
@@ -82,23 +83,24 @@ public class WatchHistoryPanel extends javax.swing.JPanel {
         return movie;
     }
 
-    public void setMovie(Movie movie) {
-        if (EventQueue.isDispatchThread()) {
+    public void setMovie(final Movie movie) {
+        EDT.async(() -> {
             final MachineRunner machineRunner = App.getMachineRunner();
+            Movie m = movie;
             if (machineRunner != null) {
-                if (movie == null) {
-                    movie = machineRunner.getMovie();
+                if (m == null) {
+                    m = machineRunner.getMovie();
                 }
                 machineRunner.dispose();
                 App.updateFrames(null);
                 App.setMachineRunner(null);
             }
-            if (movie != null) {
-                if (this.movie == movie) {
+            if (m != null) {
+                if (this.movie == m) {
                     return;
                 }
-                this.movie = movie;
-                endPlayIndex = movie.frameCount - 1;
+                this.movie = m;
+                endPlayIndex = m.frameCount - 1;
                 historySlider.setMinimum(0);
                 historySlider.setMaximum(endPlayIndex);
                 historySlider.setValue(0);
@@ -120,7 +122,7 @@ public class WatchHistoryPanel extends javax.swing.JPanel {
                             public void keyPressed(KeyEvent e) {
                                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                                     requestFocusInWindow();
-                                    EventQueue.invokeLater(() -> seek(currentFrameSpinner));
+                                    EDT.async(() -> seek(currentFrameSpinner));
                                 }
                             }
                         });
@@ -129,14 +131,11 @@ public class WatchHistoryPanel extends javax.swing.JPanel {
                 addSpinnerEditListener(startFrameSpinner, this::updatePreviewAndSave);
                 addSpinnerEditListener(endFrameSpinner, this::updatePreviewAndSave);
             }
-        } else {
-            final Movie m = movie;
-            EventQueue.invokeLater(() -> setMovie(m));
-        }
+        });
     }
 
     public void setShowSave(final boolean showSave) {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             parent.setTitle(showSave ? "Export Video/Audio" : "Watch History");
             savePanel.setVisible(showSave);
             if (showSave) {
@@ -148,13 +147,11 @@ public class WatchHistoryPanel extends javax.swing.JPanel {
                 playMovie(false, false);
             }
             updatePlayButton();
-        } else {
-            EventQueue.invokeLater(() -> setShowSave(showSave));
-        }
+        });
     }
 
     public void init() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             setPreferredSize(null);
             running = true;
             if (taskScheduler == null) {
@@ -168,9 +165,7 @@ public class WatchHistoryPanel extends javax.swing.JPanel {
             }
             popupFactory = PopupFactory.getSharedInstance();
             setComponentsEnabled(true);
-        } else {
-            EventQueue.invokeLater(this::init);
-        }
+        });
     }
 
     private void setComponentsEnabled(final boolean enabled) {
@@ -202,32 +197,30 @@ public class WatchHistoryPanel extends javax.swing.JPanel {
 
     public void movieFramePlayed(final Task task, final int frameIndex,
                                  final MachineRunner machineRunner) {
-        if (EventQueue.isDispatchThread()) {
-            historySlider.setValue(frameIndex);
-            if (frameIndex >= endPlayIndex) {
-                playingMovie = false;
-                updatePlayButton();
+        EDT.async(() -> {
+            if (!task.isCanceled()) {
+                historySlider.setValue(frameIndex);
+                if (frameIndex >= endPlayIndex) {
+                    playingMovie = false;
+                    updatePlayButton();
+                }
             }
-        } else if (!task.isCanceled()) {
-            EventQueue.invokeLater(() -> movieFramePlayed(task, frameIndex,
-                    machineRunner));
-        }
+        });
     }
 
     public void previewFramePlayed(final Task task, final int frameIndex,
                                    final MachineRunner machineRunner) {
-        if (EventQueue.isDispatchThread()) {
-            hidePreviewPopup();
-            if (mouseEntered && App.getImageFrame().isDisplayingImagePane()) {
-                previewPane.drawRectangle();
-                previewPopup = popupFactory.getPopup(this, previewPane, previewPopupX,
-                        previewPopupY);
-                previewPopup.show();
+        EDT.async(() -> {
+            if (!task.isCanceled()) {
+                hidePreviewPopup();
+                if (mouseEntered && App.getImageFrame().isDisplayingImagePane()) {
+                    previewPane.drawRectangle();
+                    previewPopup = popupFactory.getPopup(this, previewPane, previewPopupX,
+                            previewPopupY);
+                    previewPopup.show();
+                }  
             }
-        } else if (!task.isCanceled()) {
-            EventQueue.invokeLater(() -> previewFramePlayed(task, frameIndex,
-                    machineRunner));
-        }
+        });
     }
 
     private void mouseMoved(final MouseEvent e) {
@@ -296,7 +289,7 @@ public class WatchHistoryPanel extends javax.swing.JPanel {
                     ? historySlider.getValue() : historySlider.getMaximum();
             hidePreviewPopup();
             cancelPlayTask(false);
-            EventQueue.invokeLater(() -> {
+            EDT.async(() -> {
                 if (playButtonPressed
                         && historySlider.getValue() == historySlider.getMaximum()) {
                     historySlider.setValue(0);
@@ -314,11 +307,11 @@ public class WatchHistoryPanel extends javax.swing.JPanel {
     private void showFrame(final int offset) {
         if (running) {
             cancelPlayTask();
-            EventQueue.invokeLater(() -> {
+            EDT.async(() -> {
                 endPlayIndex = clamp(historySlider.getValue() + offset, 0,
                         historySlider.getMaximum());
                 playMovieTask = new RenderScreenTask(movie, endPlayIndex, (r, f) -> {
-                    EventQueue.invokeLater(() -> historySlider.setValue(f.frameIndex));
+                    EDT.async(() -> historySlider.setValue(f.frameIndex));
                     RenderScreenTask.DEFAULT_RENDER_SCREEN_LISTENER
                             .completedRendering(r, f);
                 });
@@ -341,7 +334,7 @@ public class WatchHistoryPanel extends javax.swing.JPanel {
     private void resumeHere(final int frameIndex, final boolean clearHistory) {
         if (running) {
             cancelPlayTask();
-            EventQueue.invokeLater(() -> {
+            EDT.async(() -> {
                 hidePreviewPopup();
                 taskScheduler.cancelAll();
                 hoverScheduler.cancelAll();
@@ -393,7 +386,7 @@ public class WatchHistoryPanel extends javax.swing.JPanel {
 
     public void close() {
         cancelPlayTask();
-        EventQueue.invokeLater(() -> {
+        EDT.async(() -> {
             hidePreviewPopup();
             running = false;
             if (taskScheduler != null) {
@@ -761,7 +754,7 @@ public class WatchHistoryPanel extends javax.swing.JPanel {
             wasPlayingWhenPressed = playingMovie;
             mouseEntered = true;
             cancelPlayTask();
-            EventQueue.invokeLater(() -> {
+            EDT.async(() -> {
                 final SliderUI sliderUI = historySlider.getUI();
                 if (sliderUI instanceof BasicSliderUI) {
                     historySlider.setValue(((BasicSliderUI) sliderUI).valueForXPosition(
@@ -828,7 +821,7 @@ public class WatchHistoryPanel extends javax.swing.JPanel {
                     && startFrameIndex <= endFrameIndex) {
                 hidePreviewPopup();
                 cancelPlayTask();
-                EventQueue.invokeLater(() -> {
+                EDT.async(() -> {
                     playingMovie = true;
                     endPlayIndex = endFrameIndex;
                     playMovieTask = new WatchMovieTask(movie, startFrameIndex,
@@ -852,7 +845,7 @@ public class WatchHistoryPanel extends javax.swing.JPanel {
                     && startFrameIndex <= endFrameIndex) {
                 hidePreviewPopup();
                 cancelPlayTask();
-                EventQueue.invokeLater(() -> {
+                EDT.async(() -> {
                     new ExportMediaFileDialog(App.getImageFrame(), movie, startFrameIndex,
                             endFrameIndex, previewPane.getImage(), previewPane.getScreen())
                             .setVisible(true);

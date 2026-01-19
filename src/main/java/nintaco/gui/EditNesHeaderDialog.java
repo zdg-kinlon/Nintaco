@@ -11,6 +11,7 @@ import nintaco.gui.image.preferences.Paths;
 import nintaco.mappers.nintendo.vs.VsHardware;
 import nintaco.mappers.nintendo.vs.VsPPU;
 import nintaco.preferences.AppPrefs;
+import nintaco.util.EDT;
 
 import javax.swing.*;
 import java.awt.*;
@@ -385,7 +386,7 @@ public class EditNesHeaderDialog extends javax.swing.JDialog {
 
     private void selectionChanged(final ItemEvent e) {
         if (e.getStateChange() == ItemEvent.SELECTED) {
-            EventQueue.invokeLater(() -> {
+            EDT.async(() -> {
                 captureAllFields();
                 setAllFields();
             });

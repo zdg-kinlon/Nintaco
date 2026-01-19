@@ -1,5 +1,7 @@
 package nintaco.gui;
 
+import nintaco.util.EDT;
+
 import java.awt.*;
 
 import static nintaco.util.GuiUtil.scaleFonts;
@@ -24,44 +26,24 @@ public class ProgressDialog extends javax.swing.JDialog {
     }
 
     public void setMessage(final String message) {
-        if (EventQueue.isDispatchThread()) {
-            messageLabel.setText(message);
-        } else {
-            EventQueue.invokeLater(() -> setMessage(message));
-        }
+        EDT.async(() -> messageLabel.setText(message));
     }
 
     public void setMinimum(final int minimum) {
-        if (EventQueue.isDispatchThread()) {
-            progressBar.setMinimum(minimum);
-        } else {
-            EventQueue.invokeLater(() -> setMinimum(minimum));
-        }
+        EDT.async(() -> progressBar.setMinimum(minimum));
     }
 
     public void setMaximum(final int maximum) {
-        if (EventQueue.isDispatchThread()) {
-            progressBar.setMaximum(maximum);
-        } else {
-            EventQueue.invokeLater(() -> setMaximum(maximum));
-        }
+        EDT.async(() -> progressBar.setMaximum(maximum));
     }
 
     public void setValue(final int value) {
-        if (EventQueue.isDispatchThread()) {
-            progressBar.setValue(value);
-        } else {
-            EventQueue.invokeLater(() -> setValue(value));
-        }
+        EDT.async(() -> progressBar.setValue(value));
     }
 
     @Override
     public void dispose() {
-        if (EventQueue.isDispatchThread()) {
-            super.dispose();
-        } else {
-            EventQueue.invokeLater(this::dispose);
-        }
+        EDT.async(super::dispose);
     }
 
     private void cancel() {

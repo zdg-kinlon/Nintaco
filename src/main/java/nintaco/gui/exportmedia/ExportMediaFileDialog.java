@@ -21,6 +21,7 @@ import nintaco.movie.VideoFile;
 import nintaco.palettes.PaletteNames;
 import nintaco.preferences.AppPrefs;
 import nintaco.tv.TVSystem;
+import nintaco.util.EDT;
 import nintaco.util.GuiUtil;
 
 import javax.imageio.ImageIO;
@@ -322,7 +323,7 @@ public class ExportMediaFileDialog extends javax.swing.JDialog {
             if (frameIndex == endFrameIndex) {
                 disposeImageConverter();
                 progressDialog.dispose();
-                EventQueue.invokeLater(this::displaySuccessMessage);
+                EDT.async(this::displaySuccessMessage);
             }
         } catch (final Throwable t) {
             disposeImageConverter();
@@ -385,7 +386,7 @@ public class ExportMediaFileDialog extends javax.swing.JDialog {
         if (task != null && !task.isCanceled()) {
             task.cancel();
             if (t == null) {
-                EventQueue.invokeLater(this::displaySuccessMessage);
+                EDT.async(this::displaySuccessMessage);
             } else {
                 //t.printStackTrace();
                 displayError(ERROR_TITLE, this, "Failed to write frame image.");
@@ -438,7 +439,7 @@ public class ExportMediaFileDialog extends javax.swing.JDialog {
         if (task != null && !task.isCanceled()) {
             task.cancel();
             if (t == null) {
-                EventQueue.invokeLater(this::displaySuccessMessage);
+                EDT.async(this::displaySuccessMessage);
             } else {
                 //t.printStackTrace();
                 displayError(ERROR_TITLE, this, "Failed to write frame image.");
@@ -777,7 +778,7 @@ public class ExportMediaFileDialog extends javax.swing.JDialog {
                                 pipedOut.close();
                             } catch (final Throwable u) {
                             }
-                            EventQueue.invokeLater(this::displaySuccessMessage);
+                            EDT.async(this::displaySuccessMessage);
                         }
                     };
                     audioProcessor = s -> {

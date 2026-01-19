@@ -52,6 +52,7 @@ import nintaco.preferences.AppPrefs;
 import nintaco.tv.TVSystem;
 import nintaco.util.BrowserUtil;
 import nintaco.util.CollectionsUtil;
+import nintaco.util.EDT;
 import nintaco.util.GuiUtil;
 
 import javax.swing.*;
@@ -468,7 +469,7 @@ public class ImageFrame extends javax.swing.JFrame implements StyleListener {
         uniformPixelScalingCheckBoxMenuItem.setSelected(uniformPixelScaling);
         underscanCheckBoxMenuItem.setSelected(view.isUnderscan());
 
-        EventQueue.invokeLater(() -> { // TODO REVIEW THIS
+        EDT.async(() -> { // TODO REVIEW THIS
             setUseTvAspectRatio(useTvAspectRatio);
             imagePane.setSmoothScaling(smoothScaling);
             imagePane.setUniformPixelScaling(uniformPixelScaling);
@@ -508,22 +509,15 @@ public class ImageFrame extends javax.swing.JFrame implements StyleListener {
     }
 
     public void setHistoryTracking(final boolean historyTracking) {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             this.historyTracking = historyTracking;
             trackHistoryCheckBoxMenuItem.setSelected(historyTracking);
             setTimeRewinding(timeRewinding && historyTracking);
-        } else {
-            EventQueue.invokeLater(()
-                    -> setHistoryTracking(historyTracking));
-        }
+        });
     }
 
     public void setTimeRewinding(final boolean timeRewinding) {
-        if (EventQueue.isDispatchThread()) {
-            this.timeRewinding = timeRewinding;
-        } else {
-            EventQueue.invokeLater(() -> setTimeRewinding(timeRewinding));
-        }
+        EDT.async(() -> this.timeRewinding = timeRewinding);
     }
 
     private void fireQuickSaveListeners() {
@@ -616,7 +610,7 @@ public class ImageFrame extends javax.swing.JFrame implements StyleListener {
     }
 
     public void createPaletteMenu() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(()->{
             paletteMenu.removeAll();
             final ButtonGroup buttonGroup = new ButtonGroup();
             final Palettes prefs = AppPrefs.getInstance().getPalettes();
@@ -650,9 +644,7 @@ public class ImageFrame extends javax.swing.JFrame implements StyleListener {
                 }
             });
             paletteMenu.add(defaultMenuItem);
-        } else {
-            EventQueue.invokeLater(this::createPaletteMenu);
-        }
+        });
     }
 
     private void paletteSelected(final PalettePPU palettePPU, final String name) {
@@ -807,9 +799,9 @@ public class ImageFrame extends javax.swing.JFrame implements StyleListener {
         lookAndFeelButtonGroup.add(menuItem);
         if (isSelectedTheme) {
             menuItem.setSelected(true);
-            EventQueue.invokeLater(run);
+            EDT.async(run);
         }
-        menuItem.addActionListener(e -> EventQueue.invokeLater(run));
+        menuItem.addActionListener(e -> EDT.async(run));
         lookAndFeelMenu.add(menuItem);
     }
 
@@ -820,11 +812,9 @@ public class ImageFrame extends javax.swing.JFrame implements StyleListener {
         lookAndFeelButtonGroup.add(menuItem);
         if (lookAndFeelInfo.getClassName().equals(lookAndFeelClassName)) {
             menuItem.setSelected(true);
-            EventQueue.invokeLater(
-                    () -> GuiUtil.setLookAndFeel(lookAndFeelClassName));
+            EventQueue.invokeLater(() -> GuiUtil.setLookAndFeel(lookAndFeelClassName));
         }
-        menuItem.addActionListener(e -> EventQueue.invokeLater(
-                () -> GuiUtil.setLookAndFeel(lookAndFeelInfo.getClassName())));
+        menuItem.addActionListener(_ -> EDT.async(() -> GuiUtil.setLookAndFeel(lookAndFeelInfo.getClassName())));
         lookAndFeelMenu.add(menuItem);
     }
 
@@ -845,7 +835,7 @@ public class ImageFrame extends javax.swing.JFrame implements StyleListener {
     }
 
     public void updateContentPane(final Mapper mapper, final NsfFile nsfFile) {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             final WatchHistoryFrame watchHistoryFrame = App.getWatchHistoryFrame();
             if (watchHistoryFrame != null) {
                 watchHistoryFrame.getWatchHistoryPanel().resume(false);
@@ -864,9 +854,7 @@ public class ImageFrame extends javax.swing.JFrame implements StyleListener {
                 SwingUtilities.updateComponentTreeUI(this);
                 maxipack(this);
             }
-        } else {
-            EventQueue.invokeLater(() -> updateContentPane(mapper, nsfFile));
-        }
+        });
     }
 
     public boolean isDisplayingImagePane() {
@@ -927,16 +915,14 @@ public class ImageFrame extends javax.swing.JFrame implements StyleListener {
     public void setMachine(final Machine machine) {
         this.machine = machine;
         nsfPanel.setMachine(machine);
-        EventQueue.invokeLater(this::initTimeRewinding);
+        EDT.async(this::initTimeRewinding);
     }
 
     public void appModeChanged(final AppMode appMode) {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             nsfPanel.appModeChanged(appMode);
             updateMenus();
-        } else {
-            EventQueue.invokeLater(() -> appModeChanged(appMode));
-        }
+        });
     }
 
     public String getFileInfo() {
@@ -956,13 +942,11 @@ public class ImageFrame extends javax.swing.JFrame implements StyleListener {
     }
 
     public void adjustSize() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.sync(() -> {
             if (imagePane.getBufferStrategy() == null) {
                 maxipack(this);
             }
-        } else {
-            invokeAndWait(this::adjustSize);
-        }
+        });
     }
 
     private void toggleFullscreenMode() {
@@ -993,8 +977,10 @@ public class ImageFrame extends javax.swing.JFrame implements StyleListener {
             device.setFullScreenWindow(this);
             createBufferStrategy(3);
             imagePane.setBufferStrategy(getBufferStrategy());
-            EventQueue.invokeLater(() -> setVisible(true));
-            EventQueue.invokeLater(imagePane::redraw);
+            EDT.async(() -> {
+                setVisible(true);
+                imagePane.redraw();
+            });
         }
     }
 
@@ -1011,13 +997,15 @@ public class ImageFrame extends javax.swing.JFrame implements StyleListener {
                 maximize(this);
             }
             requestVsync(this, true);
-            EventQueue.invokeLater(() -> setVisible(true));
-            EventQueue.invokeLater(imagePane::redraw);
+            EDT.async(() -> {
+                setVisible(true);
+                imagePane.redraw();
+            });
         }
     }
 
     public void setFullscreenMode(final boolean fullscreenMode) {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             final SubMonitorFrame subMonitorFrame = App.getSubMonitorFrame();
             if (fullscreenMode) {
                 if (subMonitorFrame != null) {
@@ -1030,9 +1018,7 @@ public class ImageFrame extends javax.swing.JFrame implements StyleListener {
                 }
                 exitFullscreenMode();
             }
-        } else {
-            EventQueue.invokeLater(() -> setFullscreenMode(fullscreenMode));
-        }
+        });
     }
 
     private void openArchiveFile(final String archiveFileName,
@@ -1041,7 +1027,7 @@ public class ImageFrame extends javax.swing.JFrame implements StyleListener {
 
         if (!validateFdsBIOS(entryFileName)) {
             pleaseWaitDialog.dispose();
-            if (invokeAndWait(() -> checkFdsBIOS(entryFileName))) {
+            if (EDT.sync(() -> checkFdsBIOS(entryFileName))) {
                 pleaseWaitDialog = new PleaseWaitDialog(this);
                 pleaseWaitDialog.setMessage("Reading archive file...");
                 pleaseWaitDialog.showAfterDelay();
@@ -1094,7 +1080,7 @@ public class ImageFrame extends javax.swing.JFrame implements StyleListener {
                         pleaseWaitDialog, editHeader, ejectedMachine);
             } else {
                 pleaseWaitDialog.dispose();
-                EventQueue.invokeLater(() -> showArchiveFileChooser(archiveFileName,
+                EDT.async(() -> showArchiveFileChooser(archiveFileName,
                         files, defaultEntry, editHeader, ejectedMachine));
             }
         }
@@ -1233,7 +1219,7 @@ public class ImageFrame extends javax.swing.JFrame implements StyleListener {
                         getDirectoryPath(archiveFileName));
                 AppPrefs.save();
                 editFileHeader(in, size, pleaseWaitDialog, entryFileName);
-                EventQueue.invokeLater(this::createRecentFilesMenu);
+                EDT.async(this::createRecentFilesMenu);
             } else {
                 App.setStepPause(false);
                 final Mapper m = App.loadFile(in, size, entryFileName,
@@ -1253,7 +1239,7 @@ public class ImageFrame extends javax.swing.JFrame implements StyleListener {
                 saveFileName = createSaveFile(isBlank(entryFileName) ? archiveFileName
                         : entryFileName);
                 lastSaveFile = new File(saveFileName);
-                EventQueue.invokeLater(this::finishLoad);
+                EDT.async(this::finishLoad);
             }
         } catch (final FileNotFoundException e) {
             errorMessage = "The selected file was not found.";
@@ -1292,7 +1278,7 @@ public class ImageFrame extends javax.swing.JFrame implements StyleListener {
                 AppPrefs.save();
                 editFileHeader(in, handle.getFileSize(), pleaseWaitDialog,
                         getFileName(fileName));
-                EventQueue.invokeLater(this::createRecentFilesMenu);
+                EDT.async(this::createRecentFilesMenu);
             } else {
                 App.setStepPause(false);
                 final Mapper m = App.loadFile(in, handle.getFileSize(), fileName);
@@ -1309,7 +1295,7 @@ public class ImageFrame extends javax.swing.JFrame implements StyleListener {
                 AppPrefs.save();
                 saveFileName = createSaveFile(fileName);
                 lastSaveFile = new File(saveFileName);
-                EventQueue.invokeLater(this::finishLoad);
+                EDT.async(this::finishLoad);
             }
         } catch (final FileNotFoundException e) {
             errorMessage = "The selected file was not found.";
@@ -1393,7 +1379,7 @@ public class ImageFrame extends javax.swing.JFrame implements StyleListener {
             throws Throwable {
         final MutableNesFile nesFile = new MutableNesFile(in, fileSize);
         pleaseWaitDialog.dispose();
-        EventQueue.invokeLater(() -> {
+        EDT.async(() -> {
             final EditNesHeaderDialog editDialog
                     = new EditNesHeaderDialog(this, true);
             editDialog.setNesFile(nesFile);
@@ -1517,7 +1503,7 @@ public class ImageFrame extends javax.swing.JFrame implements StyleListener {
     }
 
     public void open(final FilePath filePath) {
-        EventQueue.invokeLater(() -> recentFileMenuItemPressed(filePath));
+        EDT.async(() -> recentFileMenuItemPressed(filePath));
     }
 
     private void recentFileMenuItemPressed(final FilePath filePath) {
@@ -1579,19 +1565,11 @@ public class ImageFrame extends javax.swing.JFrame implements StyleListener {
     }
 
     public void openFile(final String fileName) {
-        if (EventQueue.isDispatchThread()) {
-            openFile(new File(fileName));
-        } else {
-            EventQueue.invokeLater(() -> openFile(fileName));
-        }
+        EDT.async(() -> ImageFrame.this.openFile(new File(fileName)));
     }
 
     public void openFile(final File file) {
-        if (EventQueue.isDispatchThread()) {
-            fileOpened(file, null, false, null, null);
-        } else {
-            EventQueue.invokeLater(() -> openFile(file));
-        }
+        EDT.async(() -> fileOpened(file, null, false, null, null));
     }
 
     private void fileOpened(final File file, String directory,
@@ -1622,7 +1600,7 @@ public class ImageFrame extends javax.swing.JFrame implements StyleListener {
                         "The specified directory does not exist.");
                 App.setNoStepPause(false);
                 final String dir = directory;
-                EventQueue.invokeLater(() -> openFile(dir, editHeader,
+                EDT.async(() -> openFile(dir, editHeader,
                         ejectedMachine));
                 return;
             } else {
@@ -1752,7 +1730,7 @@ public class ImageFrame extends javax.swing.JFrame implements StyleListener {
     }
 
     public void setKeyEventsEnabled(final boolean keyEventsEnabled) {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             this.keyEventsEnabled = keyEventsEnabled;
             final KeyboardFocusManager manager = KeyboardFocusManager
                     .getCurrentKeyboardFocusManager();
@@ -1760,9 +1738,7 @@ public class ImageFrame extends javax.swing.JFrame implements StyleListener {
             if (!keyEventsEnabled) {
                 manager.addKeyEventDispatcher(DisableKeyEventsDispatcher);
             }
-        } else {
-            EventQueue.invokeLater(() -> setKeyEventsEnabled(keyEventsEnabled));
-        }
+        });
     }
 
     private void loadBasicProgram(final File file,
@@ -4486,7 +4462,7 @@ public class ImageFrame extends javax.swing.JFrame implements StyleListener {
     }//GEN-LAST:event_optionsMenuMenuSelected
 
     private void formWindowStateChanged(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowStateChanged
-        EventQueue.invokeLater(() -> {
+        EDT.async(() -> {
             imagePane.requestRepaint();
             invalidate();
             validate();
@@ -4495,7 +4471,7 @@ public class ImageFrame extends javax.swing.JFrame implements StyleListener {
     }//GEN-LAST:event_formWindowStateChanged
 
     private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
-        EventQueue.invokeLater(() -> {
+        EDT.async(() -> {
             createVideoFiltersMenu();
             initShowMenu();
             initScreenSizeMenu();

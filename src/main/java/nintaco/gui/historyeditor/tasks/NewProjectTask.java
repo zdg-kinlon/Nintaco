@@ -3,6 +3,7 @@ package nintaco.gui.historyeditor.tasks;
 import nintaco.gui.historyeditor.HistoryEditorFrame;
 import nintaco.gui.historyeditor.HistoryTableModel;
 import nintaco.movie.Movie;
+import nintaco.util.EDT;
 
 import java.awt.*;
 
@@ -18,8 +19,6 @@ public class NewProjectTask extends SaveStateTask {
 
     @Override
     public void processSaveState(final byte[] saveState) {
-        EventQueue.invokeLater(() -> {
-            historyEditorFrame.createNewProject(saveState);
-        });
+        EDT.async(() -> historyEditorFrame.createNewProject(saveState));
     }
 }

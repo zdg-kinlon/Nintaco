@@ -11,6 +11,7 @@ import nintaco.gui.image.preferences.Paths;
 import nintaco.input.familybasic.FamilyBasicUtil;
 import nintaco.palettes.PaletteUtil;
 import nintaco.preferences.AppPrefs;
+import nintaco.util.EDT;
 
 import javax.swing.*;
 import javax.swing.event.DocumentListener;
@@ -352,7 +353,7 @@ public class BackgroundEditorFrame extends javax.swing.JFrame {
     public final void setMachine(final Machine machine) {
         this.machine = machine;
         this.ppu = machine == null ? null : machine.getPPU();
-        EventQueue.invokeLater(() -> {
+        EDT.async(() -> {
             if (ppu == null) {
                 ((ImagePanel) patternTablePanel).clearScreen();
                 ((ImagePanel) backgroundPanel).clearScreen();

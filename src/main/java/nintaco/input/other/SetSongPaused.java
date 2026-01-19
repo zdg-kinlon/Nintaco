@@ -3,6 +3,7 @@ package nintaco.input.other;
 import nintaco.App;
 import nintaco.Machine;
 import nintaco.input.OtherInput;
+import nintaco.util.EDT;
 
 import java.awt.*;
 
@@ -19,7 +20,7 @@ public class SetSongPaused implements OtherInput {
     @Override
     public void run(final Machine machine) {
         machine.getMapper().setSongPaused(paused);
-        EventQueue.invokeLater(() -> App.getImageFrame().getNsfPanel()
+        EDT.async(() -> App.getImageFrame().getNsfPanel()
                 .updateClock());
     }
 }

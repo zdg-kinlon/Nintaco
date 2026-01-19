@@ -4,6 +4,7 @@ import nintaco.App;
 import nintaco.Machine;
 import nintaco.mappers.nintendo.vs.DualAPU;
 import nintaco.mappers.nintendo.vs.MainCPU;
+import nintaco.util.EDT;
 
 import java.awt.*;
 
@@ -92,8 +93,10 @@ public class SubMonitorFrame extends javax.swing.JFrame {
             device.setFullScreenWindow(this);
             createBufferStrategy(3);
             imagePane.setBufferStrategy(getBufferStrategy());
-            EventQueue.invokeLater(() -> setVisible(true));
-            EventQueue.invokeLater(imagePane::redraw);
+            EDT.async(() -> {
+                setVisible(true);
+                imagePane.redraw();
+            });
         }
     }
 
@@ -108,8 +111,10 @@ public class SubMonitorFrame extends javax.swing.JFrame {
                 maximize(this);
             }
             requestVsync(this, true);
-            EventQueue.invokeLater(() -> setVisible(true));
-            EventQueue.invokeLater(imagePane::redraw);
+            EDT.async(() -> {
+                setVisible(true);
+                imagePane.redraw();
+            });
         }
     }
 

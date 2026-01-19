@@ -11,6 +11,7 @@ import nintaco.gui.table.TableDialog;
 import nintaco.preferences.AppPrefs;
 import nintaco.preferences.GamePrefs;
 import nintaco.util.CsvUtil;
+import nintaco.util.EDT;
 
 import javax.swing.*;
 import java.awt.*;
@@ -204,7 +205,7 @@ public class BreakpointDialog extends TableDialog {
         } else if (rows.isEmpty()) {
             displayError(this, "The file does not contain any valid address labels.");
         } else {
-            EventQueue.invokeLater(() -> {
+            EDT.async(() -> {
                 tableModel.setRows(rows);
                 selectionChanged();
                 updateClearButton();

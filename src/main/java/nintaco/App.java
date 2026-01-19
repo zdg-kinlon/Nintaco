@@ -154,7 +154,7 @@ public final class App {
         CartDB.init();
         CheatsDB.init();
         PaletteUtil.init();
-        EventQueue.invokeAndWait(() -> {
+        EDT.sync(() -> {
             initApplicationFocusListener();
             imageFrame = new ImageFrame();
             imageFrame.init();
@@ -207,7 +207,7 @@ public final class App {
 
     private static void initApplicationFocusListener() {
         KeyboardFocusManager.getCurrentKeyboardFocusManager()
-                .addPropertyChangeListener("activeWindow", e -> EventQueue.invokeLater(
+                .addPropertyChangeListener("activeWindow", _ -> EDT.async(
                         App::applicationFocusChanged));
     }
 
@@ -277,7 +277,7 @@ public final class App {
     }
 
     public static void cpuKilled(final int opcode, final int address) {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             final FourButtonDialog dialog = new FourButtonDialog(imageFrame,
                     String.format("<html>The processor executed a KIL (<tt>$%02X</tt>) "
                             + "instruction at <tt>$%04X</tt>.</html>", opcode, address),
@@ -298,9 +298,7 @@ public final class App {
                     close();
                     break;
             }
-        } else {
-            EventQueue.invokeLater(() -> cpuKilled(opcode, address));
-        }
+        });
     }
 
     public static void importHistory() {
@@ -356,7 +354,7 @@ public final class App {
             final boolean showError = failed;
             final HistoryProject p = project;
             pleaseWaitDialog.dispose();
-            EventQueue.invokeLater(() -> {
+            EDT.async(() -> {
                 historyProjectName = file.getName();
                 if (showError) {
                     displayError(imageFrame, "Failed to load history file.");
@@ -470,7 +468,7 @@ public final class App {
         } finally {
             final boolean showError = failed;
             pleaseWaitDialog.dispose();
-            EventQueue.invokeLater(() -> {
+            EDT.async(() -> {
                 if (showError) {
                     displayError(imageFrame, "Failed to save history file.");
                 } else {
@@ -767,7 +765,7 @@ public final class App {
             return ok;
         } else {
             GamePrefs.load(entryFileName);
-            return invokeAndWait(App::showDipSwitchesDialog);
+            return EDT.sync(App::showDipSwitchesDialog);
         }
     }
 
@@ -1022,7 +1020,7 @@ public final class App {
                         writeByteArrayOutputStream(out, baos);
                         out.close();
                         if (saveListener != null) {
-                            EventQueue.invokeLater(saveListener);
+                            EDT.async(saveListener);
                         }
                         showMessage(slot < 0 ? "SAVED" : String.format("SAVED (%d)", slot));
                     } catch (Throwable t) {
@@ -1210,7 +1208,7 @@ public final class App {
     }
 
     public static void fireStepPausedChanged(final boolean stepPause) {
-        EventQueue.invokeLater(() -> {
+        EDT.async(() -> {
             final ImageFrame image = imageFrame;
             if (image != null) {
                 image.onStepPausedChanged(stepPause);
@@ -1227,7 +1225,7 @@ public final class App {
     }
 
     public static void createHistoryEditorFrame() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             destroyWatchHistoryFrame();
             if (historyEditorFrame == null) {
                 setAppMode(AppMode.HistoryEditor);
@@ -1237,49 +1235,41 @@ public final class App {
             } else {
                 GuiUtil.toFront(historyEditorFrame);
             }
-        } else {
-            EventQueue.invokeLater(App::createHistoryEditorFrame);
-        }
+        });
     }
 
     public static void destroyHistoryEditorFrame() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (historyEditorFrame != null) {
                 setAppMode(AppMode.Default);
                 historyEditorFrame.destroy();
                 historyEditorFrame = null;
             }
-        } else {
-            EventQueue.invokeLater(App::destroyHistoryEditorFrame);
-        }
+        });
     }
 
     public static void createProgramServerFrame() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (programServerFrame == null) {
                 programServerFrame = new ProgramServerFrame();
                 programServerFrame.setVisible(true);
             } else {
                 GuiUtil.toFront(programServerFrame);
             }
-        } else {
-            EventQueue.invokeLater(App::createProgramServerFrame);
-        }
+        });
     }
 
     public static void destroyProgramServerFrame() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (programServerFrame != null) {
                 programServerFrame.destroy();
                 programServerFrame = null;
             }
-        } else {
-            EventQueue.invokeLater(App::destroyProgramServerFrame);
-        }
+        });
     }
 
     public static void createNetplayServerFrame() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (netplayServerFrame == null) {
                 setAppMode(AppMode.NetplayServer);
                 destroyBarcodeBattlerFrame();
@@ -1289,25 +1279,21 @@ public final class App {
             } else {
                 GuiUtil.toFront(netplayServerFrame);
             }
-        } else {
-            EventQueue.invokeLater(App::createNetplayServerFrame);
-        }
+        });
     }
 
     public static void destroyNetplayServerFrame() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (netplayServerFrame != null) {
                 setAppMode(AppMode.Default);
                 netplayServerFrame.destroy();
                 netplayServerFrame = null;
             }
-        } else {
-            EventQueue.invokeLater(App::destroyNetplayServerFrame);
-        }
+        });
     }
 
     public static void createNetplayClientFrame() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (netplayClientFrame == null) {
                 setAppMode(AppMode.NetplayClient);
                 netplayClientFrame = new NetplayClientFrame();
@@ -1315,49 +1301,41 @@ public final class App {
             } else {
                 GuiUtil.toFront(netplayClientFrame);
             }
-        } else {
-            EventQueue.invokeLater(App::createNetplayClientFrame);
-        }
+        });
     }
 
     public static void destroyNetplayClientFrame() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (netplayClientFrame != null) {
                 setAppMode(AppMode.Default);
                 netplayClientFrame.destroy();
                 netplayClientFrame = null;
             }
-        } else {
-            EventQueue.invokeLater(App::destroyNetplayClientFrame);
-        }
+        });
     }
 
     public static void createAsmDasmFrame() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (asmDasmFrame == null) {
                 asmDasmFrame = new AsmDasmFrame();
                 asmDasmFrame.setVisible(true);
             } else {
                 GuiUtil.toFront(asmDasmFrame);
             }
-        } else {
-            EventQueue.invokeLater(App::createAsmDasmFrame);
-        }
+        });
     }
 
     public static void destroyAsmDasmFrame() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (asmDasmFrame != null) {
                 asmDasmFrame.destroy();
                 asmDasmFrame = null;
             }
-        } else {
-            EventQueue.invokeLater(App::destroyAsmDasmFrame);
-        }
+        });
     }
 
     public static void createDebuggerFrame() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (debuggerFrame == null) {
                 debuggerFrame = new DebuggerFrame(machineRunner != null
                         && machineRunner.isRunning() ? machineRunner : null);
@@ -1365,96 +1343,80 @@ public final class App {
             } else {
                 GuiUtil.toFront(debuggerFrame);
             }
-        } else {
-            EventQueue.invokeLater(App::createDebuggerFrame);
-        }
+        });
     }
 
     public static void destroyDebuggerFrame() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (debuggerFrame != null) {
                 debuggerFrame.destroy();
                 debuggerFrame = null;
             }
-        } else {
-            EventQueue.invokeLater(App::destroyDebuggerFrame);
-        }
+        });
     }
 
     public static void createRamWatchFrame() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (ramWatchFrame == null) {
                 ramWatchFrame = new RamWatchFrame(getRunningMachine());
                 ramWatchFrame.setVisible(true);
             } else {
                 GuiUtil.toFront(ramWatchFrame);
             }
-        } else {
-            EventQueue.invokeLater(App::createRamWatchFrame);
-        }
+        });
     }
 
     public static void destroyRamWatchFrame() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (ramWatchFrame != null) {
                 ramWatchFrame.destroy();
                 ramWatchFrame = null;
             }
-        } else {
-            EventQueue.invokeLater(App::destroyRamWatchFrame);
-        }
+        });
     }
 
     public static void createRamSearchFrame() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (ramSearchFrame == null) {
                 ramSearchFrame = new RamSearchFrame(getRunningMachine());
                 ramSearchFrame.setVisible(true);
             } else {
                 GuiUtil.toFront(ramSearchFrame);
             }
-        } else {
-            EventQueue.invokeLater(App::createRamSearchFrame);
-        }
+        });
     }
 
     public static void destroyRamSearchFrame() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (ramSearchFrame != null) {
                 ramSearchFrame.destroy();
                 ramSearchFrame = null;
             }
-        } else {
-            EventQueue.invokeLater(App::destroyRamSearchFrame);
-        }
+        });
     }
 
     public static void createSpriteSaverFrame() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (spriteSaverFrame == null) {
                 spriteSaverFrame = new SpriteSaverFrame(getRunningMachine());
                 spriteSaverFrame.setVisible(true);
             } else {
                 GuiUtil.toFront(spriteSaverFrame);
             }
-        } else {
-            EventQueue.invokeLater(App::createSpriteSaverFrame);
-        }
+        });
     }
 
     public static void destroySpriteSaverFrame() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (spriteSaverFrame != null) {
                 spriteSaverFrame.destroy();
                 spriteSaverFrame = null;
             }
-        } else {
-            EventQueue.invokeLater(App::destroySpriteSaverFrame);
-        }
+        });
     }
 
     public static void createMapMakerFrame() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (mapMakerFrame == null) {
                 final Machine m = machine;
                 mapMakerFrame = new MapMakerFrame(getRunningMachine());
@@ -1462,96 +1424,80 @@ public final class App {
             } else {
                 GuiUtil.toFront(mapMakerFrame);
             }
-        } else {
-            EventQueue.invokeLater(App::createMapMakerFrame);
-        }
+        });
     }
 
     public static void destroyMapMakerFrame() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (mapMakerFrame != null) {
                 mapMakerFrame.destroy();
                 mapMakerFrame = null;
             }
-        } else {
-            EventQueue.invokeLater(App::destroyMapMakerFrame);
-        }
+        });
     }
 
     public static void createNametablesFrame() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (nametablesFrame == null) {
                 nametablesFrame = new NametablesFrame(machineRunner);
                 nametablesFrame.setVisible(true);
             } else {
                 GuiUtil.toFront(nametablesFrame);
             }
-        } else {
-            EventQueue.invokeLater(App::createNametablesFrame);
-        }
+        });
     }
 
     public static void destroyNametablesFrame() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (nametablesFrame != null) {
                 nametablesFrame.destroy();
                 nametablesFrame = null;
             }
-        } else {
-            EventQueue.invokeLater(App::destroyNametablesFrame);
-        }
+        });
     }
 
     public static void createOamDataFrame() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (oamDataFrame == null) {
                 oamDataFrame = new OamDataFrame(machineRunner);
                 oamDataFrame.setVisible(true);
             } else {
                 GuiUtil.toFront(oamDataFrame);
             }
-        } else {
-            EventQueue.invokeLater(App::createOamDataFrame);
-        }
+        });
     }
 
     public static void destroyOamDataFrame() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (oamDataFrame != null) {
                 oamDataFrame.destroy();
                 oamDataFrame = null;
             }
-        } else {
-            EventQueue.invokeLater(App::destroyOamDataFrame);
-        }
+        });
     }
 
     public static void createPatternTablesFrame() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (patternTablesFrame == null) {
                 patternTablesFrame = new PatternTablesFrame(machineRunner);
                 patternTablesFrame.setVisible(true);
             } else {
                 GuiUtil.toFront(patternTablesFrame);
             }
-        } else {
-            EventQueue.invokeLater(App::createPatternTablesFrame);
-        }
+        });
     }
 
     public static void destroyPatternTablesFrame() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (patternTablesFrame != null) {
                 patternTablesFrame.destroy();
                 patternTablesFrame = null;
             }
-        } else {
-            EventQueue.invokeLater(App::destroyPatternTablesFrame);
-        }
+        });
     }
 
     public static void createBackgroundEditorFrame() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (backgroundEditorFrame == null) {
                 final Machine m = getRunningMachine();
                 if (m != null) {
@@ -1561,48 +1507,40 @@ public final class App {
             } else {
                 GuiUtil.toFront(backgroundEditorFrame);
             }
-        } else {
-            EventQueue.invokeLater(App::createBackgroundEditorFrame);
-        }
+        });
     }
 
     public static void destroyBackgroundEditorFrame() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (backgroundEditorFrame != null) {
                 backgroundEditorFrame.destroy();
                 backgroundEditorFrame = null;
             }
-        } else {
-            EventQueue.invokeLater(App::destroyBackgroundEditorFrame);
-        }
+        });
     }
 
     public static void createCheatSearchFrame() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (cheatSearchFrame == null) {
                 cheatSearchFrame = new CheatSearchFrame(getRunningMachine());
                 cheatSearchFrame.setVisible(true);
             } else {
                 GuiUtil.toFront(cheatSearchFrame);
             }
-        } else {
-            EventQueue.invokeLater(App::createCheatSearchFrame);
-        }
+        });
     }
 
     public static void destroyCheatSearchFrame() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (cheatSearchFrame != null) {
                 cheatSearchFrame.destroy();
                 cheatSearchFrame = null;
             }
-        } else {
-            EventQueue.invokeLater(App::destroyCheatSearchFrame);
-        }
+        });
     }
 
     public static void createHexEditorFrame() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (hexEditorFrame == null) {
                 hexEditorFrame = new HexEditorFrame();
                 hexEditorFrame.setMachine(getRunningMachine());
@@ -1610,20 +1548,16 @@ public final class App {
             } else {
                 GuiUtil.toFront(hexEditorFrame);
             }
-        } else {
-            EventQueue.invokeLater(App::createHexEditorFrame);
-        }
+        });
     }
 
     public static void destroyHexEditorFrame() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (hexEditorFrame != null) {
                 hexEditorFrame.destroy();
                 hexEditorFrame = null;
             }
-        } else {
-            EventQueue.invokeLater(App::destroyHexEditorFrame);
-        }
+        });
     }
 
     public static void updateRobFrame(final RobController rob) {
@@ -1640,7 +1574,7 @@ public final class App {
     }
 
     public static void createRobFrame(final int game) {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (game == RobGame.NONE) {
                 destroyRobFrame();
             } else if (robFrame == null) {
@@ -1653,21 +1587,17 @@ public final class App {
                 GuiUtil.toFront(robFrame);
                 GuiUtil.toFront(imageFrame);
             }
-        } else {
-            EventQueue.invokeLater(() -> createRobFrame(game));
-        }
+        });
     }
 
     public static void destroyRobFrame() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             InputUtil.setRob(null);
             if (robFrame != null) {
                 robFrame.destroy();
                 robFrame = null;
             }
-        } else {
-            EventQueue.invokeLater(App::destroyRobFrame);
-        }
+        });
     }
 
     public static void updateGlassesFrame(final int[] screen) {
@@ -1678,7 +1608,7 @@ public final class App {
     }
 
     public static void createGlassesFrame() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (glassesFrame == null) {
                 glassesFrame = new GlassesFrame();
                 forwardKeyEvents(glassesFrame, imageFrame);
@@ -1687,24 +1617,20 @@ public final class App {
                 GuiUtil.toFront(glassesFrame);
             }
             GuiUtil.toFront(imageFrame);
-        } else {
-            EventQueue.invokeLater(App::createGlassesFrame);
-        }
+        });
     }
 
     public static void destroyGlassesFrame() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (glassesFrame != null) {
                 glassesFrame.destroy();
                 glassesFrame = null;
             }
-        } else {
-            EventQueue.invokeLater(App::destroyGlassesFrame);
-        }
+        });
     }
 
     public static void createBarcodeBattlerFrame() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (barcodeBattlerFrame == null) {
                 barcodeBattlerFrame = new BarcodeBattlerFrame();
                 barcodeBattlerFrame.setVisible(true);
@@ -1712,72 +1638,60 @@ public final class App {
                 GuiUtil.toFront(barcodeBattlerFrame);
             }
             GuiUtil.toFront(imageFrame);
-        } else {
-            EventQueue.invokeLater(App::createBarcodeBattlerFrame);
-        }
+        });
     }
 
     public static void destroyBarcodeBattlerFrame() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (barcodeBattlerFrame != null) {
                 barcodeBattlerFrame.destroy();
                 barcodeBattlerFrame = null;
             }
-        } else {
-            EventQueue.invokeLater(App::destroyBarcodeBattlerFrame);
-        }
+        });
     }
 
     public static void createApplyIpsPatchFrame() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (applyIpsPatchFrame == null) {
                 applyIpsPatchFrame = new PatchFrame(true);
                 applyIpsPatchFrame.setVisible(true);
             } else {
                 GuiUtil.toFront(applyIpsPatchFrame);
             }
-        } else {
-            EventQueue.invokeLater(App::createApplyIpsPatchFrame);
-        }
+        });
     }
 
     public static void destroyApplyIpsPatchFrame() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (applyIpsPatchFrame != null) {
                 applyIpsPatchFrame.destroy();
                 applyIpsPatchFrame = null;
             }
-        } else {
-            EventQueue.invokeLater(App::destroyApplyIpsPatchFrame);
-        }
+        });
     }
 
     public static void createCreateIpsPatchFrame() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (createIpsPatchFrame == null) {
                 createIpsPatchFrame = new PatchFrame(false);
                 createIpsPatchFrame.setVisible(true);
             } else {
                 GuiUtil.toFront(createIpsPatchFrame);
             }
-        } else {
-            EventQueue.invokeLater(App::createCreateIpsPatchFrame);
-        }
+        });
     }
 
     public static void destroyCreateIpsPatchFrame() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (createIpsPatchFrame != null) {
                 createIpsPatchFrame.destroy();
                 createIpsPatchFrame = null;
             }
-        } else {
-            EventQueue.invokeLater(App::destroyCreateIpsPatchFrame);
-        }
+        });
     }
 
     public static void createWatchHistoryFrame() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             destroyHistoryEditorFrame();
             if (watchHistoryFrame == null) {
                 setAppMode(AppMode.WatchHistory);
@@ -1786,96 +1700,80 @@ public final class App {
             } else {
                 GuiUtil.toFront(watchHistoryFrame);
             }
-        } else {
-            EventQueue.invokeLater(App::createWatchHistoryFrame);
-        }
+        });
     }
 
     public static void destroyWatchHistoryFrame() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (watchHistoryFrame != null) {
                 setAppMode(AppMode.Default);
                 watchHistoryFrame.destroy();
                 watchHistoryFrame = null;
             }
-        } else {
-            EventQueue.invokeLater(App::destroyWatchHistoryFrame);
-        }
+        });
     }
 
     public static void createVolumeMixerFrame() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (volumeMixerFrame == null) {
                 volumeMixerFrame = new VolumeMixerFrame();
                 volumeMixerFrame.setVisible(true);
             } else {
                 GuiUtil.toFront(volumeMixerFrame);
             }
-        } else {
-            EventQueue.invokeLater(App::createVolumeMixerFrame);
-        }
+        });
     }
 
     public static void destroyVolumeMixerFrame() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (volumeMixerFrame != null) {
                 volumeMixerFrame.destroy();
                 volumeMixerFrame = null;
             }
-        } else {
-            EventQueue.invokeLater(App::destroyVolumeMixerFrame);
-        }
+        });
     }
 
     public static void createSubMonitorFrame() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (subMonitorFrame == null) {
                 subMonitorFrame = new SubMonitorFrame();
                 forwardKeyEvents(subMonitorFrame, imageFrame);
                 subMonitorFrame.setVisible(true);
-                EventQueue.invokeLater(() -> GuiUtil.toFront(imageFrame));
+                EDT.async(() -> GuiUtil.toFront(imageFrame));
             } else {
                 GuiUtil.toFront(subMonitorFrame);
             }
             subMonitorFrame.init();
-        } else {
-            EventQueue.invokeLater(App::createSubMonitorFrame);
-        }
+        });
     }
 
     public static void destroySubMonitorFrame() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (subMonitorFrame != null) {
                 subMonitorFrame.destroy();
                 subMonitorFrame = null;
             }
-        } else {
-            EventQueue.invokeLater(App::destroySubMonitorFrame);
-        }
+        });
     }
 
     public static void createProgramFrame() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (programFrame == null) {
                 programFrame = new ProgramFrame();
                 programFrame.setVisible(true);
             } else {
                 GuiUtil.toFront(programFrame);
             }
-        } else {
-            EventQueue.invokeLater(App::createProgramFrame);
-        }
+        });
     }
 
     public static void destroyProgramFrame() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (programFrame != null) {
                 programFrame.destroy();
                 programFrame = null;
             }
-        } else {
-            EventQueue.invokeLater(App::destroyProgramFrame);
-        }
+        });
     }
 
     public static void runSubMonitorFrame(final SubMonitorFrameFunction function) {
@@ -2278,8 +2176,6 @@ public final class App {
         }
         imageFrame.updateContentPane(null, null);
         imageFrame.setHistoryTracking(false);
-        invokeAndWait(() -> {
-        });
         dispose();
         netplayServer.setMachineRunner(null);
         setSpeed(100);

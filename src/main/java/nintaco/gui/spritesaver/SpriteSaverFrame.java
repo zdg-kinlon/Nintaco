@@ -5,6 +5,7 @@ import nintaco.Machine;
 import nintaco.PPU;
 import nintaco.preferences.AppPrefs;
 import nintaco.preferences.GamePrefs;
+import nintaco.util.EDT;
 import nintaco.util.GuiUtil;
 
 import javax.swing.*;
@@ -128,7 +129,7 @@ public class SpriteSaverFrame extends javax.swing.JFrame {
             setRunning(false);
             flush();
         }
-        invokeAndWait(this::captureFields);
+        EDT.sync(this::captureFields);
         saveGamePrefs();
 
         final SpriteSaverAppPrefs prefs = AppPrefs.getInstance()
@@ -153,7 +154,7 @@ public class SpriteSaverFrame extends javax.swing.JFrame {
         minOccurrences = prefs.getMinOccurrences();
         withinSeconds = prefs.getWithinSeconds();
 
-        EventQueue.invokeLater(() -> {
+        EDT.async(() -> {
             filePrefixTextField.setText(filePrefix);
             scanlineTextField.setText(Integer.toString(updateScanline));
             sprite0CheckBox.setSelected(updateOnSprite0Hit);
@@ -220,12 +221,10 @@ public class SpriteSaverFrame extends javax.swing.JFrame {
     }
 
     private void setRunning(final boolean running) {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             this.running = running;
             enableComponents();
-        } else {
-            EventQueue.invokeLater(() -> setRunning(running));
-        }
+        });
     }
 
     private void updateScanlineComponents() {
@@ -246,7 +245,7 @@ public class SpriteSaverFrame extends javax.swing.JFrame {
             ppu = machine.getPPU();
             loadGamePrefs();
         }
-        EventQueue.invokeLater(() -> {
+        EDT.async(() -> {
             enableComponents();
             totalSpritesFound = 0;
         });
@@ -279,7 +278,7 @@ public class SpriteSaverFrame extends javax.swing.JFrame {
     }
 
     private void handleSpritesFound(final int spritesFound, final boolean total) {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             if (total) {
                 totalSpritesFound = spritesFound;
                 statusLabel.setText(String.format("Saved %d sprite%s.",
@@ -289,13 +288,11 @@ public class SpriteSaverFrame extends javax.swing.JFrame {
                 statusLabel.setText(String.format("Sprites found: %d",
                         totalSpritesFound));
             }
-        } else {
-            EventQueue.invokeLater(() -> handleSpritesFound(spritesFound, total));
-        }
+        });
     }
 
     private void updateStartIndex() {
-        if (EventQueue.isDispatchThread()) {
+        EDT.async(() -> {
             filePrefix = filePrefixTextField.getText().trim();
             outputDir = outputDirTextField.getText().trim();
             final String prefix = filePrefix;
@@ -303,15 +300,13 @@ public class SpriteSaverFrame extends javax.swing.JFrame {
             if (!(isBlank(prefix) || isBlank(outDir))) {
                 new Thread(() -> {
                     final int index = getSuggestedStartIndex(prefix, outDir);
-                    EventQueue.invokeLater(() -> {
+                    EDT.async(() -> {
                         fileIndex = index;
                         startIndexTextField.setText(Integer.toString(fileIndex));
                     });
                 }).start();
             }
-        } else {
-            EventQueue.invokeLater(this::updateStartIndex);
-        }
+        });
     }
 
     private void captureFields() {
@@ -347,7 +342,7 @@ public class SpriteSaverFrame extends javax.swing.JFrame {
             return;
         }
         saving = true;
-        EventQueue.invokeLater(() -> statusLabel.setText("Saving sprites..."));
+        EDT.async(() -> statusLabel.setText("Saving sprites..."));
         enableComponents(pp, saving);
         new Thread(() -> {
             handleSpritesFound(spriteSearcher.save(m, outDir, prefix, format, scale,

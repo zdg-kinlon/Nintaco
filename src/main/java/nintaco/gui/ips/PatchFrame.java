@@ -12,6 +12,7 @@ import nintaco.gui.PleaseWaitDialog;
 import nintaco.gui.image.ImageFrame;
 import nintaco.gui.image.preferences.Paths;
 import nintaco.preferences.AppPrefs;
+import nintaco.util.EDT;
 
 import javax.swing.border.TitledBorder;
 import java.awt.*;
@@ -187,10 +188,10 @@ public class PatchFrame extends javax.swing.JFrame {
         }
         pleaseWaitDialog.dispose();
         if (errorMessage == null) {
-            invokeAndWait(() -> displayMessage("Patching Completed", this,
+            EDT.sync(() -> displayMessage("Patching Completed", this,
                     "The file was successfully patched.",
                     InformationDialog.IconType.INFORMATION));
-            EventQueue.invokeLater(this::closeFrame);
+            EDT.async(this::closeFrame);
         } else {
             displayError("Apply IPS Error", this, errorMessage);
         }
@@ -210,10 +211,10 @@ public class PatchFrame extends javax.swing.JFrame {
         }
         pleaseWaitDialog.dispose();
         if (errorMessage == null) {
-            invokeAndWait(() -> displayMessage("Patch Creation Completed", this,
+            EDT.sync(() -> displayMessage("Patch Creation Completed", this,
                     "The IPS patch was successfully created.",
                     InformationDialog.IconType.INFORMATION));
-            EventQueue.invokeLater(this::closeFrame);
+            EDT.async(this::closeFrame);
         } else {
             displayError("Create IPS Error", this, errorMessage);
         }
