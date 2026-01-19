@@ -12,7 +12,7 @@ This repository uses the latest released JDK for development and the latest publ
 
 1. Download the source code of this repository.
 2. Download Java v25 from https://adoptium.net/temurin/releases/ and configure the `JAVA_HOME` system variable path.
-3. Download Gradle version 9.2.1 or above from https://gradle.org/releases/ and configure the `GRADLE_HOME` system variable path.
+3. Download Gradle version 9.3 or above from https://gradle.org/releases/ and configure the `GRADLE_HOME` system variable path.
 4. Open the Nintaco folder using IntelliJ IDEA or Visual Studio Code.
 5. The project will load automatically.
 
@@ -20,6 +20,7 @@ This repository uses the latest released JDK for development and the latest publ
 
 1. The build script is located in [build.gradle.kts](build.gradle.kts).
 2. To compile the project, run the command: `gradle build`. After execution, the compiled program will be found in the [libs](build/libs) folder, along with automatically generated JRE, native files, and dependent public JARs.
+3. run the [`start-app.bat`](build/libs/start-app.bat)
 
 # Configuring Native Files for JInput in a Gradle Development Environment
 

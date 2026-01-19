@@ -13,7 +13,7 @@
 
 1. 下载这个仓库的源代码
 2. 下载 Java v25 https://adoptium.net/temurin/releases/ 配置`JAVA_HOME`系统变量的路径
-3. 下载 Gradle v9.2.1 以上的版本 https://gradle.org/releases/ 配置`GRADLE_HOME`系统变量的路径
+3. 下载 Gradle v9.3 以上的版本 https://gradle.org/releases/ 配置`GRADLE_HOME`系统变量的路径
 4. 使用 IntelliJ IDEA 或者 Visual Studio Code 打开 Nintaco 文件夹
 5. 项目即可自动加载
 
@@ -22,6 +22,7 @@
 1. 编译的脚本在 [build.gradle.kts](build.gradle.kts)
 2. 编译项目命令：`gradle build` 执行后会在 [libs](build/libs) 文件夹中得到生成的程序，并且自动生成JRE、native
    files、依赖的公共jar
+3. 运行 [`start-app.bat`](build/libs/start-app.bat)
 
 # 关于 JInput 在 Gradle 开发环境下，配置 native 文件的方法
 

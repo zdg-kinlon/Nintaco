@@ -2,7 +2,7 @@ plugins {
     id("java")
 }
 
-group = "cn.kinlon.emu"
+group = "nintaco"
 version = "2024.10.27"
 
 repositories {
@@ -11,18 +11,25 @@ repositories {
 }
 
 dependencies {
-    implementation("commons-logging:commons-logging:1.3.4")
-    implementation("com.github.junrar:junrar:7.5.5")
-    implementation("org.apache.commons:commons-compress:1.27.1") {
+    // https://mvnrepository.com/artifact/commons-logging/commons-logging
+    implementation("commons-logging:commons-logging:1.3.5")
+    // https://mvnrepository.com/artifact/com.github.junrar/junrar
+    implementation("com.github.junrar:junrar:7.5.7")
+    // https://mvnrepository.com/artifact/org.apache.commons/commons-compress
+    implementation("org.apache.commons:commons-compress:1.28.0") {
         exclude(module = "commons-io")
         exclude(module = "commons-codec")
         exclude(module = "commons-lang3")
     }
-    implementation("ch.randelshofer:org.monte.media:17.1")
-    implementation("org.tukaani:xz:1.10")
-    implementation("net.java.jinput:jinput:2.0.7")
+    // https://mvnrepository.com/artifact/ch.randelshofer/org.monte.media
+    implementation("ch.randelshofer:org.monte.media:17.2.1")
+    // https://mvnrepository.com/artifact/org.tukaani/xz
+    implementation("org.tukaani:xz:1.11")
+    // https://mvnrepository.com/artifact/net.java.jinput/jinput
+    implementation("net.java.jinput:jinput:2.0.10")
     // https://repo1.maven.org/maven2/net/java/jinput/jinput/2.0.10/jinput-2.0.10-natives-all.jar
     // compileOnly("net.java.jinput:jinput:2.0.10:natives-all") Not Supporting x86
+    // https://mvnrepository.com/artifact/net.java.jinput/jinput-platform
     compileOnly("net.java.jinput:jinput-platform:2.0.7:natives-windows")
     compileOnly("net.java.jinput:jinput-platform:2.0.7:natives-linux")
     compileOnly("net.java.jinput:jinput-platform:2.0.7:natives-osx")
@@ -33,10 +40,6 @@ dependencies {
 //        options.compilerArgs.addAll(listOf("-Xlint:unchecked", "-Xlint:deprecation"))
 //    }
 //}
-
-tasks.test {
-    useJUnitPlatform()
-}
 
 tasks.named("build") {
     dependsOn("createJre", "generateStartScript")
@@ -55,7 +58,7 @@ tasks.register<Copy>("extractJarJinputPlatform") {
         it.moduleVersion.id.name == "jinput-platform"
                 && it.moduleVersion.id.group == "net.java.jinput"
                 && it.type == "jar"
-    }.map {
+    }.forEach {
         from(zipTree(it.file)).into(layout.projectDirectory.dir("lib/native"))
     }
     doLast {
@@ -96,6 +99,9 @@ tasks.jar {
 tasks.register<Exec>("createJre") {
     val javaHome = System.getProperty("java.home")
     val outputJreDir = file(layout.buildDirectory.dir("libs/jre/"))
+    if (outputJreDir.exists()) {
+        outputJreDir.deleteRecursively()
+    }
 
     commandLine(
         "${javaHome}/bin/jlink",
