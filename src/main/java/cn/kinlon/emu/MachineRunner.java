@@ -186,7 +186,7 @@ public class MachineRunner extends Task {
                     switch (mapper.peekCpuMemory(reg.pc())) {
                         case PLP:
                         case PLA: {
-                            final int stackSize = 0xFF - reg.sp() - 1;
+                            final int stackSize = 0xFF - reg.s() - 1;
                             if (stackSize < stepToValue) {
                                 stepToValue = stackSize;
                             }
@@ -194,7 +194,7 @@ public class MachineRunner extends Task {
                         }
                         case RTI:
                         case RTS:
-                            if (0xFF - reg.sp() - 2 < stepToValue) {
+                            if (0xFF - reg.s() - 2 < stepToValue) {
                                 stepToValue = cpu.getInstructionsCounter() + 1;
                                 pauseStepType = Into;
                             }
@@ -302,7 +302,7 @@ public class MachineRunner extends Task {
                         pauseStepType = Into;
                         stepToValue = cpu.getInstructionsCounter() + 1;
                     } else {
-                        stepToValue = 0xFF - reg.sp();
+                        stepToValue = 0xFF - reg.s();
                     }
                     break;
                 }

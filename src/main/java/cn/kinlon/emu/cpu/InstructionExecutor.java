@@ -1,16 +1,20 @@
 package cn.kinlon.emu.cpu;
 
+import java.util.function.Consumer;
+
 import static cn.kinlon.emu.utils.BitUtil.*;
 import static cn.kinlon.emu.utils.ByteUtil.toU8;
 
-public class ALU {
+public class InstructionExecutor {
 
     private final CPU cpu;
     private final Register reg;
+    private final Stack stack;
 
-    public ALU(CPU cpu) {
+    public InstructionExecutor(CPU cpu) {
         this.cpu = cpu;
         this.reg = cpu.getRegister();
+        this.stack = cpu.getStack();
     }
 
     // -- Official 6502 Instructions ------------------------------------------------
@@ -59,166 +63,185 @@ public class ALU {
         reg.v(false);
     }
 
+    /// Branch if Carry Clear
+    public boolean bcc() {
+        return !reg.c();
+    }
+
+    /// Branch if Carry Set
+    public boolean bcs() {
+        return reg.c();
+    }
+
+    /// Branch if Equal
+    public boolean beq() {
+        return reg.z();
+    }
+
+    /// Branch if Not Equal
+    public boolean bne() {
+        return !reg.z();
+    }
+
+    /// Branch if Plus
+    public boolean bpl() {
+        return reg.n();
+    }
+
+    /// Branch if Minus
+    public boolean bmi() {
+        return !reg.n();
+    }
+
+    /// Branch if Overflow Clear
+    public boolean bvc() {
+        return !reg.v();
+    }
+
+    /// Branch if Overflow Set
+    public boolean bvs() {
+        return reg.v();
+    }
+
+    private void set_nz(int value) {
+        reg.n(getBitBool(value, 7));
+        reg.z(value == 0);
+    }
+
+    private void set_nz_reg(int value, Consumer<Integer> reg) {
+        reg.accept(value);
+        set_nz(value);
+    }
+
     /// Transfer A to X
     public void tax() {
-        reg.x(reg.a());
-        reg.n(getBitBool(reg.x(), 7));
-        reg.z(reg.x() == 0);
+        set_nz_reg(reg.a(), reg::x);
     }
 
     /// Transfer X to A
     public void txa() {
-        reg.a(reg.x());
-        reg.n(getBitBool(reg.a(), 7));
-        reg.z(reg.a() == 0);
+        set_nz_reg(reg.x(), reg::a);
     }
 
     /// Transfer A to Y
     public void tay() {
-        reg.y(reg.a());
-        reg.n(getBitBool(reg.y(), 7));
-        reg.z(reg.y() == 0);
+        set_nz_reg(reg.a(), reg::y);
     }
 
     /// Transfer Y to A
     public void tya() {
-        reg.a(reg.y());
-        reg.n(getBitBool(reg.a(), 7));
-        reg.z(reg.a() == 0);
+        set_nz_reg(reg.y(), reg::a);
     }
 
     /// Transfer X to Stack Pointer
     public void txs() {
-        reg.sp(reg.x());
+        reg.s(reg.x());
     }
 
     /// Transfer Stack Pointer to X
     public void tsx() {
-        reg.x(reg.sp());
-        reg.n(getBitBool(reg.x(), 7));
-        reg.z(reg.x() == 0);
+        set_nz_reg(reg.s(), reg::x);
     }
 
     /// Push A
     public void pha() {
-        cpu.push(reg.a());
+        stack.push_u8(reg.a());
     }
 
     /// Pull A
     public void pla() {
-        reg.a(cpu.pull());
-        reg.n(getBitBool(reg.a(), 7));
-        reg.z(reg.a() == 0);
+        stack.peek();
+        set_nz_reg(stack.pull_u8(), reg::a);
     }
 
     /// Push Processor Status
     public void php() {
-        boolean _b = reg.b();
-        reg.r(true);
         reg.b(true);
-        cpu.push(reg.p());
-        reg.b(_b);
+        reg.r(true);
+        stack.push_u8(reg.p());
     }
 
     /// Pull Processor Status
     public void plp() {
+        stack.peek();
         boolean _r = reg.r();
         boolean _b = reg.b();
-        reg.p(cpu.pull());
+        reg.p(stack.pull_u8());
         reg.r(_r);
         reg.b(_b);
     }
 
+    private void compare(int value1, int value2) {
+        reg.c(value1 >= value2);
+        set_nz(value1 - value2);
+    }
+
     /// Compare A
     public void cmp(int value) {
-        reg.c(reg.a() >= value);
-        value = reg.a() - value;
-        reg.n(getBitBool(value, 7));
-        reg.z(value == 0);
+        compare(reg.a(), value);
     }
 
     /// Compare X
     public void cpx(int value) {
-        reg.c(reg.x() >= value);
-        value = reg.x() - value;
-        reg.n(getBitBool(value, 7));
-        reg.z(value == 0);
+        compare(reg.x(), value);
     }
 
     /// Compare Y
     public void cpy(int value) {
-        reg.c(reg.y() >= value);
-        value = reg.y() - value;
-        reg.n(getBitBool(value, 7));
-        reg.z(value == 0);
+        compare(reg.y(), value);
+    }
+
+    private int shift(int value, boolean c) {
+        reg.c(c);
+        set_nz(value = toU8(value));
+        return value;
     }
 
     /// Arithmetic Shift Left
-    public int asl(int value) {
-        reg.c(getBitBool(value, 7));
-        value <<= 1;
-        value = toU8(value);
-        reg.n(getBitBool(value, 7));
-        reg.z(value == 0);
-        return value;
+    public int asl(final int value) {
+        return shift(value << 1, getBitBool(value, 7));
     }
 
     /// Logical Shift Right
     public int lsr(int value) {
-        reg.c(getBitBool(value, 0));
-        value >>>= 1;
-        value = toU8(value);
-        reg.n(getBitBool(value, 7));
-        reg.z(value == 0);
-        return value;
+        return shift(value >>> 1, getBitBool(value, 0));
     }
 
     /// Rotate Left
     public int rol(int value) {
-        boolean _c = getBitBool(value, 7);
-        value = toU8(value << 1) | (toBit(reg.c()));
-        reg.c(_c);
-        reg.n(getBitBool(value, 7));
-        reg.z(value == 0);
-        return value;
+        return shift((value << 1) | toBit(reg.c()), getBitBool(value, 7));
     }
 
     /// Rotate Right
     public int ror(int value) {
-        boolean _c = getBitBool(value, 0);
-        value = toU8(value >>> 1) | (toBit(reg.c()) << 7);
-        reg.c(_c);
-        reg.n(getBitBool(value, 7));
-        reg.z(value == 0);
-        return value;
+        return shift((value >>> 1) | toBit(reg.c()) << 7, getBitBool(value, 0));
+    }
+
+    private void bitwise(int value) {
+        reg.a(value);
+        set_nz(reg.a());
     }
 
     /// Bitwise AND
     public void and(int value) {
-        reg.a(reg.a() & value);
-        reg.n(getBitBool(reg.a(), 7));
-        reg.z(reg.a() == 0);
+        bitwise(reg.a() & value);
     }
 
     /// Bitwise OR
     public void ora(int value) {
-        reg.a(reg.a() | value);
-        reg.n(getBitBool(reg.a(), 7));
-        reg.z(reg.a() == 0);
+        bitwise(reg.a() | value);
     }
 
     /// Bitwise Exclusive OR
     public void eor(int value) {
-        reg.a(reg.a() ^ value);
-        reg.n(getBitBool(reg.a(), 7));
-        reg.z(reg.a() == 0);
+        bitwise(reg.a() ^ value);
     }
 
     /// Bit Test
     public void bit(int value) {
         reg.v(getBitBool(value, 6));
         reg.n(getBitBool(value, 7));
-        reg.z((reg.a() & value) == 0);
+        reg.z(!toBitBool(value & reg.a()));
     }
 
     /// Add with Carry
@@ -226,9 +249,7 @@ public class ALU {
         int _i = reg.a() + value + toBit(reg.c());
         reg.v(getBitBool((reg.a() ^ _i) & (value ^ _i), 7));
         reg.c(getBitBool(_i, 8));
-        reg.a(_i);
-        reg.n(getBitBool(reg.a(), 7));
-        reg.z(reg.a() == 0);
+        set_nz_reg(toU8(_i), reg::a);
     }
 
     /// Subtract with Carry
@@ -236,20 +257,19 @@ public class ALU {
         adc(toU8(~value));
     }
 
+    public int increment(int value, int add) {
+        set_nz(value = toU8(value + add));
+        return value;
+    }
+
     /// Increment Memory
     public int inc(int value) {
-        value = toU8(++value);
-        reg.n(getBitBool(value, 7));
-        reg.z(value == 0);
-        return value;
+        return increment(value, 1);
     }
 
     /// Decrement Memory
     public int dec(int value) {
-        value = toU8(--value);
-        reg.n(getBitBool(value, 7));
-        reg.z(value == 0);
-        return value;
+        return increment(value, -1);
     }
 
     /// Increment X
@@ -274,38 +294,32 @@ public class ALU {
 
     /// Load A
     public void lda(int value) {
-        reg.a(value);
-        reg.n(getBitBool(reg.a(), 7));
-        reg.z(reg.a() == 0);
+        set_nz_reg(value, reg::a);
     }
 
     /// Store A
     public void sta(int value) {
-        cpu.write(value, reg.a());
+        cpu.write_u8(value, reg.a());
     }
 
     /// Load X
     public void ldx(int value) {
-        reg.x(value);
-        reg.n(getBitBool(reg.x(), 7));
-        reg.z(reg.x() == 0);
+        set_nz_reg(value, reg::x);
     }
 
     /// Store X
     public void stx(int value) {
-        cpu.write(value, reg.x());
+        cpu.write_u8(value, reg.x());
     }
 
     /// Load Y
     public void ldy(int value) {
-        reg.y(value);
-        reg.n(getBitBool(reg.y(), 7));
-        reg.z(reg.y() == 0);
+        set_nz_reg(value, reg::y);
     }
 
     /// Store Y
     public void sty(int value) {
-        cpu.write(value, reg.y());
+        cpu.write_u8(value, reg.y());
     }
 
     /// Jump
@@ -313,15 +327,35 @@ public class ALU {
         reg.pc(value);
     }
 
+    /// Return from Interrupt
+    public void rti() {
+        stack.peek();
+        boolean _r = reg.r();
+        boolean _b = reg.b();
+        reg.p(stack.pull_u8());
+        reg.r(_r);
+        reg.b(_b);
+        reg.pc((stack.pull_u16()));
+    }
+
+    /// Return from Subroutine
+    public void rts() {
+        stack.peek();
+        reg.pc(stack.pull_u16());
+        cpu.read_u8(reg.pc());
+        reg.pcInc1();
+    }
+
     /// Jump to Subroutine
     public void jsr(int value) {
-        cpu.push(reg.pc() >> 8);
-        cpu.push(reg.pc() & 0x00FF);
-        reg.pc(value);
+        stack.peek();
+        stack.push_u16(reg.pc());
+        reg.pc(value | cpu.read_u8_pc() << 8);
     }
 
     // -- Unofficial 6502 Instructions ------------------------------------------------
     // https://www.nesdev.org/wiki/CPU_unofficial_opcodes
+    // https://www.oxyron.de/html/opcodes02.html
 
     public void lax(int value) {
         lda(value);
@@ -329,17 +363,17 @@ public class ALU {
     }
 
     public void las(int value) {
-        reg.a(value & reg.sp());
-        reg.sp(reg.a());
+        reg.a(value & reg.s());
+        reg.s(reg.a());
         tax();
     }
 
     public void sax(int value) {
-        cpu.write(value, reg.a() & reg.x());
+        cpu.write_u8(value, reg.a() & reg.x());
     }
 
     public void ahx(int value) {
-        cpu.write(value, reg.a() & reg.x() & ((value >> 8) + 1));
+        cpu.write_u8(value, reg.a() & reg.x() & ((value >> 8) + 1));
     }
 
     public int isc(int value) {
@@ -388,17 +422,15 @@ public class ALU {
     }
 
     public void axs(int value) {
-        value = (reg.a() & reg.x()) + 256 - value;
-        reg.x(value);
-        reg.c(getBitBool(value, 8));
-        reg.n(getBitBool(reg.x(), 7));
-        reg.z(reg.x() == 0);
+        int _ax = reg.a() & reg.x();
+        reg.x(toU8(_ax - value));
+        reg.c(_ax >= value);
+        set_nz(reg.x());
     }
 
     public void xaa(int value) {
         reg.a(reg.a() & reg.x() & value);
-        reg.c(getBitBool(reg.a(), 7));
-        reg.n(getBitBool(reg.a(), 7));
-        reg.z(reg.a() == 0);
+        set_nz(reg.a());
+        reg.c(reg.n());
     }
 }

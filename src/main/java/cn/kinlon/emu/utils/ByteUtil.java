@@ -12,7 +12,7 @@ public class ByteUtil {
         return i8 & U8_MAX_VALUE;
     }
 
-    public static byte toi8(int u8) {
+    public static byte toI8(int u8) {
         return (byte) u8;
     }
 

@@ -41,6 +41,10 @@ dependencies {
 //    }
 //}
 
+tasks.withType<JavaExec>() {
+    jvmArgs("--enable-native-access=ALL-UNNAMED")
+}
+
 tasks.named("build") {
     dependsOn("createJre", "generateStartScript")
 }

@@ -162,7 +162,7 @@ public class NsfMapper extends Mapper {
         for (int i = chipCount - 1; i >= 0; i--) {
             audios[i].reset();
         }
-        reg.sp(0xFF);
+        reg.s(0xFF);
         reg.a(songNumber);
         reg.x(ntsc ? 0 : 1);
     }
@@ -189,7 +189,7 @@ public class NsfMapper extends Mapper {
     public void jumpSubroutine(final int address) {
         memory[0x01FE] = 0xFC;
         memory[0x01FF] = 0x4F;
-        reg.sp(0xFD);
+        reg.s(0xFD);
         reg.i(true);
         reg.pc(address);
     }

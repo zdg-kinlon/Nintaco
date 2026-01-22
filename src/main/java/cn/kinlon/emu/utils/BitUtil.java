@@ -30,7 +30,7 @@ public final class BitUtil {
     }
 
     public static int getBit(final int x, final int bit) {
-        return (x >> bit) & 1;
+        return (x >>> bit) & 1;
     }
 
     public static int setBit(final int x, final int bit) {
