@@ -5,8 +5,6 @@ import cn.kinlon.emu.input.DeviceMapper;
 import cn.kinlon.emu.input.gamepad.GamepadMapper;
 import cn.kinlon.emu.mappers.Mapper;
 
-import static cn.kinlon.emu.cpu.CPU.REG_INPUT_PORT_1;
-import static cn.kinlon.emu.cpu.CPU.REG_OUTPUT_PORT;
 import static cn.kinlon.emu.input.InputDevices.isGamepad;
 import static cn.kinlon.emu.mappers.NametableMirroring.FOUR_SCREEN;
 import static cn.kinlon.emu.utils.BitUtil.getBit;

@@ -6,27 +6,29 @@ import static cn.kinlon.emu.utils.ByteUtil.toU8;
 public class Stack {
 
     private final CPU cpu;
+    private final Register reg;
 
     public Stack(CPU cpu) {
         this.cpu = cpu;
+        this.reg = cpu.getRegister();
     }
 
     public int peek() {
-        return cpu.read_u8(VEC_STACK_START | cpu.getRegister().s());
+        return cpu.read_u8(VEC_STACK_START | reg.s());
     }
 
     public void poke(int value) {
-        cpu.write_u8(VEC_STACK_START | cpu.getRegister().s(), value);
+        cpu.write_u8(VEC_STACK_START | reg.s(), value);
     }
 
     public int pull_u8() {
-        cpu.getRegister().sInc1();
+        reg.sInc1();
         return peek();
     }
 
     public void push_u8(int value) {
         poke(value);
-        cpu.getRegister().sDec1();
+        reg.sDec1();
     }
 
     public int pull_u16() {

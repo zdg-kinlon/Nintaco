@@ -1,10 +1,6 @@
 package cn.kinlon.emu.mappers;
 
-import java.io.*;
-import java.util.*;
-
 import cn.kinlon.emu.Machine;
-import cn.kinlon.emu.ppu.PPU;
 import cn.kinlon.emu.apu.APU;
 import cn.kinlon.emu.cpu.CPU;
 import cn.kinlon.emu.cpu.Register;
@@ -91,21 +87,32 @@ import cn.kinlon.emu.mappers.unif.btl.MARIO1MALEE2;
 import cn.kinlon.emu.mappers.unif.unl.*;
 import cn.kinlon.emu.mappers.unif.unl.dripgame.DripGame;
 import cn.kinlon.emu.mappers.waixing.*;
+import cn.kinlon.emu.ppu.PPU;
 import cn.kinlon.emu.preferences.AppPrefs;
 import cn.kinlon.emu.preferences.GamePrefs;
 import cn.kinlon.emu.serializer.Transients;
 import cn.kinlon.emu.tv.TVSystem;
 
-import static cn.kinlon.emu.utils.BitUtil.*;
+import java.io.*;
+import java.util.Locale;
+import java.util.Random;
+
+import static cn.kinlon.emu.mappers.NametableMirroring.*;
+import static cn.kinlon.emu.tv.TVSystem.NTSC;
+import static cn.kinlon.emu.utils.BitUtil.isBase2;
+import static cn.kinlon.emu.utils.BitUtil.log2;
 import static cn.kinlon.emu.utils.ByteUtil.toU16;
 import static cn.kinlon.emu.utils.ByteUtil.toU8;
 import static cn.kinlon.emu.utils.StreamUtil.*;
-import static cn.kinlon.emu.mappers.NametableMirroring.*;
-import static cn.kinlon.emu.tv.TVSystem.*;
 
 public abstract class Mapper implements Serializable, Transients {
 
     private static final long serialVersionUID = 0;
+
+    public static final int REG_OAM_DMA = 0x4014;
+    public static final int REG_OUTPUT_PORT = 0x4016;
+    public static final int REG_INPUT_PORT_1 = 0x4016;
+    public static final int REG_INPUT_PORT_2 = 0x4017;
 
     protected static final int INSERT_COIN_FRAMES = 6;
 
@@ -539,10 +546,10 @@ public abstract class Mapper implements Serializable, Transients {
             case APU.REG_APU_STATUS:
                 value = apu.readStatus();
                 break;
-            case CPU.REG_INPUT_PORT_1:
+            case REG_INPUT_PORT_1:
                 value = readInputPort(0);
                 break;
-            case CPU.REG_INPUT_PORT_2:
+            case REG_INPUT_PORT_2:
                 value = readInputPort(1);
                 break;
             default:
@@ -575,10 +582,10 @@ public abstract class Mapper implements Serializable, Transients {
             case APU.REG_APU_STATUS:
                 value = apu.peekStatus();
                 break;
-            case CPU.REG_INPUT_PORT_1:
+            case REG_INPUT_PORT_1:
                 value = peekInputPort(0);
                 break;
-            case CPU.REG_INPUT_PORT_2:
+            case REG_INPUT_PORT_2:
                 value = peekInputPort(1);
                 break;
             default:
@@ -662,13 +669,13 @@ public abstract class Mapper implements Serializable, Transients {
             case APU.REG_APU_DMC_SAMPLE_LENGTH:
                 apu.dmc.writeSampleLength(value);
                 break;
-            case CPU.REG_OAM_DMA:
+            case REG_OAM_DMA:
                 cpu.oamTransfer(value);
                 break;
             case APU.REG_APU_STATUS:
                 apu.writeStatus(value);
                 break;
-            case CPU.REG_OUTPUT_PORT:
+            case REG_OUTPUT_PORT:
                 writeOutputPort(value);
                 break;
             case APU.REG_APU_FRAME_COUNTER:

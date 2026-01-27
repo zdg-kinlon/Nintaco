@@ -2,6 +2,7 @@ package cn.kinlon.emu.cpu;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static cn.kinlon.emu.utils.ByteUtil.*;
 
@@ -9,10 +10,14 @@ public class AddressMode {
 
     private final CPU cpu;
     private final Register reg;
+    private final Interrupt interrupt;
+    private final State state;
 
     public AddressMode(CPU cpu) {
         this.cpu = cpu;
         this.reg = cpu.getRegister();
+        this.interrupt = cpu.getInterrupt();
+        this.state = cpu.getState();
     }
 
     public void absolute_read(Consumer<Integer> op) {
@@ -35,7 +40,7 @@ public class AddressMode {
         int address_old = cpu.read_u16_pc();
         int address_new = toU16(address_old + offset);
         int value = cpu.read_u8(address_new);
-        if (cpu.checkPageCrossed(address_old, address_new)) {
+        if (checkPageCrossed(address_old, address_new)) {
             cpu.read_u8(address_new);
         }
         op.accept(value);
@@ -168,7 +173,7 @@ public class AddressMode {
         address_old = toU16(address_new + reg.y());
         address_new = (address_new & 0xFF00) | (address_old & 0x00FF);
         int value = cpu.read_u8(address_new);
-        if (cpu.checkPageCrossed(address_old, address_new)) {
+        if (checkPageCrossed(address_old, address_new)) {
             value = cpu.read_u8(address_old);
         }
         op.accept(value);
@@ -207,5 +212,57 @@ public class AddressMode {
     public void implied(Runnable op) {
         cpu.read_u8(reg.pc());
         op.run();
+    }
+
+    public void relative(Supplier<Boolean> op) {
+        int offset = toI8(cpu.read_u8_pc());
+        boolean branchTaken = op.get();
+        if (branchTaken) {
+            boolean clearNMI = false;
+            boolean clearIRQ = false;
+            if (interrupt.nmiRequested() && !interrupt.triggerNMI()) {
+                clearNMI = true;
+            }
+            if (interrupt.irqRequested() != 0 && !interrupt.triggerIRQ()) {
+                clearIRQ = true;
+            }
+            cpu.read_u8(reg.pc());
+            if (clearNMI) {
+                interrupt.triggerNMI(false);
+            }
+            if (clearIRQ) {
+                interrupt.triggerIRQ(false);
+            }
+            int address = toU16(reg.pc() + offset);
+            reg.pc((reg.pc() & 0xFF00) | (address & 0x00FF));
+            if (checkPageCrossed(reg.pc(), address)) {
+                cpu.read_u8(reg.pc());
+                reg.pc(address);
+            }
+        }
+    }
+
+    // https://forums.nesdev.org/viewtopic.php?p=297765
+    private void _tas_ahx_shx_shy(int indexReg, int valueReg) {
+        int bassAddr = cpu.read_u16_pc();
+        int address = toU16(bassAddr + indexReg);
+        boolean pageCrossed = checkPageCrossed(bassAddr, address);
+        boolean hadDMA = state.hasDmcCycle();
+        cpu.read_u8(toU16(address - (pageCrossed ? 0x0100 : 0)));
+        if (pageCrossed) address &= (valueReg << 8) | toU8(address);
+        int value = hadDMA ? valueReg : toU8(valueReg & ((bassAddr >> 8) + 1));
+        cpu.write_u8(address, value);
+    }
+
+    public void absolute_x_shy(Supplier<Integer> op) {
+        _tas_ahx_shx_shy(reg.x(), op.get());
+    }
+
+    public void absolute_y_shx(Supplier<Integer> op) {
+        _tas_ahx_shx_shy(reg.y(), op.get());
+    }
+
+    public boolean checkPageCrossed(int address_old, int address_new) {
+        return (address_old & 0xFF00) != (address_new & 0xFF00);
     }
 }

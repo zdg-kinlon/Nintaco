@@ -47,6 +47,10 @@ public final class MathUtil {
         return (value & 1) == 0;
     }
 
+    public static boolean isEven(final long value) {
+        return (value & 1) == 0;
+    }
+
     // m/n 
     public static int roundUpDivision(final int m, final int n) {
         return (m + n - 1) / n;

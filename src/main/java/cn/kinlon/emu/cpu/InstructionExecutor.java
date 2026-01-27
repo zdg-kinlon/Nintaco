@@ -354,9 +354,6 @@ public class InstructionExecutor {
     }
 
     // -- Unofficial 6502 Instructions ------------------------------------------------
-    // https://www.nesdev.org/wiki/CPU_unofficial_opcodes
-    // https://www.oxyron.de/html/opcodes02.html
-
     public void lax(int value) {
         lda(value);
         tax();
@@ -432,5 +429,22 @@ public class InstructionExecutor {
         reg.a(reg.a() & reg.x() & value);
         set_nz(reg.a());
         reg.c(reg.n());
+    }
+
+    public int shy() {
+        return reg.y();
+    }
+
+    public int shx() {
+        return reg.x();
+    }
+
+    public int tas() {
+        reg.s(ahx());
+        return reg.s();
+    }
+
+    public int ahx() {
+        return reg.a() & reg.x();
     }
 }
