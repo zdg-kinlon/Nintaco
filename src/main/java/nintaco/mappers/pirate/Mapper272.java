@@ -59,7 +59,7 @@ public class Mapper272 extends Mapper {
         if ((lastBit13 == 1) && (bit13 == 0) && irqCounterEnabled
                 && ++irqCounter == 84) {
             irqCounter = 0;
-            cpu.setMapperIrq(true);
+            cpu.interrupt().setMapperIrq(true);
         }
         lastBit13 = bit13;
         return super.readVRAM(address);
@@ -142,10 +142,10 @@ public class Mapper272 extends Mapper {
                 oneScreenMirroring = value & 3;
                 break;
             case 0x800C:
-                cpu.setMapperIrq(true);
+                cpu.interrupt().setMapperIrq(true);
                 break;
             case 0xC004:
-                cpu.setMapperIrq(false);
+                cpu.interrupt().setMapperIrq(false);
                 break;
             case 0xC008:
                 irqCounterEnabled = true;
@@ -153,7 +153,7 @@ public class Mapper272 extends Mapper {
             case 0xC00C:
                 irqCounterEnabled = false;
                 irqCounter = 0;
-                cpu.setMapperIrq(false);
+                cpu.interrupt().setMapperIrq(false);
                 break;
         }
 

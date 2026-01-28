@@ -42,7 +42,7 @@ public class BMCSB5013 extends Mapper {
         offset = irqCounter = 0;
         irqReload = irqEnabled = PA12Mode = irqAutoEnable = false;
         setNametableMirroring(0);
-        cpu.setMapperIrq(false);
+        cpu.interrupt().setMapperIrq(false);
         audio.reset();
         updateState();
     }
@@ -89,7 +89,7 @@ public class BMCSB5013 extends Mapper {
         } else {
             irqCounter = (irqCounter & 0xFF00) | value;
         }
-        cpu.setMapperIrq(false);
+        cpu.interrupt().setMapperIrq(false);
     }
 
     private void writeIrqCounterHighLoadLatch(final int value) {
@@ -101,19 +101,19 @@ public class BMCSB5013 extends Mapper {
         } else {
             irqCounter = (value << 8) | (irqCounter & 0x00FF);
         }
-        cpu.setMapperIrq(false);
+        cpu.interrupt().setMapperIrq(false);
     }
 
     private void writeIrqMode(final int value) {
         irqAutoEnable = getBitBool(value, 2);
         PA12Mode = getBitBool(value, 1);
         irqEnabled = getBitBool(value, 0);
-        cpu.setMapperIrq(false);
+        cpu.interrupt().setMapperIrq(false);
     }
 
     private void writeIrqDisableEnable(final int value) {
         irqEnabled = getBitBool(value, 0);
-        cpu.setMapperIrq(false);
+        cpu.interrupt().setMapperIrq(false);
     }
 
     @Override
@@ -183,7 +183,7 @@ public class BMCSB5013 extends Mapper {
                     irqCounter = (irqCounter & 0xFF00) | ((irqLatch - 1) & 0x00FF);
                 }
                 if (irqEnabled && (irqCounter & 0x00FF) == 0) {
-                    cpu.setMapperIrq(true);
+                    cpu.interrupt().setMapperIrq(true);
                 }
             }
             irqLatency = 8;
@@ -197,7 +197,7 @@ public class BMCSB5013 extends Mapper {
             --irqCounter;
             irqCounter &= 0xFFFF;
             if (irqCounter == 0) {
-                cpu.setMapperIrq(true);
+                cpu.interrupt().setMapperIrq(true);
             }
         }
     }

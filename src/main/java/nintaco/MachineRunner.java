@@ -1,30 +1,40 @@
 package nintaco;
 
-import java.util.*;
+import nintaco.api.local.LocalAPI;
+import nintaco.apu.APU;
+import nintaco.apu.SystemAudioProcessor;
+import nintaco.cheats.GameCheats;
+import nintaco.cpu.CPU;
+import nintaco.disassembler.TraceLogger;
+import nintaco.gui.image.ImagePane;
+import nintaco.gui.image.SubMonitorFrame;
+import nintaco.gui.rob.RobController;
+import nintaco.gui.rob.RobGame;
+import nintaco.gui.rob.RobState;
+import nintaco.input.DeviceMapper;
+import nintaco.input.InputUtil;
+import nintaco.input.OtherInput;
+import nintaco.mappers.Mapper;
+import nintaco.mappers.nintendo.vs.MainCPU;
+import nintaco.movie.Movie;
+import nintaco.movie.MovieBlock;
+import nintaco.movie.MovieFrame;
+import nintaco.netplay.client.NetplayClient;
+import nintaco.netplay.protocol.ControllerInput;
+import nintaco.netplay.server.NetplayServer;
+import nintaco.task.Task;
 
-import nintaco.api.local.*;
-import nintaco.apu.*;
-import nintaco.cheats.*;
-import nintaco.disassembler.*;
-import nintaco.gui.image.*;
-import nintaco.gui.rob.*;
-import nintaco.input.*;
-import nintaco.mappers.*;
-import nintaco.mappers.nintendo.vs.*;
-import nintaco.movie.*;
-import nintaco.netplay.client.*;
-import nintaco.netplay.protocol.*;
-import nintaco.netplay.server.*;
-import nintaco.task.*;
+import java.util.List;
 
 import static nintaco.PauseStepType.*;
-import static nintaco.movie.Movie.*;
+import static nintaco.movie.Movie.BLOCK_MASK;
+import static nintaco.movie.Movie.BLOCK_SIZE;
 import static nintaco.netplay.protocol.MessageType.*;
-import static nintaco.util.CollectionsUtil.*;
-import static nintaco.util.GuiUtil.*;
-import static nintaco.util.StreamUtil.*;
-import static nintaco.util.ThreadUtil.*;
-import static nintaco.util.TimeUtil.*;
+import static nintaco.util.CollectionsUtil.convertToArray;
+import static nintaco.util.GuiUtil.suppressScreensaver;
+import static nintaco.util.StreamUtil.readObject;
+import static nintaco.util.ThreadUtil.threadWait;
+import static nintaco.util.TimeUtil.sleep;
 
 public class MachineRunner extends Task {
 
@@ -84,7 +94,7 @@ public class MachineRunner extends Task {
         } else {
             this.machine = machine;
             this.mapper = machine.getMapper();
-            this.cpu = machine.getCPU();
+            this.cpu = machine.cpu();
             this.ppu = machine.getPPU();
             this.apu = machine.getAPU();
         }
@@ -684,12 +694,12 @@ public class MachineRunner extends Task {
                 case Frame:
                     return ppu.getFrameCounter() == stepToValue;
                 case Into:
-                    return cpu.getInstructionsCounter() == stepToValue;
+                    return cpu.state().instructionsCounter() == stepToValue;
                 case Out:
-                    switch (mapper.peekCpuMemory(cpu.getPC())) {
+                    switch (mapper.peekCpuMemory(cpu.register().pc())) {
                         case PLP:
                         case PLA: {
-                            final int stackSize = 0xFF - cpu.getS() - 1;
+                            final int stackSize = 0xFF - cpu.register().s() - 1;
                             if (stackSize < stepToValue) {
                                 stepToValue = stackSize;
                             }
@@ -697,15 +707,15 @@ public class MachineRunner extends Task {
                         }
                         case RTI:
                         case RTS:
-                            if (0xFF - cpu.getS() - 2 < stepToValue) {
-                                stepToValue = cpu.getInstructionsCounter() + 1;
+                            if (0xFF - cpu.register().s() - 2 < stepToValue) {
+                                stepToValue = cpu.state().instructionsCounter() + 1;
                                 pauseStepType = Into;
                             }
                             break;
                     }
                     return false;
                 case Address:
-                    return cpu.getPC() == stepToValue;
+                    return cpu.register().pc() == stepToValue;
                 case Scanline:
                     return ppu.getFrameCounter() == stepToValue2
                             && ppu.getScanline() >= stepToValue;
@@ -718,35 +728,35 @@ public class MachineRunner extends Task {
                     if (stepToValue2 == 1) {
                         stepToValue2 = 0;
                     } else {
-                        return mapper.peekCpuMemory(cpu.getPC()) == stepToValue;
+                        return mapper.peekCpuMemory(cpu.register().pc()) == stepToValue;
                     }
                 case NMI:
                     if (stepToValue == 1) {
-                        stepToValue = cpu.getServiced() == ServicedType.NMI ? 1 : 0;
+                        stepToValue = cpu.interrupt().serviced() == ServicedType.NMI ? 1 : 0;
                         break;
                     } else {
-                        return cpu.getServiced() == ServicedType.NMI;
+                        return cpu.interrupt().serviced() == ServicedType.NMI;
                     }
                 case IRQ:
                     if (stepToValue == 1) {
-                        stepToValue = cpu.getServiced() == ServicedType.IRQ ? 1 : 0;
+                        stepToValue = cpu.interrupt().serviced() == ServicedType.IRQ ? 1 : 0;
                         break;
                     } else {
-                        return cpu.getServiced() == ServicedType.IRQ;
+                        return cpu.interrupt().serviced() == ServicedType.IRQ;
                     }
                 case BRK:
                     if (stepToValue == 1) {
-                        stepToValue = cpu.getServiced() == ServicedType.BRK ? 1 : 0;
+                        stepToValue = cpu.interrupt().serviced() == ServicedType.BRK ? 1 : 0;
                         break;
                     } else {
-                        return cpu.getServiced() == ServicedType.BRK;
+                        return cpu.interrupt().serviced() == ServicedType.BRK;
                     }
                 case RST:
                     if (stepToValue == 1) {
-                        stepToValue = cpu.getServiced() == ServicedType.RST ? 1 : 0;
+                        stepToValue = cpu.interrupt().serviced() == ServicedType.RST ? 1 : 0;
                         break;
                     } else {
-                        return cpu.getServiced() == ServicedType.RST;
+                        return cpu.interrupt().serviced() == ServicedType.RST;
                     }
             }
         }
@@ -797,26 +807,26 @@ public class MachineRunner extends Task {
                     stepToValue = ppu.getFrameCounter() + 1;
                     break;
                 case Into:
-                    stepToValue = cpu.getInstructionsCounter() + 1;
+                    stepToValue = cpu.state().instructionsCounter() + 1;
                     break;
                 case Out: {
-                    final int opCode = mapper.peekCpuMemory(cpu.getPC());
+                    final int opCode = mapper.peekCpuMemory(cpu.register().pc());
                     if (opCode == RTI || opCode == RTS) {
                         pauseStepType = Into;
-                        stepToValue = cpu.getInstructionsCounter() + 1;
+                        stepToValue = cpu.state().instructionsCounter() + 1;
                     } else {
-                        stepToValue = 0xFF - cpu.getS();
+                        stepToValue = 0xFF - cpu.register().s();
                     }
                     break;
                 }
                 case Over: {
-                    final int opCode = mapper.peekCpuMemory(cpu.getPC());
+                    final int opCode = mapper.peekCpuMemory(cpu.register().pc());
                     if (opCode == JSR) {
                         pauseStepType = Address;
-                        stepToValue = (cpu.getPC() + 3) & 0xFFFF;
+                        stepToValue = (cpu.register().pc() + 3) & 0xFFFF;
                     } else {
                         pauseStepType = Into;
-                        stepToValue = cpu.getInstructionsCounter() + 1;
+                        stepToValue = cpu.state().instructionsCounter() + 1;
                     }
                     break;
                 }
@@ -824,16 +834,16 @@ public class MachineRunner extends Task {
                     stepToValue = ppu.getFrameCounter() + (ppu.isSprite0Hit() ? 1 : 0);
                     break;
                 case NMI:
-                    stepToValue = cpu.getServiced() == ServicedType.NMI ? 1 : 0;
+                    stepToValue = cpu.interrupt().serviced() == ServicedType.NMI ? 1 : 0;
                     break;
                 case IRQ:
-                    stepToValue = cpu.getServiced() == ServicedType.IRQ ? 1 : 0;
+                    stepToValue = cpu.interrupt().serviced() == ServicedType.IRQ ? 1 : 0;
                     break;
                 case BRK:
-                    stepToValue = cpu.getServiced() == ServicedType.BRK ? 1 : 0;
+                    stepToValue = cpu.interrupt().serviced() == ServicedType.BRK ? 1 : 0;
                     break;
                 case RST:
-                    stepToValue = cpu.getServiced() == ServicedType.RST ? 1 : 0;
+                    stepToValue = cpu.interrupt().serviced() == ServicedType.RST ? 1 : 0;
                     break;
             }
             this.pauseStepType = pauseStepType;
@@ -869,14 +879,14 @@ public class MachineRunner extends Task {
     public synchronized void stepToOpcode(final int opcode) {
         if (paused) {
             stepToValue = opcode;
-            stepToValue2 = mapper.peekCpuMemory(cpu.getPC()) == opcode ? 1 : 0;
+            stepToValue2 = mapper.peekCpuMemory(cpu.register().pc()) == opcode ? 1 : 0;
             step(Opcode);
         }
     }
 
     public synchronized void stepToInstructions(final int instructions) {
         if (paused) {
-            stepToValue = cpu.getInstructionsCounter() + instructions;
+            stepToValue = cpu.state().instructionsCounter() + instructions;
             pauseStepType = Into;
             notifyAll();
         }

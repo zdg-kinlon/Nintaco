@@ -136,7 +136,7 @@ public class PlayMovieTask extends Task {
         mapper.restore(App.getNsfFile());
         machine.getPPU().setScreenRenderer(screenRenderer);
         if (vsDualSystem) {
-            ((MainCPU) machine.getCPU()).getSubPPU().setScreenRenderer(
+            ((MainCPU) machine.cpu()).getSubPPU().setScreenRenderer(
                     screenRenderer2);
         }
         machine.getAPU().setAudioProcessor(audioProcessor);

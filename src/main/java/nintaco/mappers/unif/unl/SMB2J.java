@@ -36,7 +36,7 @@ public class SMB2J extends Mapper {
                 ++irqCounter;
             } else {
                 irqEnabled = false;
-                cpu.setMapperIrq(true);
+                cpu.interrupt().setMapperIrq(true);
             }
         }
     }
@@ -48,7 +48,7 @@ public class SMB2J extends Mapper {
     private void writeIrqControl(final int value) {
         irqEnabled = getBitBool(value, 0);
         irqCounter = 0;
-        cpu.setMapperIrq(false);
+        cpu.interrupt().setMapperIrq(false);
     }
 
     @Override

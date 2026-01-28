@@ -1,6 +1,6 @@
 package nintaco.input.familybasic.datarecorder;
 
-import nintaco.CPU;
+import nintaco.cpu.CPU;
 import nintaco.Machine;
 import nintaco.input.DeviceMapper;
 import nintaco.input.InputDevices;
@@ -30,7 +30,7 @@ public class DataRecorderMapper extends DeviceMapper implements Serializable {
             cpu = null;
             recorderMode = Stop;
         } else {
-            cpu = machine.getCPU();
+            cpu = machine.cpu();
         }
     }
 
@@ -54,7 +54,7 @@ public class DataRecorderMapper extends DeviceMapper implements Serializable {
                 bitList.clear();
             }
             readIndex = 0;
-            counter = cpu.getCycleCounter();
+            counter = cpu.state().cycleCounter();
             recorderMode = mode == Erase ? Stop : mode;
         }
     }
@@ -64,7 +64,7 @@ public class DataRecorderMapper extends DeviceMapper implements Serializable {
         enabled = getBitBool(value, 2);
         if (enabled && recorderMode == Record) {
             final int bit = value & 1;
-            final long cycleCounter = cpu.getCycleCounter();
+            final long cycleCounter = cpu.state().cycleCounter();
             while (counter < cycleCounter) {
                 counter += samplingPeriod;
                 bitList.add(bit);
@@ -76,7 +76,7 @@ public class DataRecorderMapper extends DeviceMapper implements Serializable {
     public int readPort(final int portIndex) {
         if (enabled && portIndex == 0 && recorderMode == Play
                 && readIndex < bitList.size()) {
-            final long cycleCounter = cpu.getCycleCounter();
+            final long cycleCounter = cpu.state().cycleCounter();
             while (counter < cycleCounter) {
                 counter += samplingPeriod;
                 if (++readIndex >= bitList.size()) {

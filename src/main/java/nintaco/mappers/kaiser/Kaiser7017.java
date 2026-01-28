@@ -33,8 +33,8 @@ public class Kaiser7017 extends Mapper {
     @Override
     public int readMemory(final int address) {
         if (address == 0x4030) {
-            final int value = toBit(cpu.getMapperIrq());
-            cpu.setMapperIrq(false);
+            final int value = toBit(cpu.interrupt().getMapperIrq());
+            cpu.interrupt().setMapperIrq(false);
             return value;
         } else {
             return super.readMemory(address);
@@ -50,10 +50,10 @@ public class Kaiser7017 extends Mapper {
             } else if ((address & 0xFF00) == 0x5100) {
                 updateState();
             } else if (address == 0x4020) {
-                cpu.setMapperIrq(false);
+                cpu.interrupt().setMapperIrq(false);
                 irqCounter = (irqCounter & 0xFF00) | value;
             } else if (address == 0x4021) {
-                cpu.setMapperIrq(false);
+                cpu.interrupt().setMapperIrq(false);
                 irqCounter = (value << 8) | (irqCounter & 0x00FF);
                 irqEnabled = true;
             } else if (address == 0x4025) {
@@ -66,7 +66,7 @@ public class Kaiser7017 extends Mapper {
     public void update() {
         if (irqEnabled && --irqCounter <= 0) {
             irqEnabled = false;
-            cpu.setMapperIrq(true);
+            cpu.interrupt().setMapperIrq(true);
         }
     }
 }

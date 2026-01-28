@@ -249,7 +249,7 @@ public class Mapper116 extends Mapper {
                         irqReloadRequest = true;
                         break;
                     case 0xE000:
-                        cpu.setMapperIrq(false);
+                        cpu.interrupt().setMapperIrq(false);
                         irqEnabled = false;
                         break;
                     case 0xE001:
@@ -305,7 +305,7 @@ public class Mapper116 extends Mapper {
                     irqCounter = irqReloadValue;
                 }
                 if (irqCounter == 0 && irqEnabled) {
-                    cpu.setMapperIrq(true);
+                    cpu.interrupt().setMapperIrq(true);
                 }
             }
             if (a12) {

@@ -240,13 +240,13 @@ public class NamcoX extends Mapper {
     }
 
     protected void writeIrqCounterLow(final int value) {
-        cpu.setMapperIrq(false);
+        cpu.interrupt().setMapperIrq(false);
         irqCounter = (readIrqCounterHigh() << 8) | value;
         setNamcoType(163);
     }
 
     protected void writeIrqCounterHigh(final int value) {
-        cpu.setMapperIrq(false);
+        cpu.interrupt().setMapperIrq(false);
         irqCounter = readIrqCounterLow() | ((value & 0x7F) << 8);
         irqEnabled = getBitBool(value, 7);
         setNamcoType(163);
@@ -272,7 +272,7 @@ public class NamcoX extends Mapper {
     @Override
     public void update() {
         if (irqEnabled && irqCounter < 0x7FFF && ++irqCounter == 0x7FFF) {
-            cpu.setMapperIrq(true);
+            cpu.interrupt().setMapperIrq(true);
         }
         audio.update();
     }

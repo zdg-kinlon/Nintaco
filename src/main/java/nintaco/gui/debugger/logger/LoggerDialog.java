@@ -14,12 +14,12 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import static nintaco.CPU.REG_INPUT_PORT_1;
-import static nintaco.CPU.REG_OUTPUT_PORT;
 import static nintaco.PPU.*;
 import static nintaco.apu.APU.REG_APU_STATUS;
 import static nintaco.files.FileUtil.getFileNameWithoutExtension;
 import static nintaco.files.FileUtil.mkdir;
+import static nintaco.mappers.Mapper.REG_INPUT_PORT_1;
+import static nintaco.mappers.Mapper.REG_OUTPUT_PORT;
 import static nintaco.util.GuiUtil.*;
 import static nintaco.util.StringUtil.*;
 

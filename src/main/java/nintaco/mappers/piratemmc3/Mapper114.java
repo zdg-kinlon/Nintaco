@@ -59,7 +59,7 @@ public class Mapper114 extends MMC3 {
                     irqReloadRequest = true;
                     break;
                 case 0xE000:
-                    cpu.setMapperIrq(false);
+                    cpu.interrupt().setMapperIrq(false);
                     irqEnabled = false;
                     break;
                 case 0xE001:

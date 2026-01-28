@@ -116,7 +116,7 @@ public class RAMBO1 extends Mapper {
     }
 
     protected void writeIrqAcknowledge() {
-        cpu.setMapperIrq(false);
+        cpu.interrupt().setMapperIrq(false);
         irqEnabled = false;
     }
 
@@ -133,7 +133,7 @@ public class RAMBO1 extends Mapper {
             }
         } else if (--irqCounter == 0) {
             if (irqEnabled) {
-                cpu.setMapperIrq(true);
+                cpu.interrupt().setMapperIrq(true);
             }
         }
     }

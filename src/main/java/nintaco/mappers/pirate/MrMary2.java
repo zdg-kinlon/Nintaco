@@ -39,7 +39,7 @@ public class MrMary2 extends Mapper {
             irqCounter++;
             if (irqCounter >= 4096) {
                 irqEnabled = false;
-                cpu.setMapperIrq(true);
+                cpu.interrupt().setMapperIrq(true);
             }
         }
     }
@@ -76,7 +76,7 @@ public class MrMary2 extends Mapper {
             case 0x4122:
             case 0x8122:
                 irqEnabled = getBitBool(value, 0);
-                cpu.setMapperIrq(false);
+                cpu.interrupt().setMapperIrq(false);
                 irqCounter = 0;
                 break;
         }

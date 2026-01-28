@@ -48,7 +48,7 @@ public abstract class VrcIrq extends Mapper {
         irqEnabled = getBitBool(value, 1);
         irqCycleMode = getBitBool(value, 2);
 
-        cpu.setMapperIrq(false);
+        cpu.interrupt().setMapperIrq(false);
         if (irqEnabled) {
             irqCounter = irqLatch;
             scanlineCycleCounter = 341;
@@ -56,14 +56,14 @@ public abstract class VrcIrq extends Mapper {
     }
 
     protected void writeIrqAcknowledge() {
-        cpu.setMapperIrq(false);
+        cpu.interrupt().setMapperIrq(false);
         irqEnabled = irqEnableAfterAck;
     }
 
     protected void clockIrqCounter() {
         if (irqCounter == 0xFF) {
             irqCounter = irqLatch;
-            cpu.setMapperIrq(true);
+            cpu.interrupt().setMapperIrq(true);
         } else {
             irqCounter++;
         }

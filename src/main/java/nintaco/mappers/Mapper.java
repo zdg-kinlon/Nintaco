@@ -5,6 +5,8 @@ import java.util.*;
 
 import nintaco.*;
 import nintaco.apu.*;
+import nintaco.cheats.Cheat;
+import nintaco.cpu.CPU;
 import nintaco.files.*;
 import nintaco.input.*;
 import nintaco.input.familybasic.datarecorder.*;
@@ -71,8 +73,28 @@ public abstract class Mapper implements Serializable, Transients {
 
     private static final long serialVersionUID = 0;
 
+    public static final int REG_OAM_DMA = 0x4014;
+    public static final int REG_OUTPUT_PORT = 0x4016;
+    public static final int REG_INPUT_PORT_1 = 0x4016;
+    public static final int REG_INPUT_PORT_2 = 0x4017;
+
     protected static final int INSERT_COIN_FRAMES = 6;
 
+    private Cheat[] cheats;
+    public void setCheats(final Cheat[] cheats) {
+        this.cheats = cheats;
+    }
+    public int applyCheats(int address, int value) {
+        if (cheats != null) {
+            for (int i = cheats.length - 1; i >= 0; i--) {
+                final int result = cheats[i].apply(address, value);
+                if (result >= 0) {
+                    return result;
+                }
+            }
+        }
+        return value;
+    }
     protected transient int[] memory = new int[0x10000];
     protected transient int[] vram = new int[0x4000];
     protected transient int[] xram;
@@ -303,7 +325,7 @@ public abstract class Mapper implements Serializable, Transients {
 
     public void setMachine(final Machine machine) {
         this.machine = machine;
-        this.cpu = machine.getCPU();
+        this.cpu = machine.cpu();
         this.ppu = machine.getPPU();
         this.apu = machine.getAPU();
     }
@@ -565,10 +587,10 @@ public abstract class Mapper implements Serializable, Transients {
             case APU.REG_APU_STATUS:
                 value = apu.readStatus();
                 break;
-            case CPU.REG_INPUT_PORT_1:
+            case REG_INPUT_PORT_1:
                 value = readInputPort(0);
                 break;
-            case CPU.REG_INPUT_PORT_2:
+            case REG_INPUT_PORT_2:
                 value = readInputPort(1);
                 break;
             default:
@@ -576,7 +598,7 @@ public abstract class Mapper implements Serializable, Transients {
                 break;
         }
 
-        return cpu.applyCheats(address, value);
+        return applyCheats(address, value);
     }
 
     public int peekWord(final int address) {
@@ -601,10 +623,10 @@ public abstract class Mapper implements Serializable, Transients {
             case APU.REG_APU_STATUS:
                 value = apu.peekStatus();
                 break;
-            case CPU.REG_INPUT_PORT_1:
+            case REG_INPUT_PORT_1:
                 value = peekInputPort(0);
                 break;
-            case CPU.REG_INPUT_PORT_2:
+            case REG_INPUT_PORT_2:
                 value = peekInputPort(1);
                 break;
             default:
@@ -612,7 +634,7 @@ public abstract class Mapper implements Serializable, Transients {
                 break;
         }
 
-        return cpu.applyCheats(address, value);
+        return applyCheats(address, value);
     }
 
     public void writeCpuWord(final int address, final int value) {
@@ -693,13 +715,13 @@ public abstract class Mapper implements Serializable, Transients {
             case APU.REG_APU_DMC_SAMPLE_LENGTH:
                 apu.dmc.writeSampleLength(value);
                 break;
-            case CPU.REG_OAM_DMA:
+            case REG_OAM_DMA:
                 cpu.oamTransfer(value);
                 break;
             case APU.REG_APU_STATUS:
                 apu.writeStatus(value);
                 break;
-            case CPU.REG_OUTPUT_PORT:
+            case REG_OUTPUT_PORT:
                 writeOutputPort(value);
                 break;
             case APU.REG_APU_FRAME_COUNTER:

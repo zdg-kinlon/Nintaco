@@ -117,7 +117,7 @@ public class SunsoftFME7 extends Mapper {
     private void writeIrqControl(final int value) {
         irqEnabled = getBitBool(value, 0);
         irqCounterEnabled = getBitBool(value, 7);
-        cpu.setMapperIrq(false);
+        cpu.interrupt().setMapperIrq(false);
     }
 
     private void writePrgBank(final int bank, final int value) {
@@ -133,7 +133,7 @@ public class SunsoftFME7 extends Mapper {
         if (irqCounterEnabled) {
             irqCounter = (irqCounter - 1) & 0xFFFF;
             if (irqCounter == 0xFFFF && irqEnabled) {
-                cpu.setMapperIrq(true);
+                cpu.interrupt().setMapperIrq(true);
             }
         }
         audio.update();

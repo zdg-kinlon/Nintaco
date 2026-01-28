@@ -342,7 +342,7 @@ public class COOLGIRL extends Mapper {
                     final int result = (REG_scanline2_IRQ_pending ? 0x80 : 0x00)
                             | ((!LastPPUIsRendering || LastPPUScanline + 1 >= 241)
                             ? 0x00 : 0x40);
-                    cpu.setMapperIrq(false);
+                    cpu.interrupt().setMapperIrq(false);
                     REG_scanline2_IRQ_pending = false;
                     return result;
                 }
@@ -491,12 +491,12 @@ public class COOLGIRL extends Mapper {
                         REG_CHR_bank_H = value;
                         break;
                     case 0x5203:
-                        cpu.setMapperIrq(false);
+                        cpu.interrupt().setMapperIrq(false);
                         REG_scanline2_IRQ_pending = false;
                         REG_scanline2_IRQ_line = value;
                         break;
                     case 0x5204:
-                        cpu.setMapperIrq(false);
+                        cpu.interrupt().setMapperIrq(false);
                         REG_scanline2_IRQ_pending = false;
                         REG_scanline2_IRQ_enabled = getBitBool(value, 7);
                         break;
@@ -710,11 +710,11 @@ public class COOLGIRL extends Mapper {
                                 | ((value & 0x0F) << 12);
                         break;
                     case 28:
-                        cpu.setMapperIrq(false);
+                        cpu.interrupt().setMapperIrq(false);
                         REG_CPU_IRQ_value = REG_CPU_IRQ_latch;
                         break;
                     case 29:
-                        cpu.setMapperIrq(false);
+                        cpu.interrupt().setMapperIrq(false);
                         REG_CPU_IRQ_control = value & 0x0F;
                         break;
                     case 30:
@@ -797,12 +797,12 @@ public class COOLGIRL extends Mapper {
                                     REG_scanline_IRQ_enabled = true;
                                 } else {
                                     REG_scanline_IRQ_enabled = false;
-                                    cpu.setMapperIrq(false);
+                                    cpu.interrupt().setMapperIrq(false);
                                 }
                                 break;
                             case 2:
                                 REG_scanline_IRQ_enabled = false;
-                                cpu.setMapperIrq(false);
+                                cpu.interrupt().setMapperIrq(false);
                                 break;
                             case 3:
                                 REG_scanline_IRQ_enabled = true;
@@ -834,11 +834,11 @@ public class COOLGIRL extends Mapper {
                     case 11:
                         REG_CPU_IRQ_control = (REG_CPU_IRQ_control & 0xFE)
                                 | ((value >> 7) & 1);
-                        cpu.setMapperIrq(false);
+                        cpu.interrupt().setMapperIrq(false);
                         break;
                     case 12:
                         REG_CPU_IRQ_value = (REG_R0 << 8) | REG_R1;
-                        cpu.setMapperIrq(false);
+                        cpu.interrupt().setMapperIrq(false);
                         break;
                     case 13:
                         REG_R0 = value;
@@ -990,14 +990,14 @@ public class COOLGIRL extends Mapper {
                                 | ((value & 0x0F) << 12);
                         break;
                     case 4: // $C000-$CFFF
-                        cpu.setMapperIrq(false);
+                        cpu.interrupt().setMapperIrq(false);
                         REG_CPU_IRQ_control = (REG_CPU_IRQ_control & 0xF8) | (value & 7);
                         if ((REG_CPU_IRQ_control & 2) != 0) {
                             REG_CPU_IRQ_value = REG_CPU_IRQ_latch;
                         }
                         break;
                     case 5: // $D000-$DFFF
-                        cpu.setMapperIrq(false);
+                        cpu.interrupt().setMapperIrq(false);
                         REG_CPU_IRQ_control = (REG_CPU_IRQ_control & 0xFD)
                                 | (REG_CPU_IRQ_control & 1) << 1;
                         break;
@@ -1060,7 +1060,7 @@ public class COOLGIRL extends Mapper {
                         break;
                     case 6: // $E000-$FFFE, even
                         REG_scanline_IRQ_enabled = false;
-                        cpu.setMapperIrq(false);
+                        cpu.interrupt().setMapperIrq(false);
                         break;
                     case 7: // $E001-$FFFF, odd
                         REG_scanline_IRQ_enabled = true;
@@ -1149,7 +1149,7 @@ public class COOLGIRL extends Mapper {
                         break;
                     case 11:
                         REG_scanline_IRQ_enabled = false;
-                        cpu.setMapperIrq(false);
+                        cpu.interrupt().setMapperIrq(false);
                         break;
                 }
                 break;
@@ -1316,7 +1316,7 @@ public class COOLGIRL extends Mapper {
                                     | ((value & 0x0F) << 4);
                             break;
                         case 2:
-                            cpu.setMapperIrq(false);
+                            cpu.interrupt().setMapperIrq(false);
                             REG_CPU_IRQ_control = (REG_CPU_IRQ_control & 0xF8)
                                     | (value & 7);
                             if ((REG_CPU_IRQ_control & 2) != 0) {
@@ -1326,7 +1326,7 @@ public class COOLGIRL extends Mapper {
                             }
                             break;
                         case 3:
-                            cpu.setMapperIrq(false);
+                            cpu.interrupt().setMapperIrq(false);
                             REG_CPU_IRQ_control = (REG_CPU_IRQ_control & 0xFD)
                                     | (REG_CPU_IRQ_control & 1) << 1;
                             break;
@@ -1382,7 +1382,7 @@ public class COOLGIRL extends Mapper {
                             break;
                         case 13:
                             REG_CPU_IRQ_control = ((value >> 6) & 1) | (value & 1);
-                            cpu.setMapperIrq(false);
+                            cpu.interrupt().setMapperIrq(false);
                             break;
                         case 14:
                             REG_CPU_IRQ_value = (REG_CPU_IRQ_value & 0xFF00) | value;
@@ -1486,25 +1486,25 @@ public class COOLGIRL extends Mapper {
                 if ((REG_CPU_IRQ_control & 1) != 0) {
                     if ((REG_CPU_IRQ_control & 8) != 0) {
                         if ((REG_CPU_IRQ_value & 0x000F) == 0) {
-                            cpu.setMapperIrq(true);
+                            cpu.interrupt().setMapperIrq(true);
                         }
                         REG_CPU_IRQ_value = (REG_CPU_IRQ_value & 0xFFF0)
                                 | ((REG_CPU_IRQ_value - 1) & 0x000F);
                     } else if ((REG_CPU_IRQ_control & 4) != 0) {
                         if ((REG_CPU_IRQ_value & 0x00FF) == 0) {
-                            cpu.setMapperIrq(true);
+                            cpu.interrupt().setMapperIrq(true);
                         }
                         REG_CPU_IRQ_value = (REG_CPU_IRQ_value & 0xFF00)
                                 | ((REG_CPU_IRQ_value - 1) & 0x00FF);
                     } else if ((REG_CPU_IRQ_control & 2) != 0) {
                         if ((REG_CPU_IRQ_value & 0x0FFF) == 0) {
-                            cpu.setMapperIrq(true);
+                            cpu.interrupt().setMapperIrq(true);
                         }
                         REG_CPU_IRQ_value = (REG_CPU_IRQ_value & 0xF000)
                                 | ((REG_CPU_IRQ_value - 1) & 0x0FFF);
                     } else {
                         if (REG_CPU_IRQ_value == 0) {
-                            cpu.setMapperIrq(true);
+                            cpu.interrupt().setMapperIrq(true);
                         }
                         --REG_CPU_IRQ_value;
                         REG_CPU_IRQ_value &= 0xFFFF;
@@ -1516,7 +1516,7 @@ public class COOLGIRL extends Mapper {
                     --REG_CPU_IRQ_value;
                     REG_CPU_IRQ_value &= 0xFFFF;
                     if (REG_CPU_IRQ_value == 0) {
-                        cpu.setMapperIrq(true);
+                        cpu.interrupt().setMapperIrq(true);
                     }
                 }
                 break;
@@ -1526,7 +1526,7 @@ public class COOLGIRL extends Mapper {
                         REG_CPU_IRQ_value = (REG_CPU_IRQ_value & 0xFF00)
                                 | ((REG_CPU_IRQ_value + 1) & 0x00FF);
                         if ((REG_CPU_IRQ_value & 0xFF) == 0) {
-                            cpu.setMapperIrq(true);
+                            cpu.interrupt().setMapperIrq(true);
                             REG_CPU_IRQ_value = (REG_CPU_IRQ_value & 0xFF00)
                                     | (REG_CPU_IRQ_latch & 0x00FF);
                         }
@@ -1534,7 +1534,7 @@ public class COOLGIRL extends Mapper {
                         ++REG_CPU_IRQ_value;
                         REG_CPU_IRQ_value &= 0xFFFF;
                         if (REG_CPU_IRQ_value == 0) {
-                            cpu.setMapperIrq(true);
+                            cpu.interrupt().setMapperIrq(true);
                             REG_CPU_IRQ_value = REG_CPU_IRQ_latch;
                         }
                     }
@@ -1546,7 +1546,7 @@ public class COOLGIRL extends Mapper {
                         ++REG_CPU_IRQ_value;
                         REG_CPU_IRQ_value &= 0xFFFF;
                         if ((REG_CPU_IRQ_value & 0x00FF) == 0) {
-                            cpu.setMapperIrq(true);
+                            cpu.interrupt().setMapperIrq(true);
                             REG_CPU_IRQ_value = REG_CPU_IRQ_latch;
                         }
                     } else {
@@ -1564,7 +1564,7 @@ public class COOLGIRL extends Mapper {
                                 REG_VRC4_IRQ_prescaler_counter = 0;
                             }
                             if ((REG_CPU_IRQ_value & 0x00FF) == 0) {
-                                cpu.setMapperIrq(true);
+                                cpu.interrupt().setMapperIrq(true);
                                 REG_CPU_IRQ_value = REG_CPU_IRQ_latch;
                             }
                         }
@@ -1573,7 +1573,7 @@ public class COOLGIRL extends Mapper {
                 break;
             case 25: // Mapper #69 - Sunsoft FME-7
                 if (REG_CPU_IRQ_value == 0 && (REG_CPU_IRQ_control & 1) != 0) {
-                    cpu.setMapperIrq(true);
+                    cpu.interrupt().setMapperIrq(true);
                 }
                 --REG_CPU_IRQ_value;
                 REG_CPU_IRQ_value &= 0xFFFF;
@@ -1597,12 +1597,12 @@ public class COOLGIRL extends Mapper {
                 REG_scanline_IRQ_counter &= 0xFF;
             }
             if (REG_scanline_IRQ_counter == 0 && REG_scanline_IRQ_enabled) {
-                cpu.setMapperIrq(true);
+                cpu.interrupt().setMapperIrq(true);
             }
 
             // for MMC5
             if (REG_scanline2_IRQ_line == scanline + 1 && REG_scanline2_IRQ_enabled) {
-                cpu.setMapperIrq(true);
+                cpu.interrupt().setMapperIrq(true);
                 REG_scanline2_IRQ_pending = true;
             }
 

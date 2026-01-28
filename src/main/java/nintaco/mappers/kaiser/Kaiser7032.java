@@ -40,11 +40,11 @@ public class Kaiser7032 extends Mapper {
                 if (irqEnabled) {
                     irqCounter = irqReloadValue;
                 }
-                cpu.setMapperIrq(false);
+                cpu.interrupt().setMapperIrq(false);
                 break;
 
             case 0xD000:
-                cpu.setMapperIrq(false);
+                cpu.interrupt().setMapperIrq(false);
                 break;
             case 0xE000:
                 regIndex = (value & 0x0F) - 1;
@@ -86,7 +86,7 @@ public class Kaiser7032 extends Mapper {
     public void update() {
         if (irqEnabled && ++irqCounter == 0xFFFF) {
             irqCounter = irqReloadValue;
-            cpu.setMapperIrq(true);
+            cpu.interrupt().setMapperIrq(true);
         }
     }
 }

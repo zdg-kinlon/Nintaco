@@ -116,7 +116,7 @@ public class CityFighter extends Mapper {
                 break;
             case 0xF008:
                 irqEnabled = getBitBool(value, 1);
-                cpu.setMapperIrq(false);
+                cpu.interrupt().setMapperIrq(false);
                 break;
         }
         updateBanks();
@@ -125,7 +125,7 @@ public class CityFighter extends Mapper {
     @Override
     public void update() {
         if (irqEnabled && --irqCounter <= 0) {
-            cpu.setMapperIrq(true);
+            cpu.interrupt().setMapperIrq(true);
         }
     }
 }

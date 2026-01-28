@@ -107,7 +107,7 @@ public class DripGame extends Mapper {
     private void writeHighIrqCounter(final int value) {
         irqCounter = ((value & 0x7F) << 8) | irqLow;
         irqEnabled = getBitBool(value, 7);
-        cpu.setMapperIrq(false);
+        cpu.interrupt().setMapperIrq(false);
     }
 
     private void writeControl(final int value) {
@@ -123,7 +123,7 @@ public class DripGame extends Mapper {
     @Override
     public void update() {
         if (irqEnabled && irqCounter > 0 && --irqCounter == 0) {
-            cpu.setMapperIrq(true);
+            cpu.interrupt().setMapperIrq(true);
         }
         audio.update();
     }

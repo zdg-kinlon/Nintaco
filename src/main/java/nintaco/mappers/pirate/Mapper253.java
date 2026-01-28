@@ -76,7 +76,7 @@ public class Mapper253 extends Mapper {
                 irqCounter = (irqCounter + 1) & 0xFF;
                 if (irqCounter == 0) {
                     irqCounter = irqReloadValue;
-                    cpu.setMapperIrq(true);
+                    cpu.interrupt().setMapperIrq(true);
                 }
             }
         }
@@ -114,17 +114,17 @@ public class Mapper253 extends Mapper {
                     break;
                 case 0xF000:
                     irqReloadValue = (irqReloadValue & 0xF0) | (value & 0x0F);
-                    cpu.setMapperIrq(false);
+                    cpu.interrupt().setMapperIrq(false);
                     break;
                 case 0xF004:
                     irqReloadValue = (irqReloadValue & 0x0F) | (value << 4);
-                    cpu.setMapperIrq(false);
+                    cpu.interrupt().setMapperIrq(false);
                     break;
                 case 0xF008:
                     irqCounter = irqReloadValue;
                     irqEnabled = getBitBool(value, 1);
                     irqScaler = 0;
-                    cpu.setMapperIrq(false);
+                    cpu.interrupt().setMapperIrq(false);
                     break;
             }
         }

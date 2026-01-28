@@ -404,7 +404,7 @@ public class JY extends Mapper {
     }
 
     protected void writeIrqAcknowledge() {
-        cpu.setMapperIrq(false);
+        cpu.interrupt().setMapperIrq(false);
         irqEnabled = false;
     }
 
@@ -473,7 +473,7 @@ public class JY extends Mapper {
             if (irqCounter == 0xFF) {
                 irqCounter = 0;
                 if (irqEnabled) {
-                    cpu.setMapperIrq(true);
+                    cpu.interrupt().setMapperIrq(true);
                 }
             } else {
                 irqCounter++;
@@ -482,7 +482,7 @@ public class JY extends Mapper {
             if (irqCounter == 0x00) {
                 irqCounter = 0xFF;
                 if (irqEnabled) {
-                    cpu.setMapperIrq(true);
+                    cpu.interrupt().setMapperIrq(true);
                 }
             } else {
                 irqCounter--;

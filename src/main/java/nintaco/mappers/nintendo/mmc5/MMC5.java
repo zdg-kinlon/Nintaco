@@ -566,7 +566,7 @@ public class MMC5 extends Mapper {
     }
 
     void updateIrq() {
-        cpu.setMapperIrq((irqEnabled && irqPending) || audio.isIrq());
+        cpu.interrupt().setMapperIrq((irqEnabled && irqPending) || audio.isIrq());
     }
 
     @Override

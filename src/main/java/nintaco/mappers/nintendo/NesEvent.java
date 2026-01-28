@@ -38,7 +38,7 @@ public class NesEvent extends MMC1 {
 
             if (!irqEnabled) {
                 irqCounter = 0;
-                cpu.setMapperIrq(false);
+                cpu.interrupt().setMapperIrq(false);
                 if (updatesEnableCounter == 1) {
                     updatesEnableCounter = 0;
                     updatesEnabled = true;
@@ -61,7 +61,7 @@ public class NesEvent extends MMC1 {
     @Override
     public void update() {
         if (irqEnabled && ++irqCounter == IRQ_VALUE) {
-            cpu.setMapperIrq(true);
+            cpu.interrupt().setMapperIrq(true);
             irqEnabled = false;
             irqCounter = 0;
         }

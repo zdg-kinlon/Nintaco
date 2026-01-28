@@ -1,6 +1,6 @@
 package nintaco.apu;
 
-import nintaco.CPU;
+import nintaco.cpu.CPU;
 import nintaco.Machine;
 import nintaco.gui.sound.volumemixer.VolumeMixerPrefs;
 import nintaco.mappers.Mapper;
@@ -158,12 +158,12 @@ public class APU implements Serializable {
 
     public void reset() {
         irqEnabled = false;
-        cpu.setApuIrq(false);
+        cpu.interrupt().setApuIrq(false);
         writeStatus(0);
     }
 
     public void setMachine(final Machine machine) {
-        this.cpu = machine.getCPU();
+        this.cpu = machine.cpu();
         this.mapper = machine.getMapper();
     }
 
@@ -217,10 +217,10 @@ public class APU implements Serializable {
 
         fiveStep = getBitBool(value, 7);
         irqEnabled = !getBitBool(value, 6);
-        writeDelay = isOdd(cpu.getCycleCounter()) ? 3 : 2;
+        writeDelay = isOdd(cpu.state().cycleCounter()) ? 3 : 2;
 
         if (!irqEnabled) {
-            cpu.setApuIrq(false);
+            cpu.interrupt().setApuIrq(false);
         }
     }
 
@@ -234,16 +234,16 @@ public class APU implements Serializable {
 
     public int readStatus() {
         final int value = peekStatus();
-        cpu.setApuIrq(false);
+        cpu.interrupt().setApuIrq(false);
         return value;
     }
 
     public int peekStatus() {
         int value = 0;
-        if (cpu.getDmcIrq()) {
+        if (cpu.interrupt().getDmcIrq()) {
             value |= 0x80;
         }
-        if (cpu.getApuIrq()) {
+        if (cpu.interrupt().getApuIrq()) {
             value |= 0x40;
         }
         if (dmc.getBytesRemaining() != 0) {
@@ -339,7 +339,7 @@ public class APU implements Serializable {
         if (irqDelay > 0) {
             irqDelay--;
             if (!fiveStep && irqEnabled) {
-                cpu.setApuIrq(true);
+                cpu.interrupt().setApuIrq(true);
             }
         }
         if (writeDelay > 0 && --writeDelay == 0) {

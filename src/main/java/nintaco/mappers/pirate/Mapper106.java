@@ -27,7 +27,7 @@ public class Mapper106 extends Mapper {
         if (irqEnabled) {
             irqCounter = (irqCounter + 1) & 0xFFFF;
             if (irqCounter == 0) {
-                cpu.setMapperIrq(true);
+                cpu.interrupt().setMapperIrq(true);
                 irqEnabled = false;
             }
         }
@@ -73,7 +73,7 @@ public class Mapper106 extends Mapper {
             case 0x0D:
                 irqEnabled = false;
                 irqCounter = 0;
-                cpu.setMapperIrq(false);
+                cpu.interrupt().setMapperIrq(false);
                 break;
 
             case 0x0E:

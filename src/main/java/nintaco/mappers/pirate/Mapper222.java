@@ -30,7 +30,7 @@ public class Mapper222 extends Mapper {
 
         final boolean a12 = (address & 0x1000) != 0;
         if (a12 && irqResetDelay == 0 && irqCounter != 0 && ++irqCounter >= 240) {
-            cpu.setMapperIrq(true);
+            cpu.interrupt().setMapperIrq(true);
             irqCounter = 0;
         }
         if (a12) {
@@ -76,7 +76,7 @@ public class Mapper222 extends Mapper {
                 break;
             case 0xF000:
                 irqCounter = value;
-                cpu.setMapperIrq(false);
+                cpu.interrupt().setMapperIrq(false);
                 break;
         }
     }

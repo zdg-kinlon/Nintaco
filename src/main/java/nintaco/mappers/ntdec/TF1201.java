@@ -81,7 +81,7 @@ public class TF1201 extends Mapper {
                 case 0xF001:
                 case 0xF003:
                     irqEnabled = (value & 2) != 0;
-                    cpu.setMapperIrq(false);
+                    cpu.interrupt().setMapperIrq(false);
                     if (ppu.getScanline() < 240) {
                         irqCounter -= 8;
                     }
@@ -94,7 +94,7 @@ public class TF1201 extends Mapper {
     public void handlePpuCycle(final int scanline, final int scanlineCycle,
                                final int address, final boolean rendering) {
         if (irqEnabled && rendering && scanlineCycle == 0 && ++irqCounter == 237) {
-            cpu.setMapperIrq(true);
+            cpu.interrupt().setMapperIrq(true);
         }
     }
 }

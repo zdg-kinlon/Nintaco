@@ -94,7 +94,7 @@ public class SS88006 extends Mapper {
 
     private void writeIrqReset() {
         irqCounter = irqReload;
-        cpu.setMapperIrq(false);
+        cpu.interrupt().setMapperIrq(false);
     }
 
     private void writeIrqControl(final int value) {
@@ -108,7 +108,7 @@ public class SS88006 extends Mapper {
         } else {
             irqSize = 0;
         }
-        cpu.setMapperIrq(false);
+        cpu.interrupt().setMapperIrq(false);
     }
 
     private void writeIrqReload(final int address, final int value) {
@@ -135,7 +135,7 @@ public class SS88006 extends Mapper {
     public void update() {
         if (irqEnabled) {
             if ((irqCounter & IRQ_MASKS[irqSize][0]) == 0) {
-                cpu.setMapperIrq(true);
+                cpu.interrupt().setMapperIrq(true);
             }
             irqCounter = (irqCounter & IRQ_MASKS[irqSize][1])
                     | ((irqCounter - 1) & IRQ_MASKS[irqSize][0]);

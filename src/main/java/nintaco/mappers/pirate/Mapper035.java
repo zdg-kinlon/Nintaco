@@ -45,7 +45,7 @@ public class Mapper035 extends Mapper {
 
             case 0xC002:
                 irqEnabled = false;
-                cpu.setMapperIrq(false);
+                cpu.interrupt().setMapperIrq(false);
                 break;
 
             case 0xC003:
@@ -70,7 +70,7 @@ public class Mapper035 extends Mapper {
             irqCounter = (irqCounter - 1) & 0xFF;
             if (irqCounter == 0) {
                 irqEnabled = false;
-                cpu.setMapperIrq(true);
+                cpu.interrupt().setMapperIrq(true);
             }
         }
         lastA12 = a12;

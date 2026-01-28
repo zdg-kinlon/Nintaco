@@ -61,7 +61,7 @@ public class ShuiGuanPipe extends Mapper {
                     if (!irqEnabled) {
                         irqPre = 0;
                     }
-                    cpu.setMapperIrq(false);
+                    cpu.interrupt().setMapperIrq(false);
                     break;
                 case 0xF00C:
                     irqPre = 16;
@@ -77,7 +77,7 @@ public class ShuiGuanPipe extends Mapper {
         if (rendering && irqEnabled && scanlineCycle == 256) {
             irqCounter = (irqCounter + 1) & 0xFF;
             if ((irqCounter - irqPre) == 238) {
-                cpu.setMapperIrq(true);
+                cpu.interrupt().setMapperIrq(true);
             }
         }
     }

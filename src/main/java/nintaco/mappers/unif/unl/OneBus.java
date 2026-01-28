@@ -366,7 +366,7 @@ public abstract class OneBus extends Mapper {
                 break;
             case 0x4103:
                 IRQEnabled = false;
-                cpu.setMapperIrq(false);
+                cpu.interrupt().setMapperIrq(false);
                 break;
             case 0x4104:
                 IRQEnabled = true;
@@ -535,7 +535,7 @@ public abstract class OneBus extends Mapper {
             --IRQLatency;
         }
         if (IRQDelay != 0 && --IRQDelay == 0) {
-            cpu.setMapperIrq(true);
+            cpu.interrupt().setMapperIrq(true);
         }
         if ((!TSYNEN && (address & 0x1000) != 0)
                 || (TSYNEN && scanlineCycle == 256 && rendering)) {
@@ -550,7 +550,7 @@ public abstract class OneBus extends Mapper {
                     if (consoleType == VT369 && BK16EN) {
                         IRQDelay = 32;
                     } else {
-                        cpu.setMapperIrq(true);
+                        cpu.interrupt().setMapperIrq(true);
                     }
                 }
             }

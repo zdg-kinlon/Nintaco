@@ -58,7 +58,7 @@ public class Mapper273 extends Mapper {
                 prescalerMask = 0xFF;
                 ++irqCounter;
                 irqCounter &= 0xFF;
-                cpu.setMapperIrq(irqCounter == 0);
+                cpu.interrupt().setMapperIrq(irqCounter == 0);
             }
         }
     }
@@ -67,14 +67,14 @@ public class Mapper273 extends Mapper {
         switch (address & 8) {
             case 0:
                 irqCounter = value;
-                cpu.setMapperIrq(false);
+                cpu.interrupt().setMapperIrq(false);
                 break;
             case 8:
                 if ((value & 1) == 0) {
                     irqEnabled = false;
                     prescaler = 0;
                     prescalerMask = 0x7F;
-                    cpu.setMapperIrq(false);
+                    cpu.interrupt().setMapperIrq(false);
                 } else {
                     irqEnabled = true;
                 }

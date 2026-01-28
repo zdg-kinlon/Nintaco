@@ -19,13 +19,13 @@ public class BTL900218 extends VRC2And4 {
     public void resetting() {
         irqEnabled = false;
         irqCounter = 0;
-        cpu.setMapperIrq(false);
+        cpu.interrupt().setMapperIrq(false);
     }
 
     @Override
     public void update() {
         if (irqEnabled && (++irqCounter & 0x400) != 0) {
-            cpu.setMapperIrq(true);
+            cpu.interrupt().setMapperIrq(true);
         }
     }
 
@@ -37,7 +37,7 @@ public class BTL900218 extends VRC2And4 {
             case 0x000C:
                 irqEnabled = false;
                 irqCounter = 0;
-                cpu.setMapperIrq(false);
+                cpu.interrupt().setMapperIrq(false);
                 break;
         }
     }

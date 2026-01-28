@@ -152,7 +152,7 @@ public class OneBus_Old extends Mapper {
                         irqReloadRequest = true;
                         break;
                     case 0x03:
-                        cpu.setMapperIrq(false);
+                        cpu.interrupt().setMapperIrq(false);
                         irqEnabled = false;
                         break;
                     case 0x04:
@@ -179,7 +179,7 @@ public class OneBus_Old extends Mapper {
                         if ((apu40xx[0x30] & 0x10) != 0) {
                             pcmEnable = (value & 0x10) != 0;
                             if (pcmIRQ != 0) {
-                                cpu.setMapperIrq(false);
+                                cpu.interrupt().setMapperIrq(false);
                                 pcmIRQ = 0;
                             }
                             if (pcmEnable) {
@@ -248,7 +248,7 @@ public class OneBus_Old extends Mapper {
                 irqReloadRequest = true;
                 break;
             case 0xE000:
-                cpu.setMapperIrq(false);
+                cpu.interrupt().setMapperIrq(false);
                 irqEnabled = false;
                 break;
             case 0xE001:
@@ -277,7 +277,7 @@ public class OneBus_Old extends Mapper {
                 irqCounter = cpu410x[0x01];
             }
             if (irqCounter == 0 && irqEnabled) {
-                cpu.setMapperIrq(true);
+                cpu.interrupt().setMapperIrq(true);
             }
         }
         if (a12) {
@@ -295,7 +295,7 @@ public class OneBus_Old extends Mapper {
                 if (pcmSize < 0) {
                     pcmIRQ = 0x80;
                     pcmEnable = false;
-                    cpu.setMapperIrq(true);
+                    cpu.interrupt().setMapperIrq(true);
                 } else {
                     final int rawPcm = readMemory(pcmAddress);
                     apu.dmc.writeDirectLoad(rawPcm);

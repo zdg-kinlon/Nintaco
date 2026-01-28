@@ -110,7 +110,7 @@ public class TC0690 extends Mapper {
 
     private void writeIrqAcknowledge() {
         irqEnabled = false;
-        cpu.setMapperIrq(false);
+        cpu.interrupt().setMapperIrq(false);
     }
 
     private void writeChrBank(final int bank, final int value, final int shift) {
@@ -137,7 +137,7 @@ public class TC0690 extends Mapper {
                 irqCounter = irqReloadValue;
             }
             if (irqCounter == 0 && irqEnabled) {
-                cpu.setMapperIrq(true);
+                cpu.interrupt().setMapperIrq(true);
             }
         }
         if (a12) {

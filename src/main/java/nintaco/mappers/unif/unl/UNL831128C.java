@@ -28,7 +28,7 @@ public class UNL831128C extends SunsoftFME7 {
             }
             if (irqCounter == 0xFF) {
                 irqCounter = irqLatch;
-                cpu.setMapperIrq(true);
+                cpu.interrupt().setMapperIrq(true);
             } else {
                 ++irqCounter;
             }
@@ -42,12 +42,12 @@ public class UNL831128C extends SunsoftFME7 {
             irqCounter = irqLatch;
             irqCycles = 341;
         }
-        cpu.setMapperIrq(false);
+        cpu.interrupt().setMapperIrq(false);
     }
 
     private void writeIrqAcknowledge() {
         irqControl = setBit(irqControl, 1, getBitBool(irqControl, 0));
-        cpu.setMapperIrq(false);
+        cpu.interrupt().setMapperIrq(false);
     }
 
     private void writeIrqLatch(final int value) {

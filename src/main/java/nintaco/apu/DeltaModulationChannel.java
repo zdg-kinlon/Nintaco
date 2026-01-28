@@ -1,6 +1,6 @@
 package nintaco.apu;
 
-import nintaco.CPU;
+import nintaco.cpu.CPU;
 
 import java.io.Serializable;
 
@@ -59,13 +59,13 @@ public class DeltaModulationChannel implements Serializable {
         } else {
             bytesRemaining = 0;
         }
-        cpu.setDmcIrq(false);
+        cpu.interrupt().setDmcIrq(false);
     }
 
     public void writeFlagsAndFrequency(final int value) {
         irqEnabled = getBitBool(value, 7);
         if (!irqEnabled) {
-            cpu.setDmcIrq(false);
+            cpu.interrupt().setDmcIrq(false);
         }
         loop = getBitBool(value, 6);
         timerReload = rates[value & 0x0F];
@@ -99,7 +99,7 @@ public class DeltaModulationChannel implements Serializable {
                 currentAddress = sampleAddress;
                 bytesRemaining = sampleLength;
             } else if (irqEnabled) {
-                cpu.setDmcIrq(true);
+                cpu.interrupt().setDmcIrq(true);
             }
         }
         requestedSample = false;
@@ -143,7 +143,8 @@ public class DeltaModulationChannel implements Serializable {
         }
         if (!requestedSample && !sampleBufferFilled && bytesRemaining > 0) {
             requestedSample = true;
-            cpu.dmcRead(currentAddress);
+            cpu.state().dmcAddress(currentAddress);
+            cpu.state().setDmcCycle(4);
             bytesRemaining--;
         }
     }

@@ -1,7 +1,7 @@
 package nintaco.disassembler;
 
 import nintaco.App;
-import nintaco.CPU;
+import nintaco.cpu.CPU;
 import nintaco.PPU;
 import nintaco.gui.debugger.DebuggerFrame;
 import nintaco.gui.debugger.logger.LoggerAppPrefs;
@@ -10,7 +10,6 @@ import nintaco.preferences.AppPrefs;
 import nintaco.preferences.GamePrefs;
 import nintaco.util.EDT;
 
-import java.awt.*;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;

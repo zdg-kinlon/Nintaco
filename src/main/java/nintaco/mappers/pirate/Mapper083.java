@@ -44,7 +44,7 @@ public class Mapper083 extends Mapper {
             if (irqCounter == 0) {
                 irqEnabled = false;
                 irqCounter = 0xFFFF;
-                cpu.setMapperIrq(true);
+                cpu.interrupt().setMapperIrq(true);
             }
         }
     }
@@ -121,7 +121,7 @@ public class Mapper083 extends Mapper {
                 break;
             case 0x8200:
                 irqCounter = (irqCounter & 0xFF00) | value;
-                cpu.setMapperIrq(false);
+                cpu.interrupt().setMapperIrq(false);
                 break;
             case 0x8201:
                 irqEnabled = getBitBool(mode, 7);

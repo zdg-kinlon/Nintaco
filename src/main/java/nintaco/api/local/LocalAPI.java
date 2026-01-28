@@ -6,6 +6,7 @@ import nintaco.cheats.Cheat;
 import nintaco.cheats.GameCheats;
 import nintaco.cheats.GameGenie;
 import nintaco.cheats.ProActionRocky;
+import nintaco.cpu.CPU;
 import nintaco.files.ArchiveEntry;
 import nintaco.files.FilePath;
 import nintaco.files.FileUtil;
@@ -559,15 +560,15 @@ public class LocalAPI implements API {
         if (cpu == null) {
             return -1;
         }
-        return cpu.getA();
+        return cpu.register().a();
     }
 
     @Override
     @ApiMethod(27)
-    public void setA(final int A) {
+    public void setA(final int a) {
         final CPU cpu = _cpu;
         if (cpu != null) {
-            cpu.setA(A);
+            cpu.register().a(a);
         }
     }
 
@@ -578,15 +579,15 @@ public class LocalAPI implements API {
         if (cpu == null) {
             return -1;
         }
-        return cpu.getS();
+        return cpu.register().s();
     }
 
     @Override
     @ApiMethod(29)
-    public void setS(final int S) {
+    public void setS(final int s) {
         final CPU cpu = _cpu;
         if (cpu != null) {
-            cpu.setS(S);
+            cpu.register().s(s);
         }
     }
 
@@ -597,15 +598,15 @@ public class LocalAPI implements API {
         if (cpu == null) {
             return -1;
         }
-        return cpu.getPC();
+        return cpu.register().pc();
     }
 
     @Override
     @ApiMethod(31)
-    public void setPC(int PC) {
+    public void setPC(int pc) {
         final CPU cpu = _cpu;
         if (cpu != null) {
-            cpu.setPC(PC);
+            cpu.register().pc(pc);
         }
     }
 
@@ -616,15 +617,15 @@ public class LocalAPI implements API {
         if (cpu == null) {
             return -1;
         }
-        return cpu.getX();
+        return cpu.register().x();
     }
 
     @Override
     @ApiMethod(33)
-    public void setX(final int X) {
+    public void setX(final int x) {
         final CPU cpu = _cpu;
         if (cpu != null) {
-            cpu.setX(X);
+            cpu.register().x(x);
         }
     }
 
@@ -635,15 +636,15 @@ public class LocalAPI implements API {
         if (cpu == null) {
             return -1;
         }
-        return cpu.getY();
+        return cpu.register().y();
     }
 
     @Override
     @ApiMethod(35)
-    public void setY(final int Y) {
+    public void setY(final int y) {
         final CPU cpu = _cpu;
         if (cpu != null) {
-            cpu.setY(Y);
+            cpu.register().y(y);
         }
     }
 
@@ -654,15 +655,15 @@ public class LocalAPI implements API {
         if (cpu == null) {
             return -1;
         }
-        return cpu.getP();
+        return cpu.register().p();
     }
 
     @Override
     @ApiMethod(37)
-    public void setP(final int P) {
+    public void setP(final int p) {
         final CPU cpu = _cpu;
         if (cpu != null) {
-            cpu.setP(P);
+            cpu.register().p(p);
         }
     }
 
@@ -673,15 +674,15 @@ public class LocalAPI implements API {
         if (cpu == null) {
             return false;
         }
-        return toBitBool(cpu.getN());
+        return cpu.register().n();
     }
 
     @Override
     @ApiMethod(39)
-    public void setN(final boolean N) {
+    public void setN(final boolean n) {
         final CPU cpu = _cpu;
         if (cpu != null) {
-            cpu.setN(toBit(N));
+            cpu.register().n(n);
         }
     }
 
@@ -692,15 +693,15 @@ public class LocalAPI implements API {
         if (cpu == null) {
             return false;
         }
-        return toBitBool(cpu.getV());
+        return cpu.register().v();
     }
 
     @Override
     @ApiMethod(41)
-    public void setV(final boolean V) {
+    public void setV(final boolean v) {
         final CPU cpu = _cpu;
         if (cpu != null) {
-            cpu.setV(toBit(V));
+            cpu.register().v(v);
         }
     }
 
@@ -711,15 +712,15 @@ public class LocalAPI implements API {
         if (cpu == null) {
             return false;
         }
-        return toBitBool(cpu.getD());
+        return cpu.register().d();
     }
 
     @Override
     @ApiMethod(43)
-    public void setD(final boolean D) {
+    public void setD(final boolean d) {
         final CPU cpu = _cpu;
         if (cpu != null) {
-            cpu.setD(toBit(D));
+            cpu.register().d(d);
         }
     }
 
@@ -730,15 +731,15 @@ public class LocalAPI implements API {
         if (cpu == null) {
             return false;
         }
-        return toBitBool(cpu.getI());
+        return cpu.register().i();
     }
 
     @Override
     @ApiMethod(45)
-    public void setI(final boolean I) {
+    public void setI(final boolean i) {
         final CPU cpu = _cpu;
         if (cpu != null) {
-            cpu.setI(toBit(I));
+            cpu.register().i(i);
         }
     }
 
@@ -749,15 +750,15 @@ public class LocalAPI implements API {
         if (cpu == null) {
             return false;
         }
-        return toBitBool(cpu.getZ());
+        return cpu.register().z();
     }
 
     @Override
     @ApiMethod(47)
-    public void setZ(final boolean Z) {
+    public void setZ(final boolean z) {
         final CPU cpu = _cpu;
         if (cpu != null) {
-            cpu.setZ(toBit(Z));
+            cpu.register().z(z);
         }
     }
 
@@ -768,15 +769,15 @@ public class LocalAPI implements API {
         if (cpu == null) {
             return false;
         }
-        return toBitBool(cpu.getC());
+        return cpu.register().c();
     }
 
     @Override
     @ApiMethod(49)
-    public void setC(final boolean C) {
+    public void setC(final boolean c) {
         final CPU cpu = _cpu;
         if (cpu != null) {
-            cpu.setC(toBit(C));
+            cpu.register().c(c);
         }
     }
 
@@ -948,7 +949,7 @@ public class LocalAPI implements API {
     public void requestInterrupt() {
         final CPU cpu = _cpu;
         if (cpu != null) {
-            cpu.setMapperIrq(true);
+            cpu.interrupt().setMapperIrq(true);
         }
     }
 
@@ -957,7 +958,7 @@ public class LocalAPI implements API {
     public void acknowledgeInterrupt() {
         final CPU cpu = _cpu;
         if (cpu != null) {
-            cpu.setMapperIrq(false);
+            cpu.interrupt().setMapperIrq(false);
         }
     }
 

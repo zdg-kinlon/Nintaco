@@ -56,7 +56,7 @@ public class FrontFareast extends Mapper {
         if (irqEnabled) {
             irqCounter = (irqCounter + 1) & 0xFFFF;
             if (irqCounter == 0) {
-                cpu.setMapperIrq(true);
+                cpu.interrupt().setMapperIrq(true);
                 irqEnabled = false;
             }
         }
@@ -76,18 +76,18 @@ public class FrontFareast extends Mapper {
 
             case 0x4501:
                 irqEnabled = false;
-                cpu.setMapperIrq(false);
+                cpu.interrupt().setMapperIrq(false);
                 break;
 
             case 0x4502:
                 irqCounter = (irqCounter & 0xFF00) | value;
-                cpu.setMapperIrq(false);
+                cpu.interrupt().setMapperIrq(false);
                 break;
 
             case 0x4503:
                 irqCounter = (irqCounter & 0x00FF) | (value << 8);
                 irqEnabled = true;
-                cpu.setMapperIrq(false);
+                cpu.interrupt().setMapperIrq(false);
                 break;
         }
         super.writeMemory(address, value);

@@ -11,6 +11,6 @@ public class Reset implements OtherInput {
     public void run(final Machine machine) {
         machine.getMapper().resetting();
         machine.getMapper().setVramMask(0x3FFF);
-        machine.getCPU().reset();
+        machine.cpu().reset();
     }
 }

@@ -163,9 +163,9 @@ public class NsfMapper extends Mapper {
         for (int i = chipCount - 1; i >= 0; i--) {
             audios[i].reset();
         }
-        cpu.setS(0xFF);
-        cpu.setA(songNumber);
-        cpu.setX(ntsc ? 0 : 1);
+        cpu.register().s(0xFF);
+        cpu.register().a(songNumber);
+        cpu.register().x(ntsc ? 0 : 1);
     }
 
     private void initBanks() {
@@ -190,9 +190,9 @@ public class NsfMapper extends Mapper {
     public void jumpSubroutine(final int address) {
         memory[0x01FE] = 0xFC;
         memory[0x01FF] = 0x4F;
-        cpu.setS(0xFD);
-        cpu.setI(1);
-        cpu.setPC(address);
+        cpu.register().s(0xFD);
+        cpu.register().i(true);
+        cpu.register().pc(address);
     }
 
     @Override
@@ -258,7 +258,7 @@ public class NsfMapper extends Mapper {
 
     @Override
     public void handleFrameRendered() {
-        if (cpu.getPC() == 0x4FFD) {
+        if (cpu.register().pc() == 0x4FFD) {
             switch (state) {
                 case STATE_SONG_REQUESTED: {
                     volume = 1f;

@@ -61,8 +61,8 @@ public final class BitUtil {
         return (value ? 1 : 0) << bit;
     }
 
-    public static final boolean toBitBool(final int value) {
-        return (value & 1) != 0;
+    public static boolean toBitBool(final int value) {
+        return value != 0;
     }
 
     public static final boolean toBitBool(final int value, final int bit) {

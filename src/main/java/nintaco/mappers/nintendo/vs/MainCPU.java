@@ -1,6 +1,6 @@
 package nintaco.mappers.nintendo.vs;
 
-import nintaco.CPU;
+import nintaco.cpu.CPU;
 import nintaco.PPU;
 import nintaco.ScreenRenderer;
 import nintaco.apu.APU;
@@ -59,8 +59,8 @@ public class MainCPU extends CPU {
         // Keep Sub CPU lagging by about 2 instructions to ensure that the
         // Main PPU always finishes rendering a frame slightly before the
         // Sub PPU. This is required for rewind time and movies.
-        final long mainCycleCounter = getCycleCounter() - 16;
-        while (subCPU.getCycleCounter() < mainCycleCounter) {
+        final long mainCycleCounter = super.state().cycleCounter() - 16;
+        while (subCPU.state().cycleCounter() < mainCycleCounter) {
             subCPU.executeInstruction();
         }
     }

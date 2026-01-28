@@ -70,7 +70,7 @@ public class FCG extends Mapper {
     protected void writeIrqControl(int value) {
         irqCounting = getBitBool(value, 0);
         irqCounter = irqLatch;
-        cpu.setMapperIrq(false);
+        cpu.interrupt().setMapperIrq(false);
     }
 
     protected void writeIrqCounterHigh(int value) {
@@ -86,7 +86,7 @@ public class FCG extends Mapper {
         if (irqCounting) {
             irqCounter = (irqCounter - 1) & 0xFFFF;
             if (irqCounter == 0) {
-                cpu.setMapperIrq(true);
+                cpu.interrupt().setMapperIrq(true);
             }
         }
     }

@@ -61,7 +61,7 @@ public class Transformer extends Mapper {
                     }
                     break;
             }
-            cpu.setMapperIrq(false);
+            cpu.interrupt().setMapperIrq(false);
             return value;
         } else {
             return super.readMemory(address);
@@ -100,7 +100,7 @@ public class Transformer extends Mapper {
                 pressed0 = pressed1;
                 pressed1 = temp;
                 if (head != tail) {
-                    cpu.setMapperIrq(true);
+                    cpu.interrupt().setMapperIrq(true);
                 }
             }
         }

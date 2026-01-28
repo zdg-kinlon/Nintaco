@@ -46,14 +46,14 @@ public class Mapper050 extends Mapper {
 
     private void disableIrq() {
         irqEnabled = false;
-        cpu.setMapperIrq(false);
+        cpu.interrupt().setMapperIrq(false);
         irqCounter = 0;
     }
 
     @Override
     public void update() {
         if (irqEnabled && ++irqCounter == 0x1000) {
-            cpu.setMapperIrq(true);
+            cpu.interrupt().setMapperIrq(true);
             irqEnabled = false;
             irqCounter = 0;
         }

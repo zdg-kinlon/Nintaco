@@ -1,6 +1,7 @@
 package nintaco.gui.debugger;
 
 import nintaco.*;
+import nintaco.cpu.CPU;
 import nintaco.disassembler.AddressLabel;
 import nintaco.disassembler.AddressTextRange;
 import nintaco.disassembler.Disassembler;
@@ -357,7 +358,7 @@ public class DebuggerFrame extends javax.swing.JFrame {
             return;
         }
         final StringBuilder sb = new StringBuilder();
-        for (int s = c.getS(); s <= 0xFF; s++) {
+        for (int s = c.register().s(); s <= 0xFF; s++) {
             sb.append(String.format("%02X ", m.peekCpuMemory(0x0100 | s)));
         }
         EDT.async(() -> stackTextArea.setText(sb.toString()));
@@ -465,7 +466,7 @@ public class DebuggerFrame extends javax.swing.JFrame {
             return;
         }
 
-        final int PC = c.getPC();
+        final int pc = c.register().pc();
         int pcLine = -1;
         instructions = Disassembler.disassemble(c, scrollValue, 0, visibleLines,
                 officialsOnly);
@@ -479,7 +480,7 @@ public class DebuggerFrame extends javax.swing.JFrame {
             line += inst.getDescriptionLines();
             inst.setLine(line - 1);
             sb.append(inst.getDescription());
-            if (inst.getAddress() == PC) {
+            if (inst.getAddress() == pc) {
                 pcLine = inst.getLine();
             }
             for (int i = 1; i < instructions.size(); i++) {
@@ -492,7 +493,7 @@ public class DebuggerFrame extends javax.swing.JFrame {
                 if (inst.getLine() < visibleLines) {
                     indexOfLastVisibleInstruction = i;
                 }
-                if (inst.getAddress() == PC) {
+                if (inst.getAddress() == pc) {
                     pcLine = inst.getLine();
                 }
                 final AddressTextRange[] ranges = inst.getRanges();
@@ -516,7 +517,7 @@ public class DebuggerFrame extends javax.swing.JFrame {
                 }
                 EDT.async(this::onScrollDown);
             } else if (pcLine < 0) {
-                scrollValue = Disassembler.getPriorAddress(m, PC, officialsOnly);
+                scrollValue = Disassembler.getPriorAddress(m, pc, officialsOnly);
                 EDT.async(() -> setScrollBarValue(scrollValue));
                 refreshDebugTextArea(false);
             } else {
@@ -846,17 +847,17 @@ public class DebuggerFrame extends javax.swing.JFrame {
             refreshDebugTextArea(paused);
             if (paused) {
                 updateStackTextArea();
-                pcValue = c.getPC();
-                aValue = c.getA();
-                xValue = c.getX();
-                yValue = c.getY();
-                sValue = c.getS();
-                nValue = c.getN() == 1;
-                vValue = c.getV() == 1;
-                dValue = c.getD() == 1;
-                iValue = c.getI() == 1;
-                zValue = c.getZ() == 1;
-                cValue = c.getC() == 1;
+                pcValue = c.register().pc();
+                aValue = c.register().a();
+                xValue = c.register().x();
+                yValue = c.register().y();
+                sValue = c.register().s();
+                nValue = c.register().n();
+                vValue = c.register().v();
+                dValue = c.register().d();
+                iValue = c.register().i();
+                zValue = c.register().z();
+                cValue = c.register().c();
                 ppuVValue = p.getV();
                 ppuTValue = p.getT();
                 ppuXValue = p.getX();
@@ -867,7 +868,7 @@ public class DebuggerFrame extends javax.swing.JFrame {
                 valuesAcquired = true;
 
                 EDT.async(this::assignFields);
-                updateFields(Disassembler.getSuccessiveAddress(m, c.getPC(),
+                updateFields(Disassembler.getSuccessiveAddress(m, c.register().pc(),
                                 officialsOnly), p.getNextScanline(), p.getNextScanlineCycle(),
                         p.getScanline(), p.getScanlineCycle(),
                         p.peekRegister(REG_PPU_STATUS),
@@ -876,47 +877,47 @@ public class DebuggerFrame extends javax.swing.JFrame {
             } else {
                 if (pcModified) {
                     pcModified = false;
-                    c.setPC(pcValue);
+                    c.register().pc(pcValue);
                 }
                 if (aModified) {
                     aModified = false;
-                    c.setA(aValue);
+                    c.register().a(aValue);
                 }
                 if (xModified) {
                     xModified = false;
-                    c.setX(xValue);
+                    c.register().x(xValue);
                 }
                 if (yModified) {
                     yModified = false;
-                    c.setY(yValue);
+                    c.register().y(yValue);
                 }
                 if (sModified) {
                     sModified = false;
-                    c.setS(sValue);
+                    c.register().s(sValue);
                 }
                 if (nModified) {
                     nModified = false;
-                    c.setN(nValue ? 1 : 0);
+                    c.register().n(nValue);
                 }
                 if (vModified) {
                     vModified = false;
-                    c.setV(vValue ? 1 : 0);
+                    c.register().v(vValue);
                 }
                 if (dModified) {
                     dModified = false;
-                    c.setD(dValue ? 1 : 0);
+                    c.register().d(dValue);
                 }
                 if (iModified) {
                     iModified = false;
-                    c.setI(iValue ? 1 : 0);
+                    c.register().i(iValue);
                 }
                 if (zModified) {
                     zModified = false;
-                    c.setZ(zValue ? 1 : 0);
+                    c.register().z(zValue);
                 }
                 if (cModified) {
                     cModified = false;
-                    c.setC(cValue ? 1 : 0);
+                    c.register().c(cValue);
                 }
                 if (ppuVModified) {
                     ppuVModified = false;

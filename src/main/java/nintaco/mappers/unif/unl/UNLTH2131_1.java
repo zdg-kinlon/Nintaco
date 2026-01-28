@@ -16,7 +16,7 @@ public class UNLTH2131_1 extends VRC2And4 {
     }
 
     private void writeIrqAcknowledgeAndReset() {
-        cpu.setMapperIrq(false);
+        cpu.interrupt().setMapperIrq(false);
         irqEnabled = false;
         irqLowCounter = 0;
     }
@@ -59,7 +59,7 @@ public class UNLTH2131_1 extends VRC2And4 {
                 irqHighCounter &= 0xFF;
             }
             if (irqHighCounter == 0 && irqLowCounter < 0x800) {
-                cpu.setMapperIrq(true);
+                cpu.interrupt().setMapperIrq(true);
             }
         }
     }

@@ -34,7 +34,7 @@ public class BJ56 extends Mapper {
     }
 
     private void acknowledgeIrq() {
-        cpu.setMapperIrq(false);
+        cpu.interrupt().setMapperIrq(false);
     }
 
     @Override
@@ -53,7 +53,7 @@ public class BJ56 extends Mapper {
     @Override
     public void update() {
         if ((++irqCounter & 0x1000) != 0) {
-            cpu.setMapperIrq(true);
+            cpu.interrupt().setMapperIrq(true);
         }
     }
 }

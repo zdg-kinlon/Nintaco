@@ -50,7 +50,7 @@ public class RacerMate extends Mapper {
         if (address == 0xF080) {
             irqEnabled = false;
             irqCounter = CLOCKS_PER_IRQ;
-            cpu.setMapperIrq(false);
+            cpu.interrupt().setMapperIrq(false);
         } else if (address == 0xF000) {
             irqEnabled = true;
         }
@@ -59,7 +59,7 @@ public class RacerMate extends Mapper {
     @Override
     public void update() {
         if (irqEnabled && --irqCounter == 0) {
-            cpu.setMapperIrq(true);
+            cpu.interrupt().setMapperIrq(true);
         }
     }
 

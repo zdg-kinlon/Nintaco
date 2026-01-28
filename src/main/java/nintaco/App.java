@@ -968,7 +968,7 @@ public final class App {
         machine.getAPU().setAudioProcessor(systemAudioProcessor);
         ppu.setScreenRenderer(imageFrame.getImagePane());
         if (ejectedMachine == null) {
-            machine.getCPU().init();
+            machine.cpu().reset();
         }
         mapper.init();
 
@@ -1115,7 +1115,7 @@ public final class App {
                 if (vsGame.isDualSystemGame()) {
                     final SubMonitorFrame subMonitor = subMonitorFrame;
                     if (subMonitor != null) {
-                        ((MainCPU) machine.getCPU()).getSubPPU().setScreenRenderer(
+                        ((MainCPU) machine.cpu()).getSubPPU().setScreenRenderer(
                                 subMonitor.getImagePane());
                     }
                 }

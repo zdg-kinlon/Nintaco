@@ -48,7 +48,7 @@ public class VRC3 extends Mapper {
     }
 
     private void writeIrqControl(final int value) {
-        cpu.setMapperIrq(false);
+        cpu.interrupt().setMapperIrq(false);
 
         irqEnableOnAck = getBitBool(value, 0);
         irqEnabled = getBitBool(value, 1);
@@ -60,7 +60,7 @@ public class VRC3 extends Mapper {
     }
 
     private void writeIrqAcknowledge() {
-        cpu.setMapperIrq(false);
+        cpu.interrupt().setMapperIrq(false);
         irqEnabled = irqEnableOnAck;
     }
 
@@ -71,12 +71,12 @@ public class VRC3 extends Mapper {
             if (irq8bit) {
                 if ((irqCounter & 0xFF) == 0) {
                     irqCounter = irqLatch;
-                    cpu.setMapperIrq(true);
+                    cpu.interrupt().setMapperIrq(true);
                 }
             } else {
                 if ((irqCounter & 0xFFFF) == 0) {
                     irqCounter = irqLatch;
-                    cpu.setMapperIrq(true);
+                    cpu.interrupt().setMapperIrq(true);
                 }
             }
         }

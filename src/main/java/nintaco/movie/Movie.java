@@ -118,7 +118,7 @@ public class Movie implements Serializable {
             }
 
             if (machine.isVsDualSystem()) {
-                final PPU subPPU = ((MainCPU) machine.getCPU()).getSubPPU();
+                final PPU subPPU = ((MainCPU) machine.cpu()).getSubPPU();
                 System.arraycopy(subPPU.getScreen(), 0, movieFrame.screen2, 0,
                         screen.length);
             }

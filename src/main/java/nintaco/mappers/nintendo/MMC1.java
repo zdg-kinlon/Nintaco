@@ -61,7 +61,7 @@ public class MMC1 extends Mapper {
     @Override
     protected void writeRegister(final int address, final int value) {
 
-        final long cycleCount = cpu.getCycleCounter();
+        final long cycleCount = cpu.state().cycleCounter();
         if (cycleCount - lastCycleCount >= 2) {
             if (getBitBool(value, 7)) {
                 shiftRegister = 0x10;

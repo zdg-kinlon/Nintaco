@@ -12,7 +12,6 @@ import nintaco.util.EDT;
 
 import javax.swing.*;
 import javax.swing.event.DocumentListener;
-import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;

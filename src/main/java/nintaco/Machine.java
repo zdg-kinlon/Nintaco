@@ -3,6 +3,7 @@ package nintaco;
 import java.io.*;
 
 import nintaco.apu.*;
+import nintaco.cpu.CPU;
 import nintaco.mappers.*;
 import nintaco.mappers.nintendo.vs.*;
 
@@ -64,7 +65,7 @@ public class Machine implements Serializable {
         this.mapper = mapper;
         this.vsDualSystem = machine.isVsDualSystem();
 
-        cpu = machine.getCPU();
+        cpu = machine.cpu();
         apu = machine.getAPU();
         ppu = machine.getPPU();
 
@@ -78,7 +79,7 @@ public class Machine implements Serializable {
         return mapper;
     }
 
-    public CPU getCPU() {
+    public CPU cpu() {
         return cpu;
     }
 

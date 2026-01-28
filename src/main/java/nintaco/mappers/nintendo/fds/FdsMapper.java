@@ -245,7 +245,7 @@ public class FdsMapper extends Mapper {
     }
 
     private void updateIrq() {
-        cpu.setMapperIrq(irqByteTransferOccurred || irqTimerOccurred);
+        cpu.interrupt().setMapperIrq(irqByteTransferOccurred || irqTimerOccurred);
     }
 
     @Override

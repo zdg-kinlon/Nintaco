@@ -35,7 +35,7 @@ public class Mapper330 extends Mapper {
             ++irqCounter;
             irqCounter &= 0xFFFF;
             if (irqCounter == 0) {
-                cpu.setMapperIrq(true);
+                cpu.interrupt().setMapperIrq(true);
             }
         }
     }
@@ -51,7 +51,7 @@ public class Mapper330 extends Mapper {
         if ((address & 0x4400) == 0x0400) {
             if (getBitBool(address, 13)) {
                 irqCounter = (value << 8) | (irqCounter & 0x00FF);
-                cpu.setMapperIrq(false);
+                cpu.interrupt().setMapperIrq(false);
             } else {
                 irqCounter = (irqCounter & 0xFF00) | value;
             }

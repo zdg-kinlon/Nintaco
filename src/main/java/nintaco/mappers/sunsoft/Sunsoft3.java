@@ -63,7 +63,7 @@ public class Sunsoft3 extends Mapper {
 
     private void writeIrqEnable(final int value) {
         irqEnabled = getBitBool(value, 4);
-        cpu.setMapperIrq(false);
+        cpu.interrupt().setMapperIrq(false);
         irqWriteLow = false;
     }
 
@@ -72,7 +72,7 @@ public class Sunsoft3 extends Mapper {
         if (irqEnabled) {
             irqCounter = (irqCounter - 1) & 0xFFFF;
             if (irqCounter == 0xFFFF) {
-                cpu.setMapperIrq(true);
+                cpu.interrupt().setMapperIrq(true);
                 irqEnabled = false;
             }
         }

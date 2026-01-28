@@ -5,8 +5,6 @@ import nintaco.input.DeviceMapper;
 import nintaco.input.gamepad.GamepadMapper;
 import nintaco.mappers.Mapper;
 
-import static nintaco.CPU.REG_INPUT_PORT_1;
-import static nintaco.CPU.REG_OUTPUT_PORT;
 import static nintaco.input.InputDevices.isGamepad;
 import static nintaco.mappers.NametableMirroring.FOUR_SCREEN;
 import static nintaco.util.BitUtil.getBit;
@@ -65,7 +63,7 @@ public class SubVsDualSystem extends Mapper {
     }
 
     public void setMapperIrq(final boolean value) {
-        cpu.setMapperIrq(value);
+        cpu.interrupt().setMapperIrq(value);
     }
 
     private void writeBankSelect(final int value) {

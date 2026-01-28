@@ -18,7 +18,7 @@ public class LogRecord {
     public int instructionType;
 
     public int bank;
-    public int PC;
+    public int pc;
     public int A;
     public int X;
     public int Y;

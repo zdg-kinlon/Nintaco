@@ -9,7 +9,6 @@ import nintaco.util.EDT;
 import nintaco.util.GuiUtil;
 
 import javax.swing.*;
-import java.awt.*;
 import java.io.File;
 
 import static nintaco.files.FileUtil.*;

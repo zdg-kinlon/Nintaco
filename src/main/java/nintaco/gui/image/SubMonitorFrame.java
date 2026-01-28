@@ -37,7 +37,7 @@ public class SubMonitorFrame extends javax.swing.JFrame {
     public void init() {
         final Machine machine = App.getMachine();
         if (machine != null) {
-            ((MainCPU) machine.getCPU()).setScreenRenderer(imagePane);
+            ((MainCPU) machine.cpu()).setScreenRenderer(imagePane);
         }
     }
 
@@ -67,7 +67,7 @@ public class SubMonitorFrame extends javax.swing.JFrame {
     public void destroy() {
         final Machine machine = App.getMachine();
         if (machine != null && machine.isVsDualSystem()) {
-            ((MainCPU) machine.getCPU()).clearScreenRenderer();
+            ((MainCPU) machine.cpu()).clearScreenRenderer();
         }
         imagePane.destroy();
         DualAPU.setMainUpdateEnabled(true);

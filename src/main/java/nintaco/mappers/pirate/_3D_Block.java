@@ -377,7 +377,7 @@ public class _3D_Block extends Mapper {
     @Override
     public void update() {
         if (maxCounter != 0 && --maxCounter == 0) {
-            cpu.setMapperIrq(false);
+            cpu.interrupt().setMapperIrq(false);
             irqPhase = PHASE_NONE;
             if ((irqsToRaise & 1) != 0) {
                 irqPhase = PHASE_RAISE;
@@ -388,14 +388,14 @@ public class _3D_Block extends Mapper {
         switch (irqPhase) {
             case PHASE_RAISE:
                 if (++irqCounter == irqRaiseCount) {
-                    cpu.setMapperIrq(true);
+                    cpu.interrupt().setMapperIrq(true);
                     irqPhase = PHASE_HOLD;
                     irqCounter = 0;
                 }
                 break;
             case PHASE_HOLD:
                 if (++irqCounter == irqHoldCount) {
-                    cpu.setMapperIrq(false);
+                    cpu.interrupt().setMapperIrq(false);
                     irqPhase = PHASE_RELEASE;
                     irqCounter = 0;
                 }
@@ -405,7 +405,7 @@ public class _3D_Block extends Mapper {
                         : irqReleaseCountEven)) {
                     if (--irqsToRaise != 0) {
                         irqPhase = PHASE_HOLD;
-                        cpu.setMapperIrq(true);
+                        cpu.interrupt().setMapperIrq(true);
                     } else {
                         irqPhase = PHASE_NONE;
                     }

@@ -35,7 +35,7 @@ public class Mapper117 extends Mapper {
         final boolean a12 = (address & 0x1000) != 0;
         if (a12 && irqResetDelay == 0 && irqEnabled && irqEnabledAlt
                 && irqCounter > 0 && --irqCounter == 0) {
-            cpu.setMapperIrq(true);
+            cpu.interrupt().setMapperIrq(true);
             irqEnabledAlt = false;
         }
         if (a12) {
@@ -74,7 +74,7 @@ public class Mapper117 extends Mapper {
                 irqReloadValue = value;
                 break;
             case 0xC002:
-                cpu.setMapperIrq(false);
+                cpu.interrupt().setMapperIrq(false);
                 break;
             case 0xC003:
                 irqCounter = irqReloadValue;
@@ -87,7 +87,7 @@ public class Mapper117 extends Mapper {
 
             case 0xE000:
                 irqEnabled = getBitBool(value, 0);
-                cpu.setMapperIrq(false);
+                cpu.interrupt().setMapperIrq(false);
                 break;
         }
     }

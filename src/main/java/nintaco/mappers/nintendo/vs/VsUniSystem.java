@@ -3,7 +3,6 @@ package nintaco.mappers.nintendo.vs;
 import nintaco.files.CartFile;
 import nintaco.mappers.Mapper;
 
-import static nintaco.CPU.REG_OUTPUT_PORT;
 import static nintaco.mappers.NametableMirroring.FOUR_SCREEN;
 import static nintaco.util.BitUtil.getBit;
 

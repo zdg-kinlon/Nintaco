@@ -1,6 +1,6 @@
 package nintaco.input.miraclepiano;
 
-import nintaco.CPU;
+import nintaco.cpu.CPU;
 import nintaco.Machine;
 import nintaco.apu.APU;
 import nintaco.apu.SystemAudioProcessor;
@@ -121,7 +121,7 @@ public class MiraclePianoMapper extends DeviceMapper implements Serializable {
         if (machine == null) {
             cpu = null;
         } else {
-            cpu = machine.getCPU();
+            cpu = machine.cpu();
         }
     }
 
@@ -404,7 +404,7 @@ public class MiraclePianoMapper extends DeviceMapper implements Serializable {
 
     private long getCycleCounter() {
         final CPU cpu = this.cpu;
-        return (cpu != null) ? cpu.getCycleCounter() : 0L;
+        return (cpu != null) ? cpu.state().cycleCounter() : 0L;
     }
 
     private void adjustVolume() {

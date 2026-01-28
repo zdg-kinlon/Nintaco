@@ -72,12 +72,12 @@ public class H3001 extends Mapper {
 
     private void writeIrqEnable(final int value) {
         irqEnabled = getBitBool(value, 7);
-        cpu.setMapperIrq(false);
+        cpu.interrupt().setMapperIrq(false);
     }
 
     private void writeReloadIrqCounter() {
         irqCounter = irqReloadValue;
-        cpu.setMapperIrq(false);
+        cpu.interrupt().setMapperIrq(false);
     }
 
     private void writeHighIrqReloadValue(final int value) {
@@ -91,7 +91,7 @@ public class H3001 extends Mapper {
     @Override
     public void update() {
         if (irqEnabled && irqCounter > 0 && --irqCounter == 0) {
-            cpu.setMapperIrq(true);
+            cpu.interrupt().setMapperIrq(true);
         }
     }
 }

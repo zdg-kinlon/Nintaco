@@ -1,7 +1,7 @@
 package nintaco.disassembler;
 
 import nintaco.App;
-import nintaco.CPU;
+import nintaco.cpu.CPU;
 import nintaco.PPU;
 import nintaco.mappers.Mapper;
 
@@ -277,7 +277,7 @@ public final class Disassembler {
                 sb.append('$');
                 size++;
             }
-            append(sb, "%04X  ", record.PC);
+            append(sb, "%04X  ", record.pc);
         }
         if (prefs.machineCode) {
             append(sb, "%02X", record.opcode);
@@ -422,11 +422,11 @@ public final class Disassembler {
             }
         }
 
-        record.A = cpu.getA();
-        record.X = cpu.getX();
-        record.Y = cpu.getY();
-        record.P = cpu.getP();
-        record.S = cpu.getS();
+        record.A = cpu.register().a();
+        record.X = cpu.register().x();
+        record.Y = cpu.register().y();
+        record.P = cpu.register().p();
+        record.S = cpu.register().s();
 
         record.v = ppu.getV();
         record.t = ppu.getT();
@@ -438,23 +438,23 @@ public final class Disassembler {
                                           final CPU cpu, final PPU ppu, final Mapper mapper) {
 
         record.frameCounter = ppu.getFrameCounter();
-        record.instructionsCounter = cpu.getInstructionsCounter();
-        record.cpuCycleCounter = cpu.getCycleCounter();
+        record.instructionsCounter = cpu.state().instructionsCounter();
+        record.cpuCycleCounter = cpu.state().cycleCounter();
 
-        record.bank = mapper.getPrgBank(cpu.getPC());
-        record.PC = cpu.getPC();
+        record.bank = mapper.getPrgBank(cpu.register().pc());
+        record.pc = cpu.register().pc();
 
         record.scanlineCycle = ppu.getScanlineCycle();
         record.scanline = ppu.getScanline();
-        record.opcode = mapper.peekCpuMemory(record.PC);
+        record.opcode = mapper.peekCpuMemory(record.pc);
 
         final int[] pattern = ALL_PATTERNS[record.opcode];
         record.length = LENGTHS[pattern[1]];
         if (record.length >= 2) {
-            record.b1 = mapper.peekCpuMemory(record.PC + 1);
+            record.b1 = mapper.peekCpuMemory(record.pc + 1);
         }
         if (record.length == 3) {
-            record.b2 = mapper.peekCpuMemory(record.PC + 2);
+            record.b2 = mapper.peekCpuMemory(record.pc + 2);
         }
 
         record.mnemonicIndex = pattern[0];
@@ -465,21 +465,21 @@ public final class Disassembler {
             case ZERO_PAGE:
                 record.value0 = mapper.peekCpuMemory(record.b1);
                 record.bank0 = mapper.getPrgBank(record.b1);
-                record.value1 = (2 + record.PC + (byte) record.b1) & 0xFFFF;
+                record.value1 = (2 + record.pc + (byte) record.b1) & 0xFFFF;
                 record.bank1 = mapper.getPrgBank(record.value1);
                 break;
             case ZERO_PAGE_X:
-                record.value0 = (record.b1 + cpu.getX()) & 0x00FF;
+                record.value0 = (record.b1 + cpu.register().x()) & 0x00FF;
                 record.value1 = mapper.peekCpuMemory(record.value0);
                 record.bank0 = mapper.getPrgBank(record.value0);
                 break;
             case ZERO_PAGE_Y:
-                record.value0 = (record.b1 + cpu.getY()) & 0x00FF;
+                record.value0 = (record.b1 + cpu.register().y()) & 0x00FF;
                 record.value1 = mapper.peekCpuMemory(record.value0);
                 record.bank0 = mapper.getPrgBank(record.value0);
                 break;
             case INDIRECT_X:
-                record.value0 = (record.b1 + cpu.getX()) & 0x00FF;
+                record.value0 = (record.b1 + cpu.register().x()) & 0x00FF;
                 record.value1 = (mapper.peekCpuMemory((record.value0 + 1) & 0xFF) << 8)
                         | mapper.peekCpuMemory(record.value0 & 0xFF);
                 record.value2 = mapper.peekCpuMemory(record.value1);
@@ -488,7 +488,7 @@ public final class Disassembler {
             case INDIRECT_Y:
                 record.value0 = ((mapper.peekCpuMemory((record.b1 + 1) & 0xFF) << 8)
                         | mapper.peekCpuMemory(record.b1)) & 0xFFFF;
-                record.value1 = (record.value0 + cpu.getY()) & 0xFFFF;
+                record.value1 = (record.value0 + cpu.register().y()) & 0xFFFF;
                 record.value2 = mapper.peekCpuMemory(record.value1);
                 record.bank1 = mapper.getPrgBank(record.value1);
                 break;
@@ -506,14 +506,14 @@ public final class Disassembler {
             case ABSOLUTE_X:
                 record.value0 = (record.b2 << 8) | record.b1;
                 record.bank0 = mapper.getPrgBank(record.value0);
-                record.value1 = (record.value0 + cpu.getX()) & 0xFFFF;
+                record.value1 = (record.value0 + cpu.register().x()) & 0xFFFF;
                 record.value2 = mapper.peekCpuMemory(record.value1);
                 record.bank1 = mapper.getPrgBank(record.value1);
                 break;
             case ABSOLUTE_Y:
                 record.value0 = (record.b2 << 8) | record.b1;
                 record.bank0 = mapper.getPrgBank(record.value0);
-                record.value1 = (record.value0 + cpu.getY()) & 0xFFFF;
+                record.value1 = (record.value0 + cpu.register().y()) & 0xFFFF;
                 record.value2 = mapper.peekCpuMemory(record.value1);
                 record.bank1 = mapper.getPrgBank(record.value1);
                 break;
@@ -523,7 +523,7 @@ public final class Disassembler {
     public static String toString(final CPU cpu, final PPU ppu,
                                   final Mapper mapper) {
 
-        final int PC = cpu.getPC();
+        final int PC = cpu.register().pc();
         final int opcode = mapper.peekCpuMemory(PC);
         final int[] pattern = ALL_PATTERNS[opcode];
         final int length = LENGTHS[pattern[1]];
@@ -564,19 +564,19 @@ public final class Disassembler {
                 }
                 break;
             case ZERO_PAGE_X: {
-                int addr = (b1 + cpu.getX()) & 0x00FF;
+                int addr = (b1 + cpu.register().x()) & 0x00FF;
                 sb.append(String.format("$%02X,X @ %02X = %02X             ", b1,
                         addr, mapper.peekCpuMemory(addr)));
                 break;
             }
             case ZERO_PAGE_Y: {
-                int addr = (b1 + cpu.getY()) & 0x00FF;
+                int addr = (b1 + cpu.register().y()) & 0x00FF;
                 sb.append(String.format("$%02X,Y @ %02X = %02X             ", b1,
                         addr, mapper.peekCpuMemory(addr)));
                 break;
             }
             case INDIRECT_X: {
-                int addr = b1 + cpu.getX();
+                int addr = b1 + cpu.register().x();
                 int a0 = mapper.peekCpuMemory(addr & 0xFF);
                 int a1 = mapper.peekCpuMemory((addr + 1) & 0xFF);
                 addr = (a1 << 8) | a0;
@@ -587,7 +587,7 @@ public final class Disassembler {
             case INDIRECT_Y: {
                 int a0 = mapper.peekCpuMemory(b1);
                 int a1 = mapper.peekCpuMemory((b1 + 1) & 0xFF);
-                int addr = (((a1 << 8) | a0) + cpu.getY()) & 0xFFFF;
+                int addr = (((a1 << 8) | a0) + cpu.register().y()) & 0xFFFF;
                 sb.append(String.format("($%02X),Y = %04X @ %04X = %02X  ", b1,
                         ((a1 << 8) | a0) & 0xFFFF, addr, mapper.peekCpuMemory(addr)));
                 break;
@@ -612,14 +612,14 @@ public final class Disassembler {
             }
             case ABSOLUTE_X: {
                 int word = (b2 << 8) | b1;
-                int addr = (word + cpu.getX()) & 0xFFFF;
+                int addr = (word + cpu.register().x()) & 0xFFFF;
                 sb.append(String.format("$%04X,X @ %04X = %02X         ", word, addr,
                         mapper.peekCpuMemory(addr)));
                 break;
             }
             case ABSOLUTE_Y: {
                 int word = (b2 << 8) | b1;
-                int addr = (word + cpu.getY()) & 0xFFFF;
+                int addr = (word + cpu.register().y()) & 0xFFFF;
                 sb.append(String.format("$%04X,Y @ %04X = %02X         ", word, addr,
                         mapper.peekCpuMemory(addr)));
                 break;
@@ -631,7 +631,7 @@ public final class Disassembler {
 
         sb.append(String.format(
                 "A:%02X X:%02X Y:%02X P:%02X SP:%02X CYC:%3d SL:%d",
-                cpu.getA(), cpu.getX(), cpu.getY(), cpu.getP(), cpu.getS(),
+                cpu.register().a(), cpu.register().x(), cpu.register().y(), cpu.register().p(), cpu.register().s(),
                 ppu.getScanlineCycle(), ppu.getScanline()));
 
         return sb.toString();
@@ -693,8 +693,8 @@ public final class Disassembler {
 
         final StringBuilder sb = new StringBuilder();
         final Instruction instruction = new Instruction();
-        final Mapper mapper = cpu.getMapper();
-        final int bank = cpu.getMapper().getPrgBank(address);
+        final Mapper mapper = cpu.mapper();
+        final int bank = cpu.mapper().getPrgBank(address);
         final int descriptionLines = appendHeader(cpu, mapper, address, bank, sb,
                 instruction);
         final String code = String.format("%02X", mapper.peekCpuMemory(address));
@@ -747,7 +747,7 @@ public final class Disassembler {
         }
 
         if (showPC) {
-            if (cpu.getPC() == address) {
+            if (cpu.register().pc() == address) {
                 sb.append('>');
             } else {
                 sb.append(' ');
@@ -792,7 +792,7 @@ public final class Disassembler {
 
         final Instruction instruction = new Instruction();
         final StringBuilder sb = new StringBuilder();
-        final Mapper mapper = cpu.getMapper();
+        final Mapper mapper = cpu.mapper();
         final int opcode = mapper.peekCpuMemory(address);
         final int bank = mapper.getPrgBank(address);
         final int[] pattern = patterns[opcode];
@@ -868,7 +868,7 @@ public final class Disassembler {
                 append(sb, "$%02X,X", b1);
                 if (inspections) {
                     sb.append(" @ ");
-                    final int addr = (b1 + cpu.getX()) & 0x00FF;
+                    final int addr = (b1 + cpu.register().x()) & 0x00FF;
                     appendAddress(sb, addr, instruction, mapper, true, false);
                     append(sb, " = #$%02X", mapper.peekCpuMemory(addr));
                 }
@@ -878,7 +878,7 @@ public final class Disassembler {
                 append(sb, "$%02X,Y", b1);
                 if (inspections) {
                     sb.append(" @ ");
-                    final int addr = (b1 + cpu.getY()) & 0x00FF;
+                    final int addr = (b1 + cpu.register().y()) & 0x00FF;
                     appendAddress(sb, addr, instruction, mapper, true, false);
                     append(sb, " = #$%02X", mapper.peekCpuMemory(addr));
                 }
@@ -888,7 +888,7 @@ public final class Disassembler {
                 append(sb, "($%02X,X)", b1);
                 if (inspections) {
                     sb.append(" @ ");
-                    int addr = b1 + cpu.getX();
+                    int addr = b1 + cpu.register().x();
                     final int a0 = mapper.peekCpuMemory(addr & 0xFF);
                     final int a1 = mapper.peekCpuMemory((addr + 1) & 0xFF);
                     addr = (a1 << 8) | a0;
@@ -903,7 +903,7 @@ public final class Disassembler {
                     sb.append(" @ ");
                     final int a0 = mapper.peekCpuMemory(b1);
                     final int a1 = mapper.peekCpuMemory((b1 + 1) & 0xFF);
-                    final int addr = (((a1 << 8) | a0) + cpu.getY()) & 0xFFFF;
+                    final int addr = (((a1 << 8) | a0) + cpu.register().y()) & 0xFFFF;
                     appendAddress(sb, addr, instruction, mapper, true, false);
                     append(sb, " = #$%02X", mapper.peekCpuMemory(addr));
                 }
@@ -938,7 +938,7 @@ public final class Disassembler {
                 appendAddress(sb, word, instruction, mapper, true, false);
                 sb.append(",X");
                 if (inspections) {
-                    final int addr = (word + cpu.getX()) & 0xFFFF;
+                    final int addr = (word + cpu.register().x()) & 0xFFFF;
                     sb.append(" @ ");
                     appendAddress(sb, addr, instruction, mapper, true, false);
                     append(sb, " = #$%02X", mapper.peekCpuMemory(addr));
@@ -950,7 +950,7 @@ public final class Disassembler {
                 appendAddress(sb, word, instruction, mapper, true, false);
                 sb.append(",Y");
                 if (inspections) {
-                    final int addr = (word + cpu.getY()) & 0xFFFF;
+                    final int addr = (word + cpu.register().y()) & 0xFFFF;
                     sb.append(" @ ");
                     appendAddress(sb, addr, instruction, mapper, true, false);
                     append(sb, " = #$%02X", mapper.peekCpuMemory(addr));
@@ -1046,7 +1046,7 @@ public final class Disassembler {
     private static void disassembleRange(final List<Instruction> result,
                                          final CPU cpu, int address, final int startIndex,
                                          final int count, final int[][] patterns) {
-        final Mapper mapper = cpu.getMapper();
+        final Mapper mapper = cpu.mapper();
         for (int i = 0; i < count && address <= 0xFFFF; i++) {
             if (i >= startIndex) {
                 final Instruction instruction = disassemble(cpu, address, patterns);
@@ -1072,7 +1072,7 @@ public final class Disassembler {
             return;
         }
 
-        final Mapper mapper = cpu.getMapper();
+        final Mapper mapper = cpu.mapper();
         int count = 0;
         while (true) {
             count = countInstructions(mapper, startAddress, endAddress, patterns);
@@ -1176,22 +1176,22 @@ public final class Disassembler {
             return;
         }
 
-        final int PC = cpu.getPC();
-        if (address == PC) {
+        final int pc = cpu.register().pc();
+        if (address == pc) {
             return;
         }
 
-        final int minAddress = result.get(0).getAddress();
-        if (PC < minAddress) {
+        final int minAddress = result.getFirst().getAddress();
+        if (pc < minAddress) {
             return;
         }
-        final int maxAddress = result.get(result.size() - 1).getAddress();
-        if (PC > maxAddress) {
+        final int maxAddress = result.getLast().getAddress();
+        if (pc > maxAddress) {
             return;
         }
 
         final int pcIndex = Collections.binarySearch(result,
-                new Instruction(PC, 0, null), INSTRUCTION_COMPARATOR);
+                new Instruction(pc, 0, null), INSTRUCTION_COMPARATOR);
         if (pcIndex >= 0) {
             return;
         }
@@ -1200,7 +1200,7 @@ public final class Disassembler {
         final int size = result.size();
         int padding = 7;
         do {
-            disassemble(result, cpu, PC, pcInsert + padding,
+            disassemble(result, cpu, pc, pcInsert + padding,
                     size - pcInsert + padding, officialsOnly);
             padding += 3;
         } while (result.size() < size);

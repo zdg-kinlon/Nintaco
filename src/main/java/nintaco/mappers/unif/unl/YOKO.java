@@ -80,7 +80,7 @@ public class YOKO extends Mapper083 {
                     break;
                 case 0x8800:
                     irqCounter = (irqCounter & 0xFF00) | value;
-                    cpu.setMapperIrq(false);
+                    cpu.interrupt().setMapperIrq(false);
                     break;
                 case 0x8801:
                     irqEnabled = getBitBool(mode, 7);

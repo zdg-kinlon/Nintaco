@@ -42,7 +42,7 @@ public class Mapper042 extends Mapper {
     private void writeIrqControl(int value) {
         irqEnabled = getBitBool(value, 1);
         if (!irqEnabled) {
-            cpu.setMapperIrq(false);
+            cpu.interrupt().setMapperIrq(false);
             irqCounter = 0;
         }
     }
@@ -50,7 +50,7 @@ public class Mapper042 extends Mapper {
     @Override
     public void update() {
         if (irqEnabled && ++irqCounter == 24576) {
-            cpu.setMapperIrq(true);
+            cpu.interrupt().setMapperIrq(true);
         }
     }
 }

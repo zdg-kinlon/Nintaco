@@ -4,6 +4,7 @@ import java.io.*;
 import java.util.*;
 
 import nintaco.api.local.*;
+import nintaco.cpu.CPU;
 import nintaco.gui.image.preferences.*;
 import nintaco.gui.rob.*;
 import nintaco.input.*;
@@ -290,7 +291,7 @@ public class PPU implements Serializable {
     }
 
     public void setMachine(final Machine machine) {
-        this.cpu = machine.getCPU();
+        this.cpu = machine.cpu();
         this.mapper = machine.getMapper();
     }
 
@@ -769,7 +770,7 @@ public class PPU implements Serializable {
             } else if (scanline == nmiScanline) {
                 NMI_occurred = true;
                 if (NMI_output) {
-                    cpu.setNMI(true);
+                    cpu.interrupt().setNMI(true);
                 }
             } else if (scanline == scanlineCount - 1) {
                 scanline = PRE_RENDER_SCANLINE;
@@ -1179,10 +1180,10 @@ public class PPU implements Serializable {
         final boolean nextNmiOutput = getBitBool(value, 7);
         if (nextNmiOutput) {
             if (!NMI_output && NMI_occurred) {
-                cpu.setNMI(true);
+                cpu.interrupt().setNMI(true);
             }
         } else if (scanline == nmiScanline && scanlineCycle < 3) {
-            cpu.setNMI(false);
+            cpu.interrupt().setNMI(false);
         }
 
         vramAddressIncrement = getBitBool(value, 2) ? 32 : 1;
@@ -1221,7 +1222,7 @@ public class PPU implements Serializable {
                 value &= 0x7F;
             }
             if (scanlineCycle < 3) {
-                cpu.setNMI(false);
+                cpu.interrupt().setNMI(false);
             }
         }
         W = false;

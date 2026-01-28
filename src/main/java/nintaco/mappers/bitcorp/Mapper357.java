@@ -65,7 +65,7 @@ public class Mapper357 extends Mapper {
     @Override
     public void update() {
         if (irqEnabled && (++irqCounter & 0xFFF) == 0) {
-            cpu.setMapperIrq(true);
+            cpu.interrupt().setMapperIrq(true);
         }
     }
 
@@ -88,7 +88,7 @@ public class Mapper357 extends Mapper {
         if ((address & 0xF1FF) == 0x4122) {
             irqEnabled = (value & 1) != 0;
             irqCounter = 0;
-            cpu.setMapperIrq(false);
+            cpu.interrupt().setMapperIrq(false);
         }
     }
 }

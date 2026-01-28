@@ -96,7 +96,7 @@ public class RenderScreenTask extends Task {
         mapper.restore(App.getNsfFile());
         machine.getPPU().setScreenRenderer(this::render);
         if (movie.isVsDualSystem()) {
-            ((MainCPU) machine.getCPU()).getSubPPU().setScreenRenderer(
+            ((MainCPU) machine.cpu()).getSubPPU().setScreenRenderer(
                     this::render2);
         }
         machine.getAPU().setAudioProcessor(this::processOutputSample);

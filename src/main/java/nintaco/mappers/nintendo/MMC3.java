@@ -58,7 +58,7 @@ public class MMC3 extends Mapper {
         if (mc_acc) {
             requestIrqOnA12Fall = true;
         } else {
-            cpu.setMapperIrq(true);
+            cpu.interrupt().setMapperIrq(true);
         }
     }
 
@@ -96,7 +96,7 @@ public class MMC3 extends Mapper {
             irqResetDelay = mc_acc ? 35 : 8;
         } else if (requestIrqOnA12Fall) {
             requestIrqOnA12Fall = false;
-            cpu.setMapperIrq(true);
+            cpu.interrupt().setMapperIrq(true);
         }
     }
 
@@ -209,7 +209,7 @@ public class MMC3 extends Mapper {
 
     protected void writeIrqDisable() {
         irqEnabled = false;
-        cpu.setMapperIrq(false);
+        cpu.interrupt().setMapperIrq(false);
     }
 
     protected void writeIrqEnable() {

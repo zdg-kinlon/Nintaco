@@ -4,20 +4,25 @@ import nintaco.MessageException;
 
 import java.awt.*;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Optional;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class EDT {
     private static final Runnable EMPTY_RUN = () -> {
     };
 
-    public static void sync(Runnable run) {
-        run = Optional.ofNullable(run).orElse(EMPTY_RUN);
+    private static boolean runIfEDT(Runnable run) {
+        if (run == null) {
+            run = EMPTY_RUN;
+        }
         if (EventQueue.isDispatchThread()) {
             run.run();
-            return;
+            return true;
         }
+        return false;
+    }
+
+    public static void sync(Runnable run) {
+        if (runIfEDT(run)) return;
         try {
             EventQueue.invokeAndWait(run);
         } catch (InterruptedException e) {
@@ -28,11 +33,7 @@ public class EDT {
     }
 
     public static void async(Runnable run) {
-        run = Optional.ofNullable(run).orElse(EMPTY_RUN);
-        if (EventQueue.isDispatchThread()) {
-            run.run();
-            return;
-        }
+        if (runIfEDT(run)) return;
         EventQueue.invokeLater(run);
     }
 

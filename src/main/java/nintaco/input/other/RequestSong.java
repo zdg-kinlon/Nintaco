@@ -5,8 +5,6 @@ import nintaco.Machine;
 import nintaco.input.OtherInput;
 import nintaco.util.EDT;
 
-import java.awt.*;
-
 public class RequestSong implements OtherInput {
 
     private static final long serialVersionUID = 0;

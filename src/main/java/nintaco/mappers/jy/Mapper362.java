@@ -32,7 +32,7 @@ public class Mapper362 extends VRC2And4 {
 
     @Override
     protected void writeIrqAcknowledge() {
-        cpu.setMapperIrq(false);
+        cpu.interrupt().setMapperIrq(false);
     }
 
     @Override

@@ -16,6 +16,6 @@ public class SetCheats implements OtherInput {
 
     @Override
     public void run(final Machine machine) {
-        machine.getCPU().setCheats(cheats);
+        machine.getMapper().setCheats(cheats);
     }
 }
